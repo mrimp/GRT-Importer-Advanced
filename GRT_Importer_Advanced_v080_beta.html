@@ -20,7 +20,7 @@ Notes:
 <head>
 <meta charset="utf-8"/>
 <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
-<title>GRT Importer Standard v0.80</title>
+<title>GRT Importer Advanced v0.80</title>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
 <script src="https://cdn.tailwindcss.com"></script>
 <style>
@@ -148,12 +148,58 @@ input[type="file"]::file-selector-button{
 }
 input[type="file"]::file-selector-button:hover{background: rgba(255,255,255,0.12);}
 input[type="file"]::file-selector-button:active{background: rgba(255,255,255,0.16);}
+
+
+/* Neon skin to visually distinguish this build */
+.header-neon{
+  position: relative;
+  overflow: hidden;
+  border-color: rgba(0,245,255,.35) !important;
+  background:
+    radial-gradient(1200px 500px at 15% 0%, rgba(0,245,255,.18), transparent 60%),
+    radial-gradient(900px 420px at 85% 0%, rgba(180,0,255,.16), transparent 55%),
+    linear-gradient(180deg, rgba(18,28,44,.96), rgba(12,18,28,.92));
+  box-shadow:
+    0 0 0 1px rgba(0,245,255,.12),
+    0 0 28px rgba(0,245,255,.18),
+    0 0 64px rgba(180,0,255,.12),
+    0 18px 50px rgba(0,0,0,.55);
+}
+.header-neon::before{
+  content:"";
+  position:absolute;
+  inset:-2px;
+  border-radius: inherit;
+  padding: 2px;
+  background: linear-gradient(90deg, rgba(0,245,255,.95), rgba(180,0,255,.95), rgba(0,255,133,.90));
+  -webkit-mask:
+    linear-gradient(#000 0 0) content-box,
+    linear-gradient(#000 0 0);
+  -webkit-mask-composite: xor;
+  mask-composite: exclude;
+  pointer-events:none;
+  opacity:.9;
+}
+.header-neon::after{
+  content:"";
+  position:absolute;
+  left:-30%;
+  top:-60%;
+  width:160%;
+  height:180%;
+  background: radial-gradient(circle at 35% 35%, rgba(0,245,255,.12), transparent 55%),
+              radial-gradient(circle at 65% 45%, rgba(180,0,255,.10), transparent 60%);
+  filter: blur(10px);
+  transform: rotate(6deg);
+  pointer-events:none;
+  opacity:.8;
+}
 </style>
 </head>
 <body class="min-h-screen p-4 md:p-6">
 <main class="max-w-5xl mx-auto">
 <!-- Header -->
-<div class="bg-grt-panel rounded-2xl shadow-2xl p-6 mb-4 border border-grt-frame">
+<div class="bg-grt-panel rounded-2xl shadow-2xl p-6 mb-4 border border-grt-frame header-neon">
 <div class="flex items-start justify-between gap-4">
 <div>
 <div class="inline-flex items-center gap-2 mb-2">
@@ -175,7 +221,7 @@ input[type="file"]::file-selector-button:active{background: rgba(255,255,255,0.1
                     </p>
 <div class="flex flex-wrap items-center gap-2 mt-2 text-xs">
 <p class="text-grt-subtle">
-                            GRT Importer Standard v0.80 • XquiziT Arms
+                            GRT Importer Advanced v0.80 • XquiziT Arms
                         </p>
 <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full border border-grt-soft bg-grt-panel-soft text-[10px] md:text-[11px] text-grt-soft" id="sessionPill" title="Summary of imported sessions and current velocity unit.">
                             ⚙️ Standard • 0 files • ft/s
