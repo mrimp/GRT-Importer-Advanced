@@ -953,6 +953,69 @@ input[type="file"]::file-selector-button:active{background: rgba(255,255,255,0.1
         let outputXML = '';
         let allStats = [];
 
+        let shotMarkerManualMap = {};          // sessionKey -> chargeIndex (manual override)
+                let shotMarkerScoreSettings = null;      // optional override for scoring params
+        
+                const LS_SM_MANUAL_MAP = 'xqa_smManualMap_v1';
+                const LS_SM_SCORE_SETTINGS = 'xqa_smScoreSettings_v1';
+        
+                function _loadShotMarkerPrefs() {
+                    try {
+                        const m = localStorage.getItem(LS_SM_MANUAL_MAP);
+                        if (m) shotMarkerManualMap = JSON.parse(m) || {};
+                    } catch {}
+                    try {
+                        const s = localStorage.getItem(LS_SM_SCORE_SETTINGS);
+                        if (s) shotMarkerScoreSettings = JSON.parse(s) || null;
+                    } catch {}
+                }
+        
+                function _saveShotMarkerManualMap() {
+                    try { localStorage.setItem(LS_SM_MANUAL_MAP, JSON.stringify(shotMarkerManualMap || {})); } catch {}
+                }
+                function _saveShotMarkerScoreSettings() {
+                    try { localStorage.setItem(LS_SM_SCORE_SETTINGS, JSON.stringify(shotMarkerScoreSettings || null)); } catch {}
+                }
+        
+                function _smSessionKey(s) {
+                    const m = session && session.meta ? session.meta : {};
+                    const parts = [
+                        m.dateText || '',
+                        m.relay || '',
+                        m.label || '',
+                        m.img || '',
+                        m.targetName || ''
+                    ];
+                    return parts.map(x => String(x||'').trim()).join('|');
+                }
+        
+                function _hydrateShotMarkerPrefsFromBase(grtText) {
+                    // Look for persisted lines in Imported Notes (safe, ignorable by GRT)
+                    const t = String(grtText || '');
+                    const m1 = t.match(/XQA_SM_MANUAL_MAP:([A-Za-z0-9+/=]+)/);
+                    const m2 = t.match(/XQA_SM_SCORE_SETTINGS:([A-Za-z0-9+/=]+)/);
+                    try {
+                        if (m1 && m1[1]) {
+                            const jsonStr = atob(m1[1]);
+                            const obj = JSON.parse(jsonStr);
+                            if (obj && typeof obj === 'object') {
+                                shotMarkerManualMap = obj;
+                                _saveShotMarkerManualMap();
+                            }
+                        }
+                    } catch {}
+                    try {
+                        if (m2 && m2[1]) {
+                            const jsonStr = atob(m2[1]);
+                            const obj = JSON.parse(jsonStr);
+                            shotMarkerScoreSettings = obj || null;
+                            _saveShotMarkerScoreSettings();
+                        }
+                    } catch {}
+                }
+        
+        _loadShotMarkerPrefs();
+
         let unit = 'imperial';          // file unit: imperial(ft/s) or metric(m/s)
         let chronographType = 'garmin'; // 'garmin' or 'athlon'
         let mode = 'normal';            // 'normal', 'ladder', or 'sessions'
@@ -2637,6 +2700,8 @@ if (smInput) smInput.value = '';            if (typeof renderAddonCards === 'fun
             const reader = new FileReader();
             reader.onload = (ev) => {
                 grtBaseContent = ev.target.result;
+                _hydrateShotMarkerPrefsFromBase(grtBaseContent);
+
                 grtBaseFilename = file && file.name ? file.name : '';
                 setCurrentStep(4);
                 const statusEl = document.getElementById('grtBaseStatus');
@@ -2790,6 +2855,16 @@ if (smInput) smInput.value = '';            if (typeof renderAddonCards === 'fun
 
         function _clamp(v, lo, hi) { return Math.max(lo, Math.min(hi, v)); }
 
+        function _scoreToTier(score0to100) {
+            if (!isFinite(score0to100)) return null;
+            const s = Number(score0to100);
+            if (s >= 85) return 1;
+            if (s >= 70) return 2;
+            if (s >= 55) return 3;
+            if (s >= 40) return 4;
+            return 5;
+        }
+
         function _mmToMoa(mm, distanceYd) {
             if (!isFinite(mm) || !isFinite(distanceYd) || distanceYd <= 0) return null;
             const distanceM = distanceYd * 0.9144;
@@ -2797,7 +2872,206 @@ if (smInput) smInput.value = '';            if (typeof renderAddonCards === 'fun
             return rad * (180 / Math.PI) * 60;
         }
 
-        function _computeGroupMetricsFromXY(xArr, yArr) {
+        
+// =======================
+// ShotMarker Advanced scoring + chrono mapping (MR-first, vertical-critical, 1000y bias)
+// =======================
+function _shotMarkerScoreParams(distanceYd) {
+  // Defaults tuned for F-Class Open (1000y bias) – safe starting point
+  const isLong = (isFinite(distanceYd) && distanceYd >= 900);
+  const base = {
+    kMR: 1.20,
+    vRef: isLong ? 0.35 : 0.40,     // MOA vertical reference (smaller = harsher penalty)
+    vPow: 2.20,
+    sdRef: isLong ? 7.5 : 8.5,      // fps SD reference
+    sdPow: 1.70,
+    wV: isLong ? 1.50 : 1.35,       // vertical critical at 1000y
+    wVel: isLong ? 0.65 : 0.55
+  };
+
+  // Optional user overrides (persisted)
+  try {
+    if (shotMarkerScoreSettings && typeof shotMarkerScoreSettings === 'object') {
+      const o = shotMarkerScoreSettings;
+      // Support separate long/short overrides
+      const bucket = isLong ? (o.long || o) : (o.short || o);
+      ['kMR','vRef','vPow','sdRef','sdPow','wV','wVel'].forEach(k => {
+        if (bucket && isFinite(bucket[k])) base[k] = Number(bucket[k]);
+      });
+    }
+  } catch {}
+  return base;
+}
+
+function _computeShotMarkerScoreAdvanced(mrMoa, vertMoa, vel, distanceYd) {
+  if (mrMoa === null || !isFinite(mrMoa)) return null;
+  const p = _shotMarkerScoreParams(distanceYd);
+
+  // MR base: exponential reward for smaller MR
+  const mrScore = 100 * Math.exp(-p.kMR * mrMoa);
+
+  // Vertical penalty: multiplicative gate (critical)
+  const v = (vertMoa !== null && isFinite(vertMoa)) ? vertMoa : null;
+  const vPenalty = (v === null) ? 1.0 : (1 / (1 + Math.pow((v / p.vRef), p.vPow)));
+
+  // Velocity penalty: secondary (SD preferred; fallback to ES)
+  let velPenalty = 1.0;
+  const sd = (vel && isFinite(vel.sd)) ? vel.sd : null;
+  const es = (vel && isFinite(vel.es)) ? vel.es : null;
+  if (sd !== null) velPenalty = 1 / (1 + Math.pow((sd / p.sdRef), p.sdPow));
+  else if (es !== null) velPenalty = 1 / (1 + Math.pow((es / (p.sdRef * 3)), p.sdPow));
+
+  const final = mrScore * Math.pow(vPenalty, p.wV) * Math.pow(velPenalty, p.wVel);
+
+  return {
+    mrScore: _clamp(mrScore, 0, 100),
+    vPenalty: _clamp(vPenalty, 0, 1),
+    velPenalty: _clamp(velPenalty, 0, 1),
+    finalScore: _clamp(final, 0, 100),
+    params: p
+  };
+}
+
+function _extractChargeFromText(t) {
+  const s = String(t || '');
+  // e.g. "45.2gr", "45.0 gn", "2.93 g"
+  const m = s.match(/(\d{1,3}(?:\.\d{1,3})?)\s*(gr|gn|g)\b/i);
+  if (!m) return null;
+  const val = parseFloat(m[1]);
+  const unit = (m[2] || '').toLowerCase();
+  if (!isFinite(val)) return null;
+  if (unit === 'g') return val * 15.43236; // grams -> grains
+  return val; // gr/gn -> grains
+}
+
+function _getChronoGroupsForMapping() {
+  const groups = [];
+
+  // Ladder mode: ladderSlots (1-indexed chargeIndex)
+  if (mode === 'ladder' && Array.isArray(ladderSlots) && ladderSlots.length) {
+    for (let i = 0; i < ladderSlots.length; i++) {
+      const slot = ladderSlots[i];
+      if (!slot || !slot.stats) continue;
+      const chargeIndex = slot.chargeIndex || (i + 1);
+      const stats = slot.stats;
+
+      let label = '';
+      // Prefer sim JSON charge labels if present
+      const simRow = (Array.isArray(grtSimLadderRows) && grtSimLadderRows[chargeIndex - 1]) ? grtSimLadderRows[chargeIndex - 1] : null;
+      if (simRow && isFinite(simRow.chargeGr)) label = `${simRow.chargeGr.toFixed(1)}gr`;
+      else if (ladderNameMode === 'charge') label = `Charge ${chargeIndex}`;
+      else label = (slot.filename || `Charge ${chargeIndex}`).replace(/\.(csv|xls|xlsx)$/i, '');
+
+      groups.push({
+        chargeIndex,
+        label,
+        meanFps: isFinite(stats.mean) ? stats.mean : null,
+        sdFps: isFinite(stats.sd) ? stats.sd : null,
+        count: isFinite(stats.count) ? stats.count : null
+      });
+    }
+    return groups;
+  }
+
+  // Sessions mode: allStats entries
+  if (mode === 'sessions' && Array.isArray(allStats) && allStats.length) {
+    let idx = 1;
+    for (const item of allStats) {
+      if (!item || !item.stats) continue;
+      const stats = item.stats;
+      const chargeIndex = isFinite(item.chargeIndex) ? item.chargeIndex : idx++;
+      const label = (item.filename || `Session ${chargeIndex}`).replace(/\.(csv|xls|xlsx)$/i, '');
+      groups.push({
+        chargeIndex,
+        label,
+        meanFps: isFinite(stats.mean) ? stats.mean : null,
+        sdFps: isFinite(stats.sd) ? stats.sd : null,
+        count: isFinite(stats.count) ? stats.count : null
+      });
+    }
+  }
+  return groups;
+}
+
+function _matchShotMarkerSessionToChronoGroup(session, groups) {
+  const d = session?.derived || {};
+  const m = session?.meta || {};
+  if (!Array.isArray(groups) || !groups.length) return null;
+
+  // 1) Name/label tag match (most reliable)
+  const taggedGr = _extractChargeFromText(m.label) ?? _extractChargeFromText(m.targetName) ?? _extractChargeFromText(m.scoreText);
+  if (taggedGr !== null) {
+    let best = null;
+    let bestAbs = 1e9;
+    for (const g of groups) {
+      const gGr = _extractChargeFromText(g.label);
+      if (gGr === null) continue;
+      const abs = Math.abs(gGr - taggedGr);
+      if (abs < bestAbs) { bestAbs = abs; best = g; }
+    }
+    if (best && bestAbs <= 0.15) {
+      return { chargeIndex: best.chargeIndex, label: best.label, confidence: 95, method: 'tag' };
+    }
+  }
+
+  // 2) Velocity + shot count matching
+  const vMean = (d.velocity && isFinite(d.velocity.mean)) ? d.velocity.mean : null;
+  const n = isFinite(d.shots) ? d.shots : null;
+
+  let best = null;
+  let bestScore = 1e9;
+  for (const g of groups) {
+    if (!isFinite(g.meanFps) || vMean === null) continue;
+    const dv = Math.abs(g.meanFps - vMean);               // fps
+    const dn = (n !== null && isFinite(g.count)) ? Math.abs(g.count - n) : 0;
+
+    // Weighted distance: mean dominates
+    const score = (dv / 6.0) ** 2 + (dn / 2.0) ** 2;
+    if (score < bestScore) { bestScore = score; best = g; }
+  }
+
+  if (!best) return null;
+
+  // Convert distance score into a confidence (cap at reasonable bounds)
+  const conf = _clamp(92 - (bestScore * 14), 50, 92);
+  return { chargeIndex: best.chargeIndex, label: best.label, confidence: conf, method: 'velocity' };
+}
+
+function mapShotMarkerSessionsToChronoCharges(sessions) {
+  const groups = _getChronoGroupsForMapping();
+  if (!Array.isArray(sessions) || !sessions.length) return sessions;
+
+  sessions.forEach(s => {
+    if (!s || !s.derived) return;
+
+    const key = (s.meta && s.meta.sessionKey) ? s.meta.sessionKey : _smSessionKey(s);
+    const manualIdx = (shotMarkerManualMap && key && isFinite(shotMarkerManualMap[key])) ? Number(shotMarkerManualMap[key]) : null;
+
+    let match = null;
+    if (manualIdx !== null) {
+      const g = groups.find(x => Number(x.chargeIndex) === Number(manualIdx));
+      if (g) {
+        match = Object.assign({}, g, { confidence: 100, manual: true });
+        s.derived.manualChargeIndex = Number(manualIdx);
+      } else {
+        // stale manual mapping; fall back to auto
+        match = _matchShotMarkerSessionToChronoGroup(s, groups);
+        s.derived.manualChargeIndex = null;
+      }
+    } else {
+      match = _matchShotMarkerSessionToChronoGroup(s, groups);
+      s.derived.manualChargeIndex = null;
+    }
+
+    s.derived.chargeMatch = match;
+  });
+
+  return sessions;
+}
+// =======================
+// /ShotMarker Advanced scoring + chrono mapping
+// =======================
+function _computeGroupMetricsFromXY(xArr, yArr) {
             const n = Math.min(xArr.length, yArr.length);
             if (!n) return null;
 
@@ -2882,13 +3156,13 @@ if (smInput) smInput.value = '';            if (typeof renderAddonCards === 'fun
 
         function parseShotMarkerShotslog(rawText) {
             const lines = String(rawText || '').replace(/\r\n/g,'\n').replace(/\r/g,'\n').split('\n');
-            const monthRe = /^(Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec)\s+\d{1,2}\s+\d{4},/;
+            const sessionRe = /^(?:(Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec)\s+\d{1,2}(?:,)?\s+\d{4},|\d{4}-\d{2}-\d{2}\s*,)/;
             const strings = [];
 
             for (let i=0;i<lines.length;i++){
                 const line = (lines[i] || '').trim();
                 if (!line) continue;
-                if (!monthRe.test(line)) continue;
+                if (!sessionRe.test(line)) continue;
 
                 const head = _csvSplitLine(line);
                 const dateText = (head[0]||'').trim();
@@ -2925,6 +3199,13 @@ if (smInput) smInput.value = '';            if (typeof renderAddonCards === 'fun
 
                 j++;
                 while (j < lines.length && String(lines[j]||'').startsWith(',')) {
+                    const rawRowLine = String(lines[j] || '');
+                    const rowTrim = rawRowLine.trim();
+                    // Stop on blank/separator/session headers
+                    if (!rowTrim) break;
+                    if (/^,+$/.test(rowTrim)) { j++; break; }
+                    if (sessionRe.test(rowTrim)) break;
+                    if (rawRowLine.trimStart().startsWith(',time')) break;
                     const row = _csvSplitLine(lines[j]).slice(1);
                     const getNum = (k) => {
                         if (k < 0 || k >= row.length) return null;
@@ -2955,22 +3236,33 @@ if (smInput) smInput.value = '';            if (typeof renderAddonCards === 'fun
                 }
 
                 const gm = _computeGroupMetricsFromXY(xs, ys);
-                if (!gm) { i = j; continue; }
+                if (!gm) { i = j - 1; continue; }
 
                 const vel = _computeVelocityStats(vs);
                 const vertMoa = (distanceYd && isFinite(gm.vert)) ? _mmToMoa(gm.vert, distanceYd) : null;
                 const mrMoa = (distanceYd && isFinite(gm.mr)) ? _mmToMoa(gm.mr, distanceYd) : null;
 
-                const verticalScore = (vertMoa !== null) ? _clamp(100 - (vertMoa * 15), 0, 100) : null;
-                const precisionScore = (mrMoa !== null) ? _clamp(100 - (mrMoa * 40), 0, 100) : null;
-                const confidenceScore = (verticalScore !== null && precisionScore !== null)
-                    ? (precisionScore * 0.6 + verticalScore * 0.4)
-                    : null;
+                const advScore = _computeShotMarkerScoreAdvanced(mrMoa, vertMoa, vel, distanceYd);
+                const verticalScore = (advScore && isFinite(advScore.vPenalty)) ? (advScore.vPenalty * 100) : null;
+                const precisionScore = (advScore && isFinite(advScore.mrScore)) ? advScore.mrScore : null;
+                const confidenceScore = (advScore && isFinite(advScore.finalScore)) ? advScore.finalScore : null;
+                const finalScore = (advScore && isFinite(advScore.finalScore)) ? advScore.finalScore : null;
 
                 const vVsY = (vel && shots.length) ? _corr(vs, ys) : null;
 
+                const sessionKey = [dateText, relay || '', label || '', img || '', targetName || '']
+                    .map(x => String(x || '').trim()).join('|');
+
+                const scoreBreakdown = (advScore && typeof advScore === 'object')
+                    ? Object.assign({
+                        mrMoa, vertMoa, distanceYd,
+                        sdFps: (vel && isFinite(vel.sd)) ? vel.sd : null,
+                        esFps: (vel && isFinite(vel.es)) ? vel.es : null
+                      }, advScore)
+                    : null;
+
                 strings.push({
-                    meta: { dateText, relay, label, img, targetName, distanceYd, scoreText },
+                    meta: { dateText, relay, label, img, targetName, distanceYd, scoreText, sessionKey },
                     shots,
                     derived: {
                         shots: gm.shots,
@@ -2981,30 +3273,130 @@ if (smInput) smInput.value = '';            if (typeof renderAddonCards === 'fun
                         mrMoa, vertMoa,
                         velocity: vel,
                         verticalScore, precisionScore, confidenceScore,
+                        finalScore,
+                        scoreBreakdown: scoreBreakdown,
                         vVsYcorr: vVsY
                     }
                 });
 
-                i = j;
+                i = j - 1;
             }
 
             return strings;
         }
 
         function _pickSessionCards(strings) {
-            const valid = (strings || []).filter(s => s && s.derived && isFinite(s.derived.mrMm));
+            const valid = (strings || []).filter(s => s && s.derived && (isFinite(s.derived.finalScore) || isFinite(s.derived.mrMoa) || isFinite(s.derived.mrMm)));
             if (!valid.length) return { best:null, typical:null, worst:null };
 
-            const byMr = [...valid].sort((a,b)=> (a.derived.mrMoa ?? 1e9) - (b.derived.mrMoa ?? 1e9));
-            const best = byMr[0] || null;
+            // Prefer advanced score when available (MR-first + vertical-critical), fallback to MR MOA.
+            const scoreOf = (s) => (s && s.derived && isFinite(s.derived.finalScore)) ? s.derived.finalScore
+                               : ((s && s.derived && isFinite(s.derived.mrMoa)) ? (100 - (s.derived.mrMoa * 40)) : -1e9);
 
-            const byMedianMr = [...valid].sort((a,b)=> (a.derived.mrMoa ?? 1e9) - (b.derived.mrMoa ?? 1e9));
-            const typical = byMedianMr[Math.floor(byMedianMr.length/2)] || null;
+            const byScoreDesc = [...valid].sort((a,b)=> scoreOf(b) - scoreOf(a));
+            const n = byScoreDesc.length;
 
-            const byVert = [...valid].sort((a,b)=> (b.derived.vertMoa ?? -1e9) - (a.derived.vertMoa ?? -1e9));
-            const worst = byVert[0] || null;
+            const best = byScoreDesc[0] || null;
+            const worst = byScoreDesc[n - 1] || null;
+
+            // "Typical" should be a distinct representative, not a duplicate of best/worst.
+            // For n<3, it's clearer to omit the Typical card entirely.
+            let typical = null;
+            if (n >= 3) {
+              typical = byScoreDesc[Math.floor(n/2)] || null;
+
+              // Ensure uniqueness in edge cases (ties/identical objects).
+              if (typical === best) typical = byScoreDesc[Math.min(1, n-1)] || null;
+              if (typical === worst) typical = byScoreDesc[Math.max(n-2, 0)] || null;
+              if (typical === best || typical === worst) typical = null;
+            }
 
             return { best, typical, worst };
+        }
+
+        // Relative highlighting within the current import (does not change absolute tiers)
+        function _shotMarkerRelativeStats(strings) {
+            const valid = (strings || []).filter(s => s && s.derived && isFinite(s.derived.mrMoa) && isFinite(s.derived.vertMoa) && isFinite(s.derived.finalScore));
+            const n = valid.length;
+            if (!n) return { n: 0, bestCompositeKey: null, bestMrKey: null, bestVertKey: null, rankByKey: {}, keyOf: (s)=>((s&&s.meta&&s.meta.sessionKey)||'') };
+
+            const keyOf = (s) => (s && s.meta && s.meta.sessionKey) ? s.meta.sessionKey : '';
+            const byScore = [...valid].sort((a,b)=> (b.derived.finalScore - a.derived.finalScore));
+            const byMr = [...valid].sort((a,b)=> (a.derived.mrMoa - b.derived.mrMoa));
+            const byVert = [...valid].sort((a,b)=> (a.derived.vertMoa - b.derived.vertMoa));
+
+            const bestCompositeKey = keyOf(byScore[0]);
+            const bestMrKey = keyOf(byMr[0]);
+            const bestVertKey = keyOf(byVert[0]);
+
+            const rankByKey = {};
+            byScore.forEach((s, i) => { const k = keyOf(s); if (k) rankByKey[k] = i + 1; });
+
+            return { n, bestCompositeKey, bestMrKey, bestVertKey, rankByKey, keyOf };
+        }
+
+        function _shotMarkerRankedListHtml(strings, rel) {
+            const all = (strings || []).filter(s => s && (s.meta || s.derived));
+            if (!all.length) return '';
+            const scored = all.filter(s => s && s.derived && isFinite(s.derived.finalScore));
+            const unscored = all.filter(s => !(s && s.derived && isFinite(s.derived.finalScore)));
+            const byScore = [...scored].sort((a,b)=> (b.derived.finalScore - a.derived.finalScore)).concat(unscored);
+
+            const row = (s) => {
+                const d = s.derived || {};
+                const m = s.meta || {};
+                const key = (m.sessionKey || '');
+                const rank = (rel && rel.rankByKey && key && rel.rankByKey[key]) ? rel.rankByKey[key] : null;
+                const n = (rel && isFinite(rel.n)) ? rel.n : null;
+                const score = isFinite(d.finalScore) ? d.finalScore : null;
+                const tier = (score !== null) ? _scoreToTier(score) : null;
+                const mr = isFinite(d.mrMoa) ? d.mrMoa : null;
+                const vv = isFinite(d.vertMoa) ? d.vertMoa : null;
+
+                const isBestComposite = (key && rel && rel.bestCompositeKey && key === rel.bestCompositeKey);
+                const isBestMr = (key && rel && rel.bestMrKey && key === rel.bestMrKey);
+                const isBestVert = (key && rel && rel.bestVertKey && key === rel.bestVertKey);
+
+                const pills = [
+                    isBestComposite ? '🏁 Best today' : '',
+                    (!isBestComposite && isBestMr) ? '🎯 Best MR' : '',
+                    (!isBestComposite && isBestVert) ? '📏 Best V' : ''
+                ].filter(Boolean).join(' • ');
+
+                const title = [m.dateText || m.date || '', m.relay || '', m.label || ''].filter(Boolean).join(' • ');
+                const t = title || (m.targetName || 'Session');
+
+                return `
+                  <div class="flex items-center justify-between gap-3 py-2 border-b border-white/5">
+                    <div class="min-w-0">
+                      <div class="text-white text-xs md:text-sm truncate">${t}</div>
+                      <div class="text-grt-subtle text-[10px] md:text-xs truncate">
+                        ${pills || (m.targetName || '')}
+                      </div>
+                    </div>
+                    <div class="flex items-center gap-2 flex-shrink-0">
+                      ${(rank && n) ? `<span class="text-grt-subtle text-[11px]">#${rank}/${n}</span>` : ''}
+                      ${(tier !== null) ? `<span class="px-2 py-1 rounded-full border border-white/10 bg-grt-frame/30 text-grt-soft text-[11px]">S${tier}</span>` : `<span class="px-2 py-1 rounded-full border border-white/10 bg-grt-frame/20 text-grt-subtle text-[11px]">Unscored</span>`}
+                      ${(mr !== null) ? `<span class="text-grt-subtle text-[11px]">MR ${mr.toFixed(3)}</span>` : ''}
+                      ${(vv !== null) ? `<span class="text-grt-subtle text-[11px]">V ${vv.toFixed(3)}</span>` : ''}
+                    </div>
+                  </div>
+                `;
+            };
+
+            return `
+              <div class="mt-4 bg-grt-panel-soft/40 border border-grt-frame rounded-2xl p-3">
+                <details>
+                  <summary class="cursor-pointer text-white text-sm font-semibold select-none">All sessions (ranked)</summary>
+                  <div class="mt-2">
+                    ${byScore.map(row).join('')}
+                    <div class="text-grt-subtle text-[11px] mt-2">
+                      Relative badges show winners inside this import; S-tier is absolute (your 1000y standard).
+                    </div>
+                  </div>
+                </details>
+              </div>
+            `;
         }
 
         function renderShotMarkerSessionCards() {
@@ -3014,7 +3406,11 @@ if (smInput) smInput.value = '';            if (typeof renderAddonCards === 'fun
             const arr = Array.isArray(shotMarkerAddons) ? shotMarkerAddons : [];
             const addon = arr.length ? arr[0] : null; // single file for now
             const strings = addon && Array.isArray(addon.sessions) ? addon.sessions : [];
+            // Re-map on render so chrono imports/edits immediately reflect in cards
+            mapShotMarkerSessionsToChronoCharges(strings);
             const picks = _pickSessionCards(strings);
+            const rel = _shotMarkerRelativeStats(strings);
+            const rankedHtml = _shotMarkerRankedListHtml(strings, rel);
 
             if (!addon || !strings.length || (!picks.best && !picks.typical && !picks.worst)) {
                 host.innerHTML = '';
@@ -3031,24 +3427,99 @@ if (smInput) smInput.value = '';            if (typeof renderAddonCards === 'fun
               const vScore = (d.verticalScore !== null && isFinite(d.verticalScore)) ? Math.round(d.verticalScore) : null;
               const pScore = (d.precisionScore !== null && isFinite(d.precisionScore)) ? Math.round(d.precisionScore) : null;
               const conf = (d.confidenceScore !== null && isFinite(d.confidenceScore)) ? Math.round(d.confidenceScore) : null;
+              const fScore = (d.finalScore !== null && isFinite(d.finalScore)) ? Math.round(d.finalScore) : conf;
               const sd = (d.velocity && isFinite(d.velocity.sd)) ? d.velocity.sd : null;
               const es = (d.velocity && isFinite(d.velocity.es)) ? d.velocity.es : null;
-            
-              // Simple, chrono-card-like status styling
-              let statusLabel = (conf !== null) ? `C ${conf}` : '—';
+
+              const match = d.chargeMatch || null;
+              const matchLabel = match && match.label ? match.label : '';
+              const matchConf = match && isFinite(match.confidence) ? Math.round(match.confidence) : null;
+
+              // Simple, chrono-card-like status styling (Absolute tier, score-driven)
+              let statusLabel = (fScore !== null) ? `S${_scoreToTier(fScore)}` : '—';
               let statusClass = 'bg-slate-800/60 text-slate-200 border-slate-500/40';
               let borderClass = 'border-grt-frame';
-              if (conf !== null) {
-                if (conf >= 90) { statusLabel = `C ${conf}`; statusClass = 'bg-emerald-900/70 text-emerald-200 border-emerald-500/60'; borderClass = 'border-emerald-500/70'; }
-                else if (conf >= 80) { statusLabel = `C ${conf}`; statusClass = 'bg-sky-900/70 text-sky-200 border-sky-500/60'; borderClass = 'border-sky-500/60'; }
-                else { statusLabel = `C ${conf}`; statusClass = 'bg-amber-900/60 text-amber-200 border-amber-500/60'; borderClass = 'border-amber-500/60'; }
+
+              const tier = (fScore !== null) ? _scoreToTier(fScore) : null;
+              if (tier !== null) {
+                if (tier === 1) { statusClass = 'bg-emerald-900/70 text-emerald-200 border-emerald-500/60'; borderClass = 'border-emerald-500/70'; }
+                else if (tier === 2) { statusClass = 'bg-sky-900/70 text-sky-200 border-sky-500/60'; borderClass = 'border-sky-500/60'; }
+                else if (tier === 3) { statusClass = 'bg-amber-900/60 text-amber-200 border-amber-500/60'; borderClass = 'border-amber-500/60'; }
+                else if (tier === 4) { statusClass = 'bg-amber-900/45 text-amber-200 border-amber-500/50'; borderClass = 'border-amber-500/50'; }
+                else { statusClass = 'bg-rose-950/50 text-rose-200 border-rose-500/40'; borderClass = 'border-rose-500/40'; }
               }
-            
+
+              // Relative highlights (best-in-this-import)
+              const relKey = (m.sessionKey || '');
+              const relRank = (rel && rel.rankByKey && relKey && rel.rankByKey[relKey]) ? rel.rankByKey[relKey] : null;
+              const relN = (rel && isFinite(rel.n)) ? rel.n : null;
+              const isBestComposite = (relKey && rel && rel.bestCompositeKey && relKey === rel.bestCompositeKey);
+              const isBestMr = (relKey && rel && rel.bestMrKey && relKey === rel.bestMrKey);
+              const isBestVert = (relKey && rel && rel.bestVertKey && relKey === rel.bestVertKey);
+
+              let relBorder = '';
+              if (isBestComposite) relBorder = 'ring-2 ring-emerald-400/60';
+              else if (isBestMr) relBorder = 'ring-2 ring-yellow-300/50';
+              else if (isBestVert) relBorder = 'ring-2 ring-sky-400/50';
+
+              const relPills = `
+                ${(isBestComposite) ? `<div class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full border bg-emerald-900/30 text-emerald-200 border-emerald-500/40 text-[11px] md:text-xs" title="Best composite in this import (relative).">
+                    <span class="opacity-90">🏁</span>Best today
+                  </div>` : ''}
+                ${(isBestMr && !isBestComposite) ? `<div class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full border bg-yellow-900/25 text-yellow-200 border-yellow-500/35 text-[11px] md:text-xs" title="Best MR in this import (relative).">
+                    <span class="opacity-90">🎯</span>Best MR
+                  </div>` : ''}
+                ${(isBestVert && !isBestComposite) ? `<div class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full border bg-sky-900/25 text-sky-200 border-sky-500/35 text-[11px] md:text-xs" title="Best vertical control in this import (relative).">
+                    <span class="opacity-90">📏</span>Best V
+                  </div>` : ''}
+                ${(relRank !== null && relN) ? `<div class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full border bg-grt-frame/30 text-grt-soft border-white/10 text-[11px] md:text-xs" title="Rank within this import (relative).">
+                    <span class="opacity-80">#</span>${relRank}/${relN}
+                  </div>` : ''}
+              `.trim();
+
               const fmt = (v, digits=3) => (v === null || !isFinite(v)) ? '–' : v.toFixed(digits);
               const fmt1 = (v) => (v === null || !isFinite(v)) ? '–' : v.toFixed(1);
+
+              // Breakdown tooltip (MR-first, vertical-critical, 1000y bias)
+              const bd = d.scoreBreakdown || null;
+              let scoreTooltip = '';
+              if (bd && typeof bd === 'object') {
+                const p = bd.params || {};
+                const lines = [];
+                if (m.distanceYd) lines.push(`Distance: ${m.distanceYd} yd`);
+                if (isFinite(bd.mrMoa)) lines.push(`MR: ${bd.mrMoa.toFixed(3)} MOA`);
+                if (isFinite(bd.vertMoa)) lines.push(`Vertical: ${bd.vertMoa.toFixed(3)} MOA (ref ${isFinite(p.vRef)?p.vRef.toFixed(2):'—'})`);
+                if (isFinite(bd.sdFps)) lines.push(`SD: ${bd.sdFps.toFixed(1)} fps (ref ${isFinite(p.sdRef)?p.sdRef.toFixed(1):'—'})`);
+                else if (isFinite(bd.esFps)) lines.push(`ES: ${bd.esFps.toFixed(1)} fps`);
+                if (isFinite(bd.mrScore)) lines.push(`MR score: ${bd.mrScore.toFixed(1)}`);
+                if (isFinite(bd.vPenalty)) lines.push(`Vertical penalty: ${(bd.vPenalty*100).toFixed(1)}% (w ${isFinite(p.wV)?p.wV.toFixed(2):'—'})`);
+                if (isFinite(bd.velPenalty)) lines.push(`Velocity penalty: ${(bd.velPenalty*100).toFixed(1)}% (w ${isFinite(p.wVel)?p.wVel.toFixed(2):'—'})`);
+                if (isFinite(bd.finalScore)) lines.push(`Final: ${bd.finalScore.toFixed(1)}`);
+                scoreTooltip = lines.join('\n');
+              }
+
+              // Manual mapping UI
+              const groupsForUI = _getChronoGroupsForMapping();
+              const sessionKey = m.sessionKey || _smSessionKey(s);
+              const manualIdx = (d.manualChargeIndex !== null && isFinite(d.manualChargeIndex)) ? Number(d.manualChargeIndex) : null;
+              const mapSelect = (groupsForUI && groupsForUI.length) ? `
+                <div class="mt-2">
+                  <label class="text-grt-subtle text-[11px]">Charge link</label>
+                  <select data-sm-map="1" data-sm-key="${encodeURIComponent(sessionKey)}"
+                          class="mt-1 w-full bg-grt-panel-soft border border-grt-frame rounded-xl px-2 py-1.5 text-white text-xs">
+                    <option value="">Auto</option>
+                    ${groupsForUI.map(g => {
+                      const idx = Number(g.chargeIndex);
+                      const label = g.label || ('Charge ' + idx);
+                      const sel = (manualIdx !== null && idx === manualIdx) ? 'selected' : '';
+                      return `<option value="${idx}" ${sel}>${label}</option>`;
+                    }).join('')}
+                  </select>
+                </div>` : '';
+
             
               return `
-                <div class="bg-grt-panel rounded-2xl shadow-xl p-4 border ${borderClass}">
+                <div class="bg-grt-panel rounded-2xl shadow-xl p-4 border ${borderClass} ${relBorder}">
                   <div class="flex items-start justify-between gap-3">
                     <div class="min-w-0">
                       <div class="text-white text-base font-semibold">${title}</div>
@@ -3057,11 +3528,16 @@ if (smInput) smInput.value = '';            if (typeof renderAddonCards === 'fun
                       </div>
                     </div>
                     <div class="flex items-center gap-2 flex-shrink-0">
-                      ${(conf !== null) ? `<div class="inline-flex items-center gap-2 px-2.5 py-1 rounded-full border ${statusClass} text-[11px] md:text-xs">
+                      ${(fScore !== null) ? `<div class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full border ${statusClass} text-[11px] md:text-xs" title="${scoreTooltip || 'Score breakdown unavailable'}">
                           <span class="h-1.5 w-1.5 rounded-full bg-current opacity-80"></span>${statusLabel}
+                        </div>` : ''}
+                      ${relPills}
+                      ${(matchLabel) ? `<div class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full border bg-grt-frame/50 text-grt-soft border-white/10 text-[11px] md:text-xs" title="Chrono match confidence: ${matchConf ?? '—'}">
+                          <span class="opacity-80">⛭</span>${matchLabel}${(matchConf !== null) ? ` • ${matchConf}` : ''}
                         </div>` : ''}
                     </div>
                   </div>
+                  ${mapSelect}
             
                   <div class="mt-3 space-y-1.5 text-sm">
                     <div class="flex items-center justify-between gap-3"><div class="text-grt-subtle">Shots</div><div class="text-white font-semibold">${shots || '–'}</div></div>
@@ -3083,12 +3559,101 @@ if (smInput) smInput.value = '';            if (typeof renderAddonCards === 'fun
             };
 
             host.innerHTML = `
-              <div class="grid grid-cols-1 md:grid-cols-3 gap-3">
+              
+              <div class="bg-grt-panel-soft/40 border border-grt-frame rounded-2xl p-3 mb-3">
+                <details>
+                  <summary class="cursor-pointer text-white text-sm font-semibold select-none">Advanced scoring knobs</summary>
+                  <div class="mt-3 grid grid-cols-1 md:grid-cols-3 gap-3 text-xs">
+                    <div>
+                      <label class="text-grt-subtle">1000y vertical ref (MOA)</label>
+                      <input id="smKnob_vRefLong" type="number" step="0.01" min="0.10" max="1.50"
+                             class="mt-1 w-full bg-grt-panel-soft border border-grt-frame rounded-xl px-2 py-1.5 text-white"
+                             value="${(shotMarkerScoreSettings && shotMarkerScoreSettings.long && isFinite(shotMarkerScoreSettings.long.vRef)) ? shotMarkerScoreSettings.long.vRef : 0.35}">
+                    </div>
+                    <div>
+                      <label class="text-grt-subtle">1000y vertical weight</label>
+                      <input id="smKnob_wVLong" type="number" step="0.05" min="0.50" max="3.00"
+                             class="mt-1 w-full bg-grt-panel-soft border border-grt-frame rounded-xl px-2 py-1.5 text-white"
+                             value="${(shotMarkerScoreSettings && shotMarkerScoreSettings.long && isFinite(shotMarkerScoreSettings.long.wV)) ? shotMarkerScoreSettings.long.wV : 1.50}">
+                    </div>
+                    <div>
+                      <label class="text-grt-subtle">1000y velocity weight</label>
+                      <input id="smKnob_wVelLong" type="number" step="0.05" min="0.00" max="2.00"
+                             class="mt-1 w-full bg-grt-panel-soft border border-grt-frame rounded-xl px-2 py-1.5 text-white"
+                             value="${(shotMarkerScoreSettings && shotMarkerScoreSettings.long && isFinite(shotMarkerScoreSettings.long.wVel)) ? shotMarkerScoreSettings.long.wVel : 0.65}">
+                    </div>
+                  </div>
+                  <div class="mt-3 flex items-center gap-2">
+                    <button id="smKnobApply" class="px-3 py-1.5 rounded-xl bg-grt-highlight hover:bg-grt-highlight/80 text-white text-xs font-semibold border border-grt-frame">
+                      Apply scoring
+                    </button>
+                    <span class="text-grt-subtle text-[11px]">Stored in project + this browser.</span>
+                  </div>
+                </details>
+              </div>
+<div class="grid grid-cols-1 md:grid-cols-3 gap-3">
                 ${cardHtml('Best precision', picks.best)}
                 ${cardHtml('Most typical', picks.typical)}
                 ${cardHtml('Worst control', picks.worst)}
               </div>
+              ${rankedHtml}
             `;
+
+            // Wire manual mapping dropdowns + scoring knobs (persist + re-render)
+            host.querySelectorAll('select[data-sm-map]').forEach(sel => {
+              sel.onchange = (ev) => {
+                const el = ev.target;
+                const key = decodeURIComponent(el.getAttribute('data-sm-key') || '');
+                const val = el.value;
+                if (!key) return;
+                if (val === '' || val === null) delete shotMarkerManualMap[key];
+                else shotMarkerManualMap[key] = Number(val);
+                _saveShotMarkerManualMap();
+                renderShotMarkerSessionCards();
+                if (typeof renderShotMarkerAddonCards === 'function') renderShotMarkerAddonCards();
+              };
+            });
+
+            const applyBtn = host.querySelector('#smKnobApply');
+            if (applyBtn) {
+              applyBtn.onclick = () => {
+                const vRef = parseFloat(host.querySelector('#smKnob_vRefLong')?.value);
+                const wV = parseFloat(host.querySelector('#smKnob_wVLong')?.value);
+                const wVel = parseFloat(host.querySelector('#smKnob_wVelLong')?.value);
+
+                shotMarkerScoreSettings = shotMarkerScoreSettings || {};
+                shotMarkerScoreSettings.long = shotMarkerScoreSettings.long || {};
+                if (isFinite(vRef)) shotMarkerScoreSettings.long.vRef = vRef;
+                if (isFinite(wV)) shotMarkerScoreSettings.long.wV = wV;
+                if (isFinite(wVel)) shotMarkerScoreSettings.long.wVel = wVel;
+                _saveShotMarkerScoreSettings();
+
+                try {
+                  const arr = Array.isArray(shotMarkerAddons) ? shotMarkerAddons : [];
+                  const addon = arr.length ? arr[0] : null;
+                  const sessions = addon && Array.isArray(addon.sessions) ? addon.sessions : [];
+                  sessions.forEach(s => {
+                    if (!s || !s.derived) return;
+                    const d = s.derived;
+                    const m = s.meta || {};
+                    const adv = _computeShotMarkerScoreAdvanced(d.mrMoa, d.vertMoa, d.velocity, m.distanceYd);
+                    if (!adv) return;
+                    d.precisionScore = adv.mrScore;
+                    d.verticalScore = adv.vPenalty * 100;
+                    d.confidenceScore = adv.finalScore;
+                    d.finalScore = adv.finalScore;
+                    d.scoreBreakdown = Object.assign({
+                      mrMoa: d.mrMoa, vertMoa: d.vertMoa, distanceYd: m.distanceYd,
+                      sdFps: (d.velocity && isFinite(d.velocity.sd)) ? d.velocity.sd : null,
+                      esFps: (d.velocity && isFinite(d.velocity.es)) ? d.velocity.es : null
+                    }, adv);
+                  });
+                } catch {}
+                renderShotMarkerSessionCards();
+                if (typeof renderShotMarkerAddonCards === 'function') renderShotMarkerAddonCards();
+              };
+            }
+
         }
 function addonCardHtml(addon) {
             const metrics = addon.metrics || null;
@@ -3176,6 +3741,8 @@ function addonCardHtml(addon) {
 
                     if (isShotslog) {
                         const sessions = parseShotMarkerShotslog(rawText);
+                        mapShotMarkerSessionsToChronoCharges(sessions);
+
                         // Aggregate XY across all sessions for a top-level ES/MR summary (optional)
                         const xs = [], ys = [];
                         sessions.forEach(s => {
@@ -4202,6 +4769,17 @@ function stripExistingImportedGallery(inner) {
                     pushSession('Most typical', picks.typical);
                     pushSession('Worst control', picks.worst);
                 }
+
+                
+                // Persist ShotMarker manual mapping + scoring settings into the .grtload (safe plain-text markers)
+                try {
+                    const mapStr = btoa(JSON.stringify(shotMarkerManualMap || {}));
+                    lines.push(`XQA_SM_MANUAL_MAP:${mapStr}`);
+                } catch {}
+                try {
+                    const setStr = btoa(JSON.stringify(shotMarkerScoreSettings || null));
+                    lines.push(`XQA_SM_SCORE_SETTINGS:${setStr}`);
+                } catch {}
 
                 return lines.join('\n');
             }
@@ -5647,4 +6225,4 @@ document.addEventListener('DOMContentLoaded', function setupHelpOverlay() {
 <canvas id="chronoSimChart" style="display:none"></canvas>
 
 </body>
-</html>
+                </html>
