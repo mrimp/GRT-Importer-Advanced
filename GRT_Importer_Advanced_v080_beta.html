@@ -20,7 +20,7 @@ Notes:
 <head>
 <meta charset="utf-8"/>
 <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
-<title>GRT Importer Advanced v0.87.0</title>
+<title>GRT Importer Advanced v0.87.1</title>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
 <script src="https://cdn.tailwindcss.com"></script>
 <style>
@@ -221,7 +221,7 @@ input[type="file"]::file-selector-button:active{background: rgba(255,255,255,0.1
                     </p>
 <div class="flex flex-wrap items-center gap-2 mt-2 text-xs">
 <p class="text-grt-subtle">
-                            GRT Importer Advanced v0.87.0 • XquiziT Arms
+                            GRT Importer Advanced v0.87.1 • XquiziT Arms
                         </p>
 <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full border border-grt-soft bg-grt-panel-soft text-[10px] md:text-[11px] text-grt-soft" id="sessionPill" title="Summary of imported sessions and current velocity unit.">
                             ⚙️ Standard • 0 files • ft/s
@@ -3116,6 +3116,9 @@ function _getChronoGroupsForMapping() {
         label: `Charge ${chargeIndex} — ${label}`,
         meanFps: _numMaybe(stats && (stats.mean ?? stats.avg ?? stats.average ?? stats.meanFps ?? stats.avgFps)),
         sdFps: _numMaybe(stats && (stats.sd ?? stats.sdFps ?? stats.stdev)),
+        minFps: _numMaybe(stats && (stats.min ?? stats.minFps ?? stats.minimum)),
+        maxFps: _numMaybe(stats && (stats.max ?? stats.maxFps ?? stats.maximum)),
+        esFps: (()=>{ const mn=_numMaybe(stats && (stats.min ?? stats.minFps ?? stats.minimum)); const mx=_numMaybe(stats && (stats.max ?? stats.maxFps ?? stats.maximum)); return (Number.isFinite(mn)&&Number.isFinite(mx)) ? (mx-mn) : null; })(),
         count: _numMaybe(stats && (stats.count ?? stats.shots ?? stats.n))
       });
     }
@@ -3143,6 +3146,9 @@ function _getChronoGroupsForMapping() {
         label: `Charge ${chargeIndex} — ${cleanName}`,
         meanFps,
         sdFps,
+        minFps: _numMaybe(stats.min ?? stats.minFps ?? stats.minimum),
+        maxFps: _numMaybe(stats.max ?? stats.maxFps ?? stats.maximum),
+        esFps: (()=>{ const mn=_numMaybe(stats.min ?? stats.minFps ?? stats.minimum); const mx=_numMaybe(stats.max ?? stats.maxFps ?? stats.maximum); return (Number.isFinite(mn)&&Number.isFinite(mx)) ? (mx-mn) : null; })(),
         count
       });
     }
@@ -3247,6 +3253,30 @@ function mapShotMarkerSessionsToChronoCharges(sessions) {
     }
 
     s.derived.chargeMatch = match;
+
+    // Attach chrono-derived velocity stats (session-level) so cards update when Charge link changes.
+    // This does NOT imply per-shot velocity correlation is available.
+    try{
+      if(match && Number.isFinite(match.chargeIndex)){
+        const g = groups.find(x => Number(x.chargeIndex) === Number(match.chargeIndex));
+        if(g){
+          const vel = {
+            mean: (Number.isFinite(g.meanFps) ? Number(g.meanFps) : null),
+            sd:   (Number.isFinite(g.sdFps) ? Number(g.sdFps) : null),
+            es:   (Number.isFinite(g.esFps) ? Number(g.esFps) : null),
+            min:  (Number.isFinite(g.minFps) ? Number(g.minFps) : null),
+            max:  (Number.isFinite(g.maxFps) ? Number(g.maxFps) : null),
+            n:    (Number.isFinite(g.count) ? Number(g.count) : null),
+            source: 'chrono'
+          };
+          s.derived.velocity = vel;
+        }
+      } else {
+        // If unlinked/auto with no match, avoid carrying stale chrono velocity
+        if(s.derived.velocity && s.derived.velocity.source === 'chrono') delete s.derived.velocity;
+      }
+    }catch(_e){} 
+
   });
 
   return sessions;
@@ -6784,7 +6814,7 @@ function _smConfFromN(n){ n = Number(n||0); if (!isFinite(n)||n<=0) return 0; co
 
 
 
-// --- Current Tune + Improvement helpers (v0.87.0) ---
+// --- Current Tune + Improvement helpers (v0.87.1) ---
 function _smParseDateISOFromMeta(meta){
   try{
     const dt = (meta && meta.dateText) ? String(meta.dateText) : '';
@@ -7261,11 +7291,14 @@ function _smPhase3ForSession(session){
 function _smPhase3BadgePills(badges){
   const b = Array.isArray(badges)?badges:[];
   if(!b.length) return '<span class="text-grt-subtle text-[11px]">—</span>';
-  return b.slice(0,4).map(x=>`
-    <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full border border-grt-frame bg-grt-panel-soft/50 text-[10px] text-white/85">
-      <span>${x.icon||'•'}</span><span>${x.label||''}</span>
-    </span>
-  `).join(' ');
+  return b.slice(0,4).map(x=>{
+    const tip = String(x.detail || x.label || '').replace(/"/g,'&quot;');
+    return `
+      <span title="${tip}" class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full border border-grt-frame bg-grt-panel-soft/50 text-[10px] text-white/85">
+        <span>${x.icon||'•'}</span><span>${x.label||''}</span>
+      </span>
+    `;
+  }).join(' ');
 }
 window._smPhase3BadgePills = _smPhase3BadgePills;
 }
@@ -7614,15 +7647,24 @@ function openSmDrilldown(rowIndex){
   const residMm = d?.velocityResidual?.residualVerticalESmm;
   const residMoa = Number.isFinite(residMm) ? _mmToMoa(residMm, distanceYd) : null;
 
-  const vSD = d?.velocityDiag?.vSD;
-  const vES = d?.velocityDiag?.vES;
+  const vSD_model = d?.velocityDiag?.vSD;
+  const vES_model = d?.velocityDiag?.vES;
   const r2  = d?.velocityDiag?.r2;
   const corr = d?.velocityDiag?.corr;
   const flags = d?.velocityDiag?.flags || {};
 
-  const hasVel = Number.isFinite(vSD) || Number.isFinite(vES) || Number.isFinite(r2) || Number.isFinite(corr);
-  const velLabel = hasVel ? (d?.rank2?.label || 'mixed') : 'target-only';
-  const velIcon  = hasVel ? _smRankIcon(velLabel) : '📄';
+  // If we don't have per-shot velocity (target-only ShotMarker), we can still show chrono-linked SD/ES
+  const vSD_chrono = d?.velocity?.sd;
+  const vES_chrono = d?.velocity?.es;
+
+  const vSD = Number.isFinite(vSD_model) ? vSD_model : (Number.isFinite(vSD_chrono) ? vSD_chrono : null);
+  const vES = Number.isFinite(vES_model) ? vES_model : (Number.isFinite(vES_chrono) ? vES_chrono : null);
+
+  const hasModelVel = Number.isFinite(vSD_model) || Number.isFinite(vES_model) || Number.isFinite(r2) || Number.isFinite(corr);
+  const hasAnyVel = Number.isFinite(vSD) || Number.isFinite(vES);
+
+  const velLabel = hasModelVel ? (d?.rank2?.label || 'mixed') : (hasAnyVel ? 'linked-chrono' : 'target-only');
+  const velIcon  = hasModelVel ? _smRankIcon(velLabel) : (hasAnyVel ? '⛭' : '📄');
 
 
   const html = `
@@ -7638,7 +7680,7 @@ function openSmDrilldown(rowIndex){
     <div class="mt-4 grid grid-cols-2 gap-3 text-sm">
       <div class="bg-grt-panel-soft/40 border border-grt-frame rounded-xl p-3">
         <div class="text-grt-subtle text-[10px] uppercase">Residual Vertical</div>
-        <div class="text-white text-lg font-semibold mt-1">${hasVel && Number.isFinite(residMoa) ? (__fmtNum(residMoa,3)+' MOA') : '—'}</div>
+        <div class="text-white text-lg font-semibold mt-1">${hasModelVel && Number.isFinite(residMoa) ? (__fmtNum(residMoa,3)+' MOA') : '—'}</div>
       </div>
       <div class="bg-grt-panel-soft/40 border border-grt-frame rounded-xl p-3">
         <div class="text-grt-subtle text-[10px] uppercase">Vertical ES</div>
@@ -7679,7 +7721,7 @@ function openSmDrilldown(rowIndex){
         corr: <span class="text-white">${isFinite(corr)?__fmtNum(corr,2):'—'}</span>
       </div>
       <div class="mt-2 text-[12px] text-grt-subtle">
-        Flags: ${hasVel ? (flags.weirdSign?'⚠ weirdSign ':'')+(flags.velocityDominated?'⛽ velocityDominated ':'')+(flags.windDominated?'🌬 windDominated ':'')+(flags.mixed?'🎯 mixed':'') : '📄 target-only (no velocity)'}
+        Flags: ${hasModelVel ? (flags.weirdSign?'⚠ weirdSign ':'')+(flags.velocityDominated?'⛽ velocityDominated ':'')+(flags.windDominated?'🌬 windDominated ':'')+(flags.mixed?'🎯 mixed':'') : (hasAnyVel ? '⛭ linked chrono (no per-shot)' : '📄 target-only (no velocity)')}
       </div>
     </div>
 
@@ -7774,4 +7816,4 @@ function closeSmDrilldown(){
 </div>
 
 </body>
-         </html>
+        </html>
