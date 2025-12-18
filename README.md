@@ -1,8 +1,10 @@
 # GRT-Importer-Advanced
 
-<img width="2415" height="4848" alt="_C__Users_bill_Downloads_GRT_Importer_Advanced_v0 80_beta html" src="https://github.com/user-attachments/assets/6becef47-941f-4ee4-a550-8a6b844310d8" />
+<img width="2415" height="4848" alt="_C__Users_bill_Downloads_GRT_Importer_Advanced_v0 87 1_LastImproved_TooltipsAndChargeLinkFix html (2)" src="https://github.com/user-attachments/assets/0cb365c5-7e73-4ec4-bbe2-28bfaeeaeaa6" />
 
-<img width="2415" height="7740" alt="_C__Users_bill_Downloads_GRT_Importer_Advanced_v0 80_beta html (1)" src="https://github.com/user-attachments/assets/70cb4afe-a3eb-47c4-9f9d-106e86cb009d" />
+
+<img width="2415" height="9788" alt="_C__Users_bill_Downloads_GRT_Importer_Advanced_v0 87 1_LastImproved_TooltipsAndChargeLinkFix html (1)" src="https://github.com/user-attachments/assets/a45f99f7-b65e-47d4-af2e-d40884f8aeed" />
+
 
 🎯 GRT Importer Advanced — ShotMarker-First Load Analysis
 
