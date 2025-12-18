@@ -1,0 +1,80 @@
+v0.87.0 — Current Tune Intelligence & UX Polish
+
+Status: Stable
+Baseline: v0.86.3 (Phase 3 complete)
+
+✨ Highlights
+
+Strong time-decay aggregation (“Current Tune” dominates)
+
+Recent sessions weighted heavily
+
+Historical data retained as low-weight context
+
+14-day half-life with decay floor
+
+1000y-first diagnostic tuning
+
+Vertical diagnostics gated at ≥10 shots
+
+New 1000y vertical severity bands:
+
+🟢 ≤ 0.80 MOA — competitive
+
+🟡 0.81–1.05 MOA — watch / tuneable
+
+🟠 1.06–1.30 MOA — likely velocity-limited (tuneable)
+
+🔴 > 1.30 MOA — likely non-competitive
+
+Improved velocity diagnostics (ES vs SD)
+
+SD treated as primary signal
+
+ES inflated by single outlier detected and soft-flagged
+
+Reduced false “bad velocity” conclusions
+
+Ranking table overhaul
+
+Sorted by recent 1000y vertical + confidence
+
+Badge icons only (icon opacity reflects confidence)
+
+Rank stability via hysteresis (prevents jitter)
+
+Rows with no recent 1000y data visibly de-emphasized
+
+Drilldown UX polish
+
+Default view: Current Tune
+
+Toggle: Current Tune / All Time
+
+Diagnostics grouped by cause:
+
+Velocity / Vertical
+
+Wind / Horizontal
+
+Mechanical
+
+Shooter / Process
+
+Low-confidence and historical findings suppressed by default
+
+New: “Last Improved” indicator
+
+Detects meaningful recent improvement in 1000y vertical
+
+Requires confidence + non-contradiction by newer data
+
+Shown subtly in ranking table and drilldown summary
+
+🧠 Behavioral Notes
+
+Diagnostics favor repeatability over single groups
+
+Strong recent performance suppresses historical warnings
+
+Tool now reflects how loads are actually tuned and evaluated
