@@ -973,12 +973,69 @@ input[type="file"]::file-selector-button:active{background: rgba(255,255,255,0.1
                 function _saveShotMarkerManualMap() {
                     try { localStorage.setItem(LS_SM_MANUAL_MAP, JSON.stringify(shotMarkerManualMap || {})); } catch {}
                 }
-                function _saveShotMarkerScoreSettings() {
+                
+                
+                function onSmChargeLinkChange(selEl){
+                    try{
+                        const keyEnc = selEl.getAttribute('data-sm-key') || '';
+                        const sessionKey = decodeURIComponent(keyEnc);
+                        const v = selEl.value;
+                        if (!shotMarkerManualMap) shotMarkerManualMap = {};
+                        if (v === '' || v == null){
+                            // Auto
+                            delete shotMarkerManualMap[sessionKey];
+                        } else {
+                            shotMarkerManualMap[sessionKey] = Number(v);
+                        }
+                        _saveShotMarkerManualMap();
+                        try{ showToast(`Linked: ${sessionKey.split('|')[1]||'session'} → Charge ${v||'—'}`,'ok'); }catch(_e){}
+                        // re-render so badges + node confidence update immediately
+                        renderShotMarkerSessionCards();
+                    }catch(e){
+                        console.error(e);
+                    }
+                }
+
+                function smLockAutoLinksToManual(sessions){
+                    try{
+                        let arr = Array.isArray(sessions) ? sessions : [];
+                        if (!arr.length){
+                            try { arr = (shotMarkerAddons && shotMarkerAddons[0] && Array.isArray(shotMarkerAddons[0].sessions)) ? shotMarkerAddons[0].sessions : []; } catch(e) { arr = []; }
+                        }
+
+                        if (!shotMarkerManualMap) shotMarkerManualMap = {};
+                        // Ensure auto-matches are computed
+                        mapShotMarkerSessionsToChronoCharges(arr);
+                        let locked = 0;
+                        for (const s of arr){
+                            if (!s) continue;
+                            const key = (s.meta && s.meta.sessionKey) ? s.meta.sessionKey : _smSessionKey(s);
+                            const d = s.derived || {};
+                            const cm = d.chargeMatch || null;
+                            const autoIdx = (cm && isFinite(cm.chargeIndex)) ? Number(cm.chargeIndex) : null;
+                            if (autoIdx === null) continue;
+                            // Only lock if not already manually set
+                            if (shotMarkerManualMap[key] == null){
+                                shotMarkerManualMap[key] = autoIdx;
+                                locked++;
+                            }
+                        }
+                        _saveShotMarkerManualMap();
+                        renderShotMarkerSessionCards();
+                        if (typeof showStatus === 'function'){
+                            showStatus('success', locked ? `Locked ${locked} auto link${locked===1?'':'s'} to charges.` : 'No auto links to lock (nothing matched yet).');
+                        }
+                    }catch(e){
+                        console.error(e);
+                        if (typeof showStatus === 'function') showStatus('error', 'Lock auto links failed: ' + (e?.message || e));
+                    }
+                }
+function _saveShotMarkerScoreSettings() {
                     try { localStorage.setItem(LS_SM_SCORE_SETTINGS, JSON.stringify(shotMarkerScoreSettings || null)); } catch {}
                 }
         
                 function _smSessionKey(s) {
-                    const m = session && session.meta ? session.meta : {};
+                    const m = (s && s.meta) ? s.meta : {};
                     const parts = [
                         m.dateText || '',
                         m.relay || '',
@@ -990,13 +1047,17 @@ input[type="file"]::file-selector-button:active{background: rgba(255,255,255,0.1
                 }
         
                 function _hydrateShotMarkerPrefsFromBase(grtText) {
-                    // Look for persisted lines in Imported Notes (safe, ignorable by GRT)
+                    // Prefer hidden XML attributes; fall back to legacy plain-text markers.
                     const t = String(grtText || '');
+                    const a1 = t.match(/xqa_sm_manual_map="([^"]+)"/i);
+                    const a2 = t.match(/xqa_sm_score_settings="([^"]+)"/i);
                     const m1 = t.match(/XQA_SM_MANUAL_MAP:([A-Za-z0-9+/=]+)/);
                     const m2 = t.match(/XQA_SM_SCORE_SETTINGS:([A-Za-z0-9+/=]+)/);
+                    const mapB64 = (a1 && a1[1]) ? a1[1] : (m1 && m1[1] ? m1[1] : null);
+                    const setB64 = (a2 && a2[1]) ? a2[1] : (m2 && m2[1] ? m2[1] : null);
                     try {
-                        if (m1 && m1[1]) {
-                            const jsonStr = atob(m1[1]);
+                        if (mapB64) {
+                            const jsonStr = atob(mapB64);
                             const obj = JSON.parse(jsonStr);
                             if (obj && typeof obj === 'object') {
                                 shotMarkerManualMap = obj;
@@ -1005,8 +1066,8 @@ input[type="file"]::file-selector-button:active{background: rgba(255,255,255,0.1
                         }
                     } catch {}
                     try {
-                        if (m2 && m2[1]) {
-                            const jsonStr = atob(m2[1]);
+                        if (setB64) {
+                            const jsonStr = atob(setB64);
                             const obj = JSON.parse(jsonStr);
                             shotMarkerScoreSettings = obj || null;
                             _saveShotMarkerScoreSettings();
@@ -2759,6 +2820,11 @@ if (smInput) smInput.value = '';            if (typeof renderAddonCards === 'fun
                 .replace(/'/g, '&#39;');
         }
 
+
+        // Alias used by newer UI helpers (kept for backward compatibility)
+        function _escapeHtml(str) {
+            return escapeHtml(str);
+        }
         function normalizeHeaderKey(s) {
             return String(s || '')
                 .trim()
@@ -2944,51 +3010,80 @@ function _extractChargeFromText(t) {
   return val; // gr/gn -> grains
 }
 
+function _numMaybe(x) {
+  if (x == null) return null;
+  if (typeof x === 'number') return isFinite(x) ? x : null;
+  const s = String(x).trim();
+  if (!s) return null;
+  // Extract first number from strings like "2893.1 fps" or "SD 4.7"
+  const m = s.match(/-?\d+(\.\d+)?/);
+  if (!m) return null;
+  const v = parseFloat(m[0]);
+  return isFinite(v) ? v : null;
+}
+
 function _getChronoGroupsForMapping() {
   const groups = [];
 
+  const hasLadder = (typeof ladderSlots !== 'undefined') && Array.isArray(ladderSlots) && ladderSlots.length;
+  const hasAllStats = (typeof allStats !== 'undefined') && Array.isArray(allStats) && allStats.length;
+
   // Ladder mode: ladderSlots (1-indexed chargeIndex)
-  if (mode === 'ladder' && Array.isArray(ladderSlots) && ladderSlots.length) {
+  if (hasLadder) {
     for (let i = 0; i < ladderSlots.length; i++) {
       const slot = ladderSlots[i];
-      if (!slot || !slot.stats) continue;
+      if (!slot) continue;
+
       const chargeIndex = slot.chargeIndex || (i + 1);
-      const stats = slot.stats;
+      const stats = slot.stats || null;
 
       let label = '';
-      // Prefer sim JSON charge labels if present
-      const simRow = (Array.isArray(grtSimLadderRows) && grtSimLadderRows[chargeIndex - 1]) ? grtSimLadderRows[chargeIndex - 1] : null;
+      const simRow = (typeof grtSimLadderRows !== 'undefined' && Array.isArray(grtSimLadderRows) && grtSimLadderRows[chargeIndex - 1]) ? grtSimLadderRows[chargeIndex - 1] : null;
       if (simRow && isFinite(simRow.chargeGr)) label = `${simRow.chargeGr.toFixed(1)}gr`;
-      else if (ladderNameMode === 'charge') label = `Charge ${chargeIndex}`;
       else label = (slot.filename || `Charge ${chargeIndex}`).replace(/\.(csv|xls|xlsx)$/i, '');
 
       groups.push({
         chargeIndex,
-        label,
-        meanFps: isFinite(stats.mean) ? stats.mean : null,
-        sdFps: isFinite(stats.sd) ? stats.sd : null,
-        count: isFinite(stats.count) ? stats.count : null
+        label: `Charge ${chargeIndex} — ${label}`,
+        meanFps: _numMaybe(stats && (stats.mean ?? stats.avg ?? stats.average ?? stats.meanFps ?? stats.avgFps)),
+        sdFps: _numMaybe(stats && (stats.sd ?? stats.sdFps ?? stats.stdev)),
+        count: _numMaybe(stats && (stats.count ?? stats.shots ?? stats.n))
       });
     }
-    return groups;
+    if (groups.length) return groups;
   }
 
-  // Sessions mode: allStats entries
-  if (mode === 'sessions' && Array.isArray(allStats) && allStats.length) {
+  // Standard / Sessions fallback: use allStats (Files Processed)
+  if (hasAllStats) {
     let idx = 1;
     for (const item of allStats) {
-      if (!item || !item.stats) continue;
-      const stats = item.stats;
-      const chargeIndex = isFinite(item.chargeIndex) ? item.chargeIndex : idx++;
-      const label = (item.filename || `Session ${chargeIndex}`).replace(/\.(csv|xls|xlsx)$/i, '');
+      if (!item) continue;
+      const stats = item.stats || item;
+
+      const meanFps = _numMaybe(stats.mean ?? stats.avg ?? stats.average ?? stats.meanFps ?? stats.avgFps);
+      const sdFps   = _numMaybe(stats.sd ?? stats.sdFps ?? stats.stdev);
+      const count   = _numMaybe(stats.count ?? stats.shots ?? stats.n);
+
+      // Include even if stats are missing; we still want manual linking by file/slot
+      const chargeIndex = idx++;
+      const rawName = item.label || item.filename || item.name || `Rifle file ${chargeIndex}`;
+      const cleanName = String(rawName).replace(/\.(csv|xls|xlsx)$/i, '');
+
       groups.push({
         chargeIndex,
-        label,
-        meanFps: isFinite(stats.mean) ? stats.mean : null,
-        sdFps: isFinite(stats.sd) ? stats.sd : null,
-        count: isFinite(stats.count) ? stats.count : null
+        label: `Charge ${chargeIndex} — ${cleanName}`,
+        meanFps,
+        sdFps,
+        count
       });
     }
+    if (groups.length) return groups;
+  }
+
+  // Last resort: create 3 placeholders so UI always appears once SM sessions exist
+  const fallbackN = hasLadder ? ladderSlots.length : (hasAllStats ? allStats.length : 3);
+  for (let i = 1; i <= fallbackN; i++) {
+    groups.push({ chargeIndex: i, label: `Charge ${i}`, meanFps: null, sdFps: null, count: null });
   }
   return groups;
 }
@@ -3015,7 +3110,7 @@ function _matchShotMarkerSessionToChronoGroup(session, groups) {
   }
 
   // 2) Velocity + shot count matching
-  const vMean = (d.velocity && isFinite(d.velocity.mean)) ? d.velocity.mean : null;
+  const vMean = (d.velocity) ? _numMaybe(d.velocity.mean ?? d.velocity.avg ?? d.velocity.average ?? d.velocity.meanFps ?? d.velocity.avgFps) : null;
   const n = isFinite(d.shots) ? d.shots : null;
 
   let best = null;
@@ -3030,7 +3125,16 @@ function _matchShotMarkerSessionToChronoGroup(session, groups) {
     if (score < bestScore) { bestScore = score; best = g; }
   }
 
-  if (!best) return null;
+  if (!best) {
+    // Fallback: map by relay order (R1/R2/R3) if present, otherwise by import order.
+    const rtxt = String((m.relay ?? m.label ?? m.targetName ?? '') || '');
+    const rm = rtxt.match(/\bR(\d+)\b/i);
+    const r = rm ? parseInt(rm[1], 10) : NaN;
+    let g = null;
+    if (isFinite(r) && r >= 1) g = groups[Math.min(r - 1, groups.length - 1)];
+    if (!g) g = groups[0];
+    return { chargeIndex: g.chargeIndex, label: g.label, confidence: 55, method: 'order' };
+  }
 
   // Convert distance score into a confidence (cap at reasonable bounds)
   const conf = _clamp(92 - (bestScore * 14), 50, 92);
@@ -3041,17 +3145,21 @@ function mapShotMarkerSessionsToChronoCharges(sessions) {
   const groups = _getChronoGroupsForMapping();
   if (!Array.isArray(sessions) || !sessions.length) return sessions;
 
-  sessions.forEach(s => {
-    if (!s || !s.derived) return;
+  sessions.forEach((s, idx) => {
+    if (!s) return;
+    if (!s.derived) s.derived = {};
 
     const key = (s.meta && s.meta.sessionKey) ? s.meta.sessionKey : _smSessionKey(s);
-    const manualIdx = (shotMarkerManualMap && key && isFinite(shotMarkerManualMap[key])) ? Number(shotMarkerManualMap[key]) : null;
+    const manualIdx = (shotMarkerManualMap && key != null && isFinite(shotMarkerManualMap[key]))
+      ? Number(shotMarkerManualMap[key])
+      : null;
 
     let match = null;
+
     if (manualIdx !== null) {
       const g = groups.find(x => Number(x.chargeIndex) === Number(manualIdx));
       if (g) {
-        match = Object.assign({}, g, { confidence: 100, manual: true });
+        match = Object.assign({}, g, { confidence: 100, manual: true, method: 'manual' });
         s.derived.manualChargeIndex = Number(manualIdx);
       } else {
         // stale manual mapping; fall back to auto
@@ -3063,10 +3171,46 @@ function mapShotMarkerSessionsToChronoCharges(sessions) {
       s.derived.manualChargeIndex = null;
     }
 
+    // HARD FALLBACK: if auto matching fails, map by order (so Auto-link + Lock can still function in Standard mode)
+    if (!match && Array.isArray(groups) && groups.length) {
+      const g = groups[Math.min(idx, groups.length - 1)];
+      match = { chargeIndex: g.chargeIndex, label: g.label, confidence: 20, method: 'order' };
+    }
+
     s.derived.chargeMatch = match;
   });
 
   return sessions;
+}
+
+function lockShotMarkerAutoLinks(strings){
+  try{
+    const sessions = Array.isArray(strings) ? strings : [];
+    if (!sessions.length) return;
+    // Ensure matches are up to date
+    try { mapShotMarkerSessionsToChronoCharges(sessions); } catch(e){}
+    let changed = 0;
+    sessions.forEach(s=>{
+      if (!s || !s.derived) return;
+      const key = (s.meta && s.meta.sessionKey) ? s.meta.sessionKey : _smSessionKey(s);
+      if (!key) return;
+      // If user already set a manual mapping, respect it
+      if (shotMarkerManualMap && Object.prototype.hasOwnProperty.call(shotMarkerManualMap, key)) return;
+      const m = s.derived.chargeMatch;
+      if (m && isFinite(m.chargeIndex)) {
+        if (!shotMarkerManualMap) shotMarkerManualMap = {};
+        shotMarkerManualMap[key] = Number(m.chargeIndex);
+        s.derived.manualChargeIndex = Number(m.chargeIndex);
+        // promote match to manual for UI clarity
+        s.derived.chargeMatch = Object.assign({}, m, { manual: true, confidence: 100 });
+        changed++;
+      }
+    });
+    if (changed){
+      try { _saveShotMarkerManualMap(); } catch(e){}
+      try { renderShotMarkerSessionCards(); } catch(e){}
+    }
+  }catch(e){}
 }
 // =======================
 // /ShotMarker Advanced scoring + chrono mapping
@@ -3132,6 +3276,149 @@ function _computeGroupMetricsFromXY(xArr, yArr) {
             const es = max - min;
             return { n, avg, sd, es, min, max };
         }
+
+        // =======================
+        // Shot plot helpers (per-session)
+        // =======================
+        let shotMarkerPlotUnit = (function(){
+          try { return localStorage.getItem('xqa_sm_plot_unit') || 'moa'; } catch(e) { return 'moa'; }
+        })();
+
+        function _smUnitLabel(u){
+          return (u==='in')?'in' : (u==='mm')?'mm' : (u==='mil')?'mil' : 'MOA';
+        }
+
+        function _smMmToIn(mm){ return mm / 25.4; }
+
+        function _smMmToMoa(mm, distanceYd){
+          const d = (isFinite(distanceYd) && distanceYd>0) ? distanceYd : 1000;
+          const inches = _smMmToIn(mm);
+          const moaIn = 1.047 * (d/100);
+          return inches / moaIn;
+        }
+
+        function _smMmToMil(mm, distanceYd){
+          const d = (isFinite(distanceYd) && distanceYd>0) ? distanceYd : 1000;
+          const inches = _smMmToIn(mm);
+          const milIn = 0.036 * d; // 1 mil ≈ 0.001 rad
+          return inches / milIn;
+        }
+
+        function _smConvertMm(mm, unit, distanceYd){
+          if (!isFinite(mm)) return null;
+          if (unit === 'mm') return mm;
+          if (unit === 'in') return _smMmToIn(mm);
+          if (unit === 'mil') return _smMmToMil(mm, distanceYd);
+          return _smMmToMoa(mm, distanceYd); // default moa
+        }
+
+        function _renderShotMarkerPlotPanelHtml(session){
+          const s = session || {};
+          const shots = Array.isArray(s.shots) ? s.shots : [];
+          const m = s.meta || {};
+          const d = s.derived || {};
+          const unit = shotMarkerPlotUnit || 'moa';
+          const uLabel = _smUnitLabel(unit);
+          const dist = (m && isFinite(m.distanceYd)) ? m.distanceYd : 1000;
+
+          const xsMm = [];
+          const ysMm = [];
+          for (const sh of shots){
+            if (!sh) continue;
+            if (isFinite(sh.xMm) && isFinite(sh.yMm)){
+              xsMm.push(sh.xMm);
+              ysMm.push(sh.yMm);
+            }
+          }
+          if (!xsMm.length) return '';
+
+          const gm = _computeGroupMetricsFromXY(xsMm, ysMm);
+          const mr = gm ? _smConvertMm(gm.mr, unit, dist) : null;
+          const es = gm ? _smConvertMm(gm.es, unit, dist) : null;
+          const w = gm ? _smConvertMm(gm.horiz, unit, dist) : null;
+          const h = gm ? _smConvertMm(gm.vert, unit, dist) : null;
+
+          // Normalize plot to max(|x|,|y|) with padding
+          let maxAbs = 0;
+          for (let i=0;i<xsMm.length;i++){
+            const x = _smConvertMm(xsMm[i], unit, dist);
+            const y = _smConvertMm(ysMm[i], unit, dist);
+            if (!isFinite(x) || !isFinite(y)) continue;
+            maxAbs = Math.max(maxAbs, Math.abs(x), Math.abs(y));
+          }
+          if (!isFinite(maxAbs) || maxAbs<=0) maxAbs = 1;
+          const pad = maxAbs * 0.15;
+          const range = maxAbs + pad;
+
+          const size = 220;
+          const cx = size/2, cy = size/2;
+
+          const toPx = (v) => (v / range) * (size*0.42); // keep margin
+          const ringR = [0.25,0.5,0.75,1.0].map(f => Math.abs(toPx(range*f)));
+
+          const pts = [];
+          for (let i=0;i<xsMm.length;i++){
+            const x = _smConvertMm(xsMm[i], unit, dist);
+            const y = _smConvertMm(ysMm[i], unit, dist);
+            if (!isFinite(x) || !isFinite(y)) continue;
+            const px = cx + toPx(x);
+            const py = cy - toPx(y);
+            pts.push({i:i+1, px, py});
+          }
+
+          const svg = `
+            <svg viewBox="0 0 ${size} ${size}" class="w-full h-auto rounded-xl border border-grt-frame bg-grt-panel-soft">
+              <defs>
+                <radialGradient id="smPlotGlow" cx="50%" cy="50%" r="70%">
+                  <stop offset="0%" stop-color="rgba(60,134,199,0.18)"/>
+                  <stop offset="100%" stop-color="rgba(60,134,199,0)"/>
+                </radialGradient>
+              </defs>
+              <rect x="0" y="0" width="${size}" height="${size}" fill="url(#smPlotGlow)"></rect>
+              <line x1="${cx}" y1="10" x2="${cx}" y2="${size-10}" stroke="rgba(255,255,255,0.10)" stroke-width="1"/>
+              <line x1="10" y1="${cy}" x2="${size-10}" y2="${cy}" stroke="rgba(255,255,255,0.10)" stroke-width="1"/>
+              ${ringR.map(r => `<circle cx="${cx}" cy="${cy}" r="${r}" fill="none" stroke="rgba(255,255,255,0.12)" stroke-width="1"/>`).join('')}
+              ${pts.map(p => `
+                <g>
+                  <circle cx="${p.px}" cy="${p.py}" r="6.3" fill="rgba(0,0,0,0.55)" stroke="rgba(255,255,255,0.55)" stroke-width="1"/>
+                  <text x="${p.px}" y="${p.py+3.2}" text-anchor="middle" font-size="9" fill="rgba(255,255,255,0.92)" font-weight="700">${p.i}</text>
+                </g>`).join('')}
+            </svg>
+          `;
+
+          const sd = (d.velocity && isFinite(d.velocity.sd)) ? d.velocity.sd : null;
+          const vel = (d.velocity && isFinite(d.velocity.avg)) ? d.velocity.avg : null;
+
+          const stats = `
+            <div class="text-[11px] text-grt-soft">
+              <div class="flex justify-between gap-2"><span class="text-grt-subtle">Shots</span><span class="font-semibold text-white">${pts.length}</span></div>
+              <div class="flex justify-between gap-2"><span class="text-grt-subtle">Size (ES)</span><span class="font-semibold text-white">${(es!==null && isFinite(es))?es.toFixed(unit==='mm'?1:2):'–'} ${uLabel}</span></div>
+              <div class="flex justify-between gap-2"><span class="text-grt-subtle">W / H</span><span class="font-semibold text-white">${(w!==null&&isFinite(w))?w.toFixed(unit==='mm'?1:2):'–'} / ${(h!==null&&isFinite(h))?h.toFixed(unit==='mm'?1:2):'–'} ${uLabel}</span></div>
+              <div class="flex justify-between gap-2"><span class="text-grt-subtle">MR</span><span class="font-semibold text-white">${(mr!==null&&isFinite(mr))?mr.toFixed(unit==='mm'?1:3):'–'} ${uLabel}</span></div>
+              <div class="flex justify-between gap-2"><span class="text-grt-subtle">V (avg)</span><span class="font-semibold text-white">${(vel!==null&&isFinite(vel))?vel.toFixed(0):'–'} <span class="text-grt-subtle">fps</span></span></div>
+              <div class="flex justify-between gap-2"><span class="text-grt-subtle">SD</span><span class="font-semibold text-white">${(sd!==null&&isFinite(sd))?sd.toFixed(1):'–'} <span class="text-grt-subtle">fps</span></span></div>
+            </div>
+          `;
+
+          return `
+            <div class="mt-3 bg-grt-panel-soft/40 border border-grt-frame rounded-2xl p-3">
+              <div class="flex items-center justify-between gap-2 mb-2">
+                <div class="text-white/85 text-xs font-semibold">Shot plot</div>
+                <select data-sm-plotunit="1" class="bg-grt-panel-soft border border-grt-frame rounded-xl px-2 py-1 text-white text-[11px]">
+                  <option value="moa" ${unit==='moa'?'selected':''}>MOA</option>
+                  <option value="mil" ${unit==='mil'?'selected':''}>mil</option>
+                  <option value="in" ${unit==='in'?'selected':''}>in</option>
+                  <option value="mm" ${unit==='mm'?'selected':''}>mm</option>
+                </select>
+              </div>
+              <div class="grid grid-cols-1 md:grid-cols-3 gap-3 items-start">
+                <div class="md:col-span-2">${svg}</div>
+                <div>${stats}</div>
+              </div>
+            </div>
+          `;
+        }
+
 
         function _corr(a, b) {
             const pairs = [];
@@ -3374,7 +3661,7 @@ function _computeGroupMetricsFromXY(xArr, yArr) {
                         ${pills || (m.targetName || '')}
                       </div>
                     </div>
-                    <div class="flex items-center gap-2 flex-shrink-0">
+                    <div class="flex flex-wrap items-center justify-end gap-2 flex-shrink-0">
                       ${(rank && n) ? `<span class="text-grt-subtle text-[11px]">#${rank}/${n}</span>` : ''}
                       ${(tier !== null) ? `<span class="px-2 py-1 rounded-full border border-white/10 bg-grt-frame/30 text-grt-soft text-[11px]">S${tier}</span>` : `<span class="px-2 py-1 rounded-full border border-white/10 bg-grt-frame/20 text-grt-subtle text-[11px]">Unscored</span>`}
                       ${(mr !== null) ? `<span class="text-grt-subtle text-[11px]">MR ${mr.toFixed(3)}</span>` : ''}
@@ -3399,7 +3686,259 @@ function _computeGroupMetricsFromXY(xArr, yArr) {
             `;
         }
 
-        function renderShotMarkerSessionCards() {
+        
+// =======================
+// ShotMarker Phase C: Node aggregation + confidence (by charge)
+// =======================
+function _smWeightedStd(values) {
+  // values: [{v, w}]
+  if (!Array.isArray(values) || values.length < 2) return 0;
+  let sumW = 0, sum = 0;
+  for (const it of values) { if (!it) continue; const v = it.v, w = it.w; if (!isFinite(v) || !isFinite(w) || w<=0) continue; sumW += w; sum += v*w; }
+  if (sumW <= 0) return 0;
+  const mean = sum / sumW;
+  let varSum = 0;
+  for (const it of values) { if (!it) continue; const v = it.v, w = it.w; if (!isFinite(v) || !isFinite(w) || w<=0) continue; const d = v-mean; varSum += w*d*d; }
+  const variance = varSum / sumW;
+  return Math.sqrt(Math.max(0, variance));
+}
+
+function _smPooledVelAdd(acc, vel) {
+  // acc: {n, mean, m2, min, max}
+  // vel: {count, mean, sd, min, max}
+  const nB = vel && isFinite(vel.count) ? Number(vel.count) : 0;
+  const meanB = vel && isFinite(vel.mean) ? Number(vel.mean) : null;
+  if (!(nB > 0) || meanB === null) return acc;
+
+  const sdB = vel && isFinite(vel.sd) ? Number(vel.sd) : null;
+  const varB = (sdB !== null) ? (sdB*sdB) : 0; // treat as population variance proxy
+  const m2B = varB * nB;
+
+  if (!(acc.n > 0)) {
+    acc.n = nB;
+    acc.mean = meanB;
+    acc.m2 = m2B;
+    acc.min = (vel && isFinite(vel.min)) ? Number(vel.min) : meanB;
+    acc.max = (vel && isFinite(vel.max)) ? Number(vel.max) : meanB;
+    return acc;
+  }
+
+  const nA = acc.n;
+  const meanA = acc.mean;
+  const n = nA + nB;
+  const delta = meanB - meanA;
+
+  // Parallel/pooled update for M2
+  acc.m2 = acc.m2 + m2B + (delta*delta) * (nA * nB / n);
+  acc.mean = (meanA*nA + meanB*nB) / n;
+  acc.n = n;
+
+  if (vel && isFinite(vel.min)) acc.min = Math.min(acc.min, Number(vel.min));
+  if (vel && isFinite(vel.max)) acc.max = Math.max(acc.max, Number(vel.max));
+  return acc;
+}
+
+function _shotMarkerNodeAggregates(strings) {
+  const sessions = (strings || []).filter(s => s && s.derived && s.derived.chargeMatch && isFinite(s.derived.chargeMatch.chargeIndex));
+  const byIdx = new Map();
+
+  for (const s of sessions) {
+    const d = s.derived || {};
+    const m = s.meta || {};
+    const match = d.chargeMatch || {};
+    const idx = Number(match.chargeIndex);
+    if (!isFinite(idx)) continue;
+
+    const label = match.label || `Charge ${idx}`;
+    const nShots = (isFinite(d.shots) ? Number(d.shots) : (Array.isArray(s.shots) ? s.shots.length : 0)) || 0;
+
+    let node = byIdx.get(idx);
+    if (!node) {
+      node = {
+        chargeIndex: idx,
+        label,
+        sessions: [],
+        shots: 0,
+        mrW: 0, mrSum: 0,
+        vertW: 0, vertSum: 0,
+        mrVals: [],
+        vertVals: [],
+        velAcc: { n: 0, mean: 0, m2: 0, min: Infinity, max: -Infinity },
+        distances: []
+      };
+      byIdx.set(idx, node);
+    }
+
+    node.sessions.push(s);
+    node.shots += nShots;
+
+    if (isFinite(d.mrMoa)) { node.mrSum += d.mrMoa * Math.max(1, nShots); node.mrW += Math.max(1, nShots); node.mrVals.push({v: d.mrMoa, w: Math.max(1, nShots)}); }
+    if (isFinite(d.vertMoa)) { node.vertSum += d.vertMoa * Math.max(1, nShots); node.vertW += Math.max(1, nShots); node.vertVals.push({v: d.vertMoa, w: Math.max(1, nShots)}); }
+
+    if (d.velocity) _smPooledVelAdd(node.velAcc, d.velocity);
+    const dy = (isFinite(m.distanceYd) ? Number(m.distanceYd) : null);
+    if (dy !== null) node.distances.push(dy);
+  }
+
+  const nodes = [];
+  for (const node of byIdx.values()) {
+    const mrMoa = (node.mrW > 0) ? (node.mrSum / node.mrW) : null;
+    const vertMoa = (node.vertW > 0) ? (node.vertSum / node.vertW) : null;
+
+    const velN = node.velAcc.n;
+    const velMean = (velN > 0) ? node.velAcc.mean : null;
+    const velSd = (velN > 0) ? Math.sqrt(Math.max(0, node.velAcc.m2 / velN)) : null;
+    const velEs = (velN > 0 && isFinite(node.velAcc.min) && isFinite(node.velAcc.max)) ? (node.velAcc.max - node.velAcc.min) : null;
+
+    // Choose a representative distance (median-ish)
+    let distYd = null;
+    if (node.distances.length) {
+      const sorted = [...node.distances].sort((a,b)=>a-b);
+      distYd = sorted[Math.floor(sorted.length/2)];
+    }
+
+    const velObj = { mean: velMean, sd: velSd, es: velEs, count: velN, min: isFinite(node.velAcc.min)?node.velAcc.min:null, max: isFinite(node.velAcc.max)?node.velAcc.max:null };
+    const adv = _computeShotMarkerScoreAdvanced(mrMoa, vertMoa, velObj, distYd);
+
+    const base = (adv && isFinite(adv.finalScore)) ? adv.finalScore : null;
+
+    // Consistency (vertical repeatability between strings) – F-Class critical
+    const vertStd = _smWeightedStd(node.vertVals);        // MOA
+    const mrStd = _smWeightedStd(node.mrVals);            // MOA
+
+    const vCons = 1 / (1 + Math.pow((vertStd / 0.12), 2));   // 0.12 MOA session-to-session std is "pretty repeatable"
+    const mrCons = 1 / (1 + Math.pow((mrStd / 0.07), 2));
+
+    // Repeat bonus: 1 string = cautious; 2+ strings ramps up confidence
+    const k = (node.sessions || []).length;
+    const rep = _clamp(0.70 + 0.15 * (k - 1), 0.70, 1.00);
+
+    // Final node confidence
+    const nodeConf = (base !== null) ? _clamp(base * vCons * mrCons * rep, 0, 100) : null;
+
+    nodes.push({
+      chargeIndex: node.chargeIndex,
+      label: node.label,
+      sessionCount: k,
+      shots: node.shots,
+      mrMoa,
+      vertMoa,
+      vertStd,
+      mrStd,
+      velocity: velObj,
+      baseScore: base,
+      nodeConfidence: nodeConf,
+      breakdown: { vCons, mrCons, rep, adv }
+    });
+  }
+
+  nodes.sort((a,b)=> (b.nodeConfidence ?? -1e9) - (a.nodeConfidence ?? -1e9));
+  return nodes;
+}
+
+function _shotMarkerNodeSectionHtml(strings) {
+  const nodes = _shotMarkerNodeAggregates(strings);
+  // If nothing is linked yet, show a helpful hint instead of silently hiding the section.
+  if (!nodes.length) {
+    const hasSessions = Array.isArray(strings) && strings.length;
+    if (!hasSessions) return '';
+    return `
+      <div class="bg-grt-panel-soft/40 border border-grt-frame rounded-2xl p-3 mb-3">
+        <div class="flex items-start justify-between gap-3">
+          <div>
+            <div class="text-white text-sm font-semibold">Node confidence (by charge)</div>
+            <div class="text-grt-subtle text-[11px] mt-0.5">No sessions are linked to charges yet. Use the <span class=\"font-semibold\">Charge link</span> dropdown on each session card (or import chrono first) and this section will populate.</div>
+          </div>
+          
+          
+        </div>
+      </div>
+    `;
+  }
+
+  const best = nodes[0];
+  const conf = (best.nodeConfidence !== null) ? Math.round(best.nodeConfidence) : null;
+  const tier = (conf !== null) ? _scoreToTier(conf) : null;
+
+  // Confidence badge styling (use same tier palette)
+  let badgeClass = 'bg-slate-800/60 text-slate-200 border-slate-500/40';
+  if (tier === 1) badgeClass = 'bg-emerald-950/50 text-emerald-200 border-emerald-500/40';
+  else if (tier === 2) badgeClass = 'bg-emerald-900/40 text-emerald-100 border-emerald-400/40';
+  else if (tier === 3) badgeClass = 'bg-sky-950/50 text-sky-100 border-sky-400/35';
+  else if (tier === 4) badgeClass = 'bg-amber-900/45 text-amber-100 border-amber-500/40';
+  else if (tier === 5) badgeClass = 'bg-rose-950/55 text-rose-200 border-rose-500/40';
+
+  const vel = best.velocity || {};
+  const sd = isFinite(vel.sd) ? vel.sd : null;
+  const es = isFinite(vel.es) ? vel.es : null;
+
+  const tipLines = [];
+  tipLines.push(`Node: ${best.label}`);
+  tipLines.push(`Sessions: ${best.sessionCount} • Shots: ${best.shots}`);
+  if (isFinite(best.mrMoa)) tipLines.push(`MR: ${best.mrMoa.toFixed(3)} MOA (σ ${best.mrStd.toFixed(3)})`);
+  if (isFinite(best.vertMoa)) tipLines.push(`V: ${best.vertMoa.toFixed(3)} MOA (σ ${best.vertStd.toFixed(3)})`);
+  if (sd !== null) tipLines.push(`SD: ${sd.toFixed(1)} fps`);
+  if (es !== null) tipLines.push(`ES: ${es.toFixed(1)} fps`);
+  if (isFinite(best.baseScore)) tipLines.push(`Base score: ${best.baseScore.toFixed(1)}`);
+  tipLines.push(`Repeat: ${(best.breakdown.rep*100).toFixed(0)}%`);
+  tipLines.push(`V-consistency: ${(best.breakdown.vCons*100).toFixed(0)}%`);
+  tipLines.push(`MR-consistency: ${(best.breakdown.mrCons*100).toFixed(0)}%`);
+  if (conf !== null) tipLines.push(`Node confidence: ${conf}`);
+
+  const nodeListRows = nodes.map((n,i)=>{
+    const c = (n.nodeConfidence !== null) ? Math.round(n.nodeConfidence) : '—';
+    return `<div class="flex items-center justify-between gap-3 py-1 border-b border-white/5 last:border-0">
+      <div class="text-sm text-white/90"><span class="opacity-60 mr-2">#${i+1}</span>${_escapeHtml(n.label)}</div>
+      <div class="text-xs text-white/70">${n.sessionCount} sess • ${n.shots} shots</div>
+      <div class="text-sm font-semibold text-white">${c}</div>
+    </div>`;
+  }).join('');
+
+  return `
+    <div class="mt-4 mb-5">
+      <div class="flex items-start justify-between gap-3 mb-2">
+        <div>
+          <div class="text-sm font-semibold text-white/90">Node confidence (by charge)</div>
+          <div class="text-xs text-white/60">Aggregated across sessions (repeatability-weighted)</div>
+        </div>
+        <div class="flex items-center gap-2 flex-wrap justify-end">
+          
+          
+        </div>
+      </div>
+
+      <div class="bg-grt-panel border border-grt-frame rounded-2xl p-4">
+        <div class="flex items-start justify-between gap-3">
+          <div>
+            <div class="text-base font-semibold text-white">Most confident node</div>
+            <div class="mt-1 text-white/80 text-sm">${_escapeHtml(best.label)}</div>
+            <div class="mt-1 text-white/60 text-xs">${best.sessionCount} sessions • ${best.shots} shots</div>
+          </div>
+          <div class="inline-flex items-center gap-2 px-3 py-1.5 rounded-full border ${badgeClass}" title="${_escapeHtml(tipLines.join('\n'))}">
+            <span class="h-1.5 w-1.5 rounded-full bg-current opacity-80"></span>
+            ${conf !== null ? `NC ${conf}` : 'NC —'}
+          </div>
+        </div>
+
+        <div class="mt-4 grid grid-cols-2 md:grid-cols-4 gap-3 text-sm">
+          <div><div class="text-white/60 text-xs">MR (agg)</div><div class="text-white font-semibold">${isFinite(best.mrMoa)?best.mrMoa.toFixed(3):'—'} <span class="text-white/60 text-xs">MOA</span></div></div>
+          <div><div class="text-white/60 text-xs">Vertical (agg)</div><div class="text-white font-semibold">${isFinite(best.vertMoa)?best.vertMoa.toFixed(3):'—'} <span class="text-white/60 text-xs">MOA</span></div></div>
+          <div><div class="text-white/60 text-xs">SD (pooled)</div><div class="text-white font-semibold">${sd!==null?sd.toFixed(1):'—'} <span class="text-white/60 text-xs">fps</span></div></div>
+          <div><div class="text-white/60 text-xs">Vertical σ</div><div class="text-white font-semibold">${isFinite(best.vertStd)?best.vertStd.toFixed(3):'—'} <span class="text-white/60 text-xs">MOA</span></div></div>
+        </div>
+
+        <details class="mt-4">
+          <summary class="cursor-pointer text-xs text-white/70 hover:text-white/90">All nodes (ranked)</summary>
+          <div class="mt-3">${nodeListRows}</div>
+        </details>
+      </div>
+    </div>
+  `;
+}
+// =======================
+// /ShotMarker Phase C
+// =======================
+function renderShotMarkerSessionCards() {
             const host = document.getElementById('shotMarkerSessionCards');
             if (!host) return;
 
@@ -3411,6 +3950,7 @@ function _computeGroupMetricsFromXY(xArr, yArr) {
             const picks = _pickSessionCards(strings);
             const rel = _shotMarkerRelativeStats(strings);
             const rankedHtml = _shotMarkerRankedListHtml(strings, rel);
+            const nodeSection = _shotMarkerNodeSectionHtml(strings);
 
             if (!addon || !strings.length || (!picks.best && !picks.typical && !picks.worst)) {
                 host.innerHTML = '';
@@ -3506,8 +4046,9 @@ function _computeGroupMetricsFromXY(xArr, yArr) {
                 <div class="mt-2">
                   <label class="text-grt-subtle text-[11px]">Charge link</label>
                   <select data-sm-map="1" data-sm-key="${encodeURIComponent(sessionKey)}"
+                          onchange="onSmChargeLinkChange(this)"
                           class="mt-1 w-full bg-grt-panel-soft border border-grt-frame rounded-xl px-2 py-1.5 text-white text-xs">
-                    <option value="">Auto</option>
+                    <option value="">${(manualIdx===null) ? `Select…` : `Unlinked`}</option>
                     ${groupsForUI.map(g => {
                       const idx = Number(g.chargeIndex);
                       const label = g.label || ('Charge ' + idx);
@@ -3527,15 +4068,12 @@ function _computeGroupMetricsFromXY(xArr, yArr) {
                         ${m.date || ''}${m.relay ? ` • ${m.relay}` : ''}${m.label ? ` • ${m.label}` : ''}
                       </div>
                     </div>
-                    <div class="flex items-center gap-2 flex-shrink-0">
+                    <div class="flex flex-wrap items-center justify-end gap-2 flex-shrink-0">
                       ${(fScore !== null) ? `<div class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full border ${statusClass} text-[11px] md:text-xs" title="${scoreTooltip || 'Score breakdown unavailable'}">
                           <span class="h-1.5 w-1.5 rounded-full bg-current opacity-80"></span>${statusLabel}
                         </div>` : ''}
                       ${relPills}
-                      ${(matchLabel) ? `<div class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full border bg-grt-frame/50 text-grt-soft border-white/10 text-[11px] md:text-xs" title="Chrono match confidence: ${matchConf ?? '—'}">
-                          <span class="opacity-80">⛭</span>${matchLabel}${(matchConf !== null) ? ` • ${matchConf}` : ''}
-                        </div>` : ''}
-                    </div>
+                      </div>
                   </div>
                   ${mapSelect}
             
@@ -3559,7 +4097,7 @@ function _computeGroupMetricsFromXY(xArr, yArr) {
             };
 
             host.innerHTML = `
-              
+              ${nodeSection}
               <div class="bg-grt-panel-soft/40 border border-grt-frame rounded-2xl p-3 mb-3">
                 <details>
                   <summary class="cursor-pointer text-white text-sm font-semibold select-none">Advanced scoring knobs</summary>
@@ -4770,26 +5308,22 @@ function stripExistingImportedGallery(inner) {
                     pushSession('Worst control', picks.worst);
                 }
 
-                
-                // Persist ShotMarker manual mapping + scoring settings into the .grtload (safe plain-text markers)
-                try {
-                    const mapStr = btoa(JSON.stringify(shotMarkerManualMap || {}));
-                    lines.push(`XQA_SM_MANUAL_MAP:${mapStr}`);
-                } catch {}
-                try {
-                    const setStr = btoa(JSON.stringify(shotMarkerScoreSettings || null));
-                    lines.push(`XQA_SM_SCORE_SETTINGS:${setStr}`);
-                } catch {}
-
                 return lines.join('\n');
             }
+
 
             if (shotMarkerAddons && shotMarkerAddons.length) {
                 const smTitle = getUniqueImportedTitle(current, 'ShotMarker');
                 let idx = getNextAppendixIndex(current);
                 const text = buildAddonText('ShotMarker', shotMarkerAddons);
                 const encodedText = encodeURIComponent(text);
-                const note = `      <note index="${idx}" hasfocus="false" showinreport="true" reporttemplate="false" title="${smTitle}" text="${encodedText}" selstart="0" sellength="0" scrollposition="0" config="${DEFAULT_NOTE_CONFIG}" />\n`;
+
+                // Persist ShotMarker manual mapping + scoring settings as XML attributes (hidden from note text)
+                let _xqaSmMap = '';
+                let _xqaSmSet = '';
+                try { _xqaSmMap = btoa(JSON.stringify(shotMarkerManualMap || {})); } catch {}
+                try { _xqaSmSet = btoa(JSON.stringify(shotMarkerScoreSettings || null)); } catch {}
+                const note = `      <note index="${idx}" hasfocus="false" showinreport="true" reporttemplate="false" title="${smTitle}" text="${encodedText}" selstart="0" sellength="0" scrollposition="0" xqa_sm_manual_map="${_xqaSmMap}" xqa_sm_score_settings="${_xqaSmSet}" config="${DEFAULT_NOTE_CONFIG}" />\n`;
                 current += '\n' + note;
             }
 
@@ -6225,4 +6759,4 @@ document.addEventListener('DOMContentLoaded', function setupHelpOverlay() {
 <canvas id="chronoSimChart" style="display:none"></canvas>
 
 </body>
-                </html>
+        </html>
