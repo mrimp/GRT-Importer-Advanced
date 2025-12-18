@@ -6782,6 +6782,152 @@ document.addEventListener('DOMContentLoaded', function setupHelpOverlay() {
 // --- math helpers ---
 function _smConfFromN(n){ n = Number(n||0); if (!isFinite(n)||n<=0) return 0; const k=7.5; return 1-Math.exp(-n/k); }
 
+
+
+// --- Current Tune + Improvement helpers (v0.87.0) ---
+function _smParseDateISOFromMeta(meta){
+  try{
+    const dt = (meta && meta.dateText) ? String(meta.dateText) : '';
+    if(!dt) return null;
+    const first = dt.split('|')[0].trim(); // e.g. "Sep 25 2025"
+    const d = new Date(first);
+    if(!isFinite(d.getTime())) return null;
+    const yyyy = d.getFullYear();
+    const mm = String(d.getMonth()+1).padStart(2,'0');
+    const dd = String(d.getDate()).padStart(2,'0');
+    return yyyy + '-' + mm + '-' + dd;
+  }catch(e){ return null; }
+}
+function _smDecayWeight(ageDays, halfLifeDays=14, floor=0.15){
+  ageDays = Number(ageDays||0);
+  if(!isFinite(ageDays) || ageDays<0) ageDays = 0;
+  const w = Math.pow(0.5, ageDays / halfLifeDays);
+  return Math.max(floor, w);
+}
+function _smShotConfWeight(shots){
+  shots = Number(shots||0);
+  if(!isFinite(shots) || shots < 10) return 0;
+  const extra = Math.floor((shots - 10) / 5);
+  return Math.min(1.0, 0.8 + extra * 0.1); // 10→0.8, 15→0.9, 20→1.0
+}
+function _smVertSeverity1000(vMoa){
+  if(!isFinite(vMoa)) return null;
+  if(vMoa <= 0.80) return 'GREEN';
+  if(vMoa <= 1.05) return 'YELLOW';
+  if(vMoa <= 1.30) return 'ORANGE';
+  return 'RED';
+}
+function _smCurrentTuneVertical(sessions, nowDate){
+  const now = nowDate || new Date();
+  const elig = (Array.isArray(sessions)?sessions:[]).filter(s=>{
+    const m=s?.meta||{}; const d=s?.derived||{};
+    const dist = (m.distanceYd && isFinite(m.distanceYd)) ? Number(m.distanceYd) : 1000;
+    const shots = Number.isFinite(d.shots)?Number(d.shots):Number(m.shots||0);
+    const v = Number.isFinite(d.vertMoa)?Number(d.vertMoa):null;
+    return dist===1000 && shots>=10 && isFinite(v);
+  });
+  if(!elig.length) return null;
+  let num=0, den=0;
+  for(const s of elig){
+    const m=s?.meta||{}; const d=s?.derived||{};
+    const shots = Number.isFinite(d.shots)?Number(d.shots):Number(m.shots||0);
+    const v = Number(d.vertMoa);
+    const iso=_smParseDateISOFromMeta(m);
+    const dt = iso ? new Date(iso) : null;
+    const ageDays = dt ? ((now - dt)/(1000*60*60*24)) : 0;
+    const w = _smDecayWeight(ageDays) * _smShotConfWeight(shots);
+    num += w * v; den += w;
+  }
+  return den>0 ? (num/den) : null;
+}
+function _smSupportScore(sessions, nowDate){
+  const now = nowDate || new Date();
+  let support = 0;
+  for(const s of (Array.isArray(sessions)?sessions:[])){
+    const m=s?.meta||{}; const d=s?.derived||{};
+    const dist = (m.distanceYd && isFinite(m.distanceYd)) ? Number(m.distanceYd) : 1000;
+    const shots = Number.isFinite(d.shots)?Number(d.shots):Number(m.shots||0);
+    const v = Number.isFinite(d.vertMoa)?Number(d.vertMoa):null;
+    if(dist!==1000 || shots<10 || !isFinite(v)) continue;
+    const iso=_smParseDateISOFromMeta(m);
+    const dt = iso ? new Date(iso) : null;
+    const ageDays = dt ? ((now - dt)/(1000*60*60*24)) : 0;
+    support += _smDecayWeight(ageDays) * _smShotConfWeight(shots);
+  }
+  return support;
+}
+function _smImprovementForCharge(chargeSessions, nowDate){
+  const now = nowDate || new Date();
+  const recentWindowDays = 14;
+  const priorWindowDays = 60;
+
+  const recent = (Array.isArray(chargeSessions)?chargeSessions:[]).filter(s=>{
+    const iso=_smParseDateISOFromMeta(s?.meta||{});
+    const dt = iso ? new Date(iso) : null;
+    const age = dt ? ((now - dt)/(1000*60*60*24)) : 9999;
+    return age <= recentWindowDays;
+  });
+  const prior = (Array.isArray(chargeSessions)?chargeSessions:[]).filter(s=>{
+    const iso=_smParseDateISOFromMeta(s?.meta||{});
+    const dt = iso ? new Date(iso) : null;
+    const age = dt ? ((now - dt)/(1000*60*60*24)) : 9999;
+    return age > recentWindowDays && age <= priorWindowDays;
+  });
+
+  const vRecent = _smCurrentTuneVertical(recent, now);
+  const vPrior  = _smCurrentTuneVertical(prior, now);
+  if(!isFinite(vRecent) || !isFinite(vPrior)) return null;
+
+  if(_smSupportScore(recent, now) < 1.0) return null;
+
+  const delta = vPrior - vRecent; // positive = improvement
+  const sevRecent = _smVertSeverity1000(vRecent);
+  const sevPrior  = _smVertSeverity1000(vPrior);
+
+  const severityImproved =
+    (sevPrior==='RED'    && (sevRecent==='ORANGE'||sevRecent==='YELLOW'||sevRecent==='GREEN')) ||
+    (sevPrior==='ORANGE' && (sevRecent==='YELLOW'||sevRecent==='GREEN')) ||
+    (sevPrior==='YELLOW' && sevRecent==='GREEN');
+
+  const moaImproved = (delta >= 0.15);
+
+  if(!(severityImproved || moaImproved)) return null;
+
+  return {
+    deltaMOA: delta,
+    label: 'Vertical improved vs prior tune',
+    detail: 'Δ −' + __fmtNum(delta,2) + ' MOA (recent ' + recentWindowDays + 'd vs prior ' + priorWindowDays + 'd)'
+  };
+}
+function _smImprovementsByCharge(strings){
+  const sessions = Array.isArray(strings)?strings:[];
+  const by = {};
+  for(const s of sessions){
+    const ci = _smGetLinkedChargeIndex(s);
+    if(ci==null || !isFinite(ci)) continue;
+    (by[ci] ||= []).push(s);
+  }
+  const out = {};
+  for(const k of Object.keys(by)){
+    const imp = _smImprovementForCharge(by[k], new Date());
+    if(imp) out[String(k)] = imp;
+  }
+  return out;
+}
+function _smImprovementIconHtml(ci){
+  const imp = (window.__xqaSmImprovementsByCharge||{})[String(ci)];
+  if(!imp) return '';
+  const tip = (imp.detail||imp.label||'Improved');
+  return ' <span title="' + tip.replace(/"/g,'&quot;') + '" class="ml-1 inline-flex items-center justify-center w-5 h-5 rounded-full bg-emerald-500/15 border border-emerald-400/25 text-emerald-200 text-[11px]">↑</span>';
+}
+function _smImprovementPillHtml(ci){
+  const imp = (window.__xqaSmImprovementsByCharge||{})[String(ci)];
+  if(!imp) return '';
+  const tip = (imp.detail||imp.label||'Improved').replace(/"/g,'&quot;');
+  const lab = (imp.label||'Improved');
+  return '<div class="mt-2 inline-flex items-center gap-2 px-2 py-1 rounded-full bg-emerald-500/10 border border-emerald-400/20 text-emerald-200 text-[11px]" title="' + tip + '"><span class="text-[12px]">↑</span><span>' + lab + '</span></div>';
+}
+
 function _smPearson(x,y){
   const n=x.length; if(n<2) return null;
   const mx=x.reduce((a,v)=>a+v,0)/n, my=y.reduce((a,v)=>a+v,0)/n;
@@ -7241,6 +7387,8 @@ function _smRankIcon(label){
 
 function _shotMarkerPhase2RankingTableHtml(strings){
   const sessions = Array.isArray(strings)?strings:[];
+  const improvements = _smImprovementsByCharge(sessions);
+  window.__xqaSmImprovementsByCharge = improvements;
   const rows = sessions
     .map(s=>{
       const key = s?.meta?.sessionKey || '';
@@ -7257,7 +7405,7 @@ function _shotMarkerPhase2RankingTableHtml(strings){
   const body = rows.map((x,i)=>`
     <tr class="border-t border-grt-frame/60 hover:bg-white/5 cursor-pointer" onclick="openSmDrilldown(${i})">
       <td class=\"py-2 px-2 text-[12px]\">${(x.s?.derived?.velocityDiag && (Number.isFinite(x.s.derived.velocityDiag.vSD)||Number.isFinite(x.s.derived.velocityDiag.vES)||Number.isFinite(x.s.derived.velocityDiag.r2)||Number.isFinite(x.s.derived.velocityDiag.corr))) ? _smRankIcon(x.r.label) : '📄'}</td>
-      <td class="py-2 px-3 text-[11px] text-white/90">${(x.ci!=null && Number.isFinite(x.ci)) ? ('Charge '+x.ci) : 'Unlinked'}</td>
+      <td class="py-2 px-3 text-[11px] text-white/90">${((x.ci!=null && Number.isFinite(x.ci)) ? ("Charge "+x.ci) : "Unlinked") + _smImprovementIconHtml(x.ci)}</td>
       <td class=\"py-2 px-3 text-[11px] text-grt-subtle\">${_smPhase3BadgePills(x.s?.derived?.phase3?.badges)}<div class="mt-1">${(x.r.reasons && x.r.reasons.length)? x.r.reasons.join(' • ') : (((x.s?.derived?.velocityDiag && (Number.isFinite(x.s.derived.velocityDiag.vSD)||Number.isFinite(x.s.derived.velocityDiag.vES)||Number.isFinite(x.s.derived.velocityDiag.r2)||Number.isFinite(x.s.derived.velocityDiag.corr))) ? '' : 'target-only (no velocity)'))}</div></td>
       <td class="py-2 px-3 text-[11px] text-white/90">${x.score.toFixed(3)}</td>
     </tr>`).join('');
@@ -7482,6 +7630,7 @@ function openSmDrilldown(rowIndex){
       <div>
         <div class="text-white font-semibold text-base">${meta.targetName || 'ShotMarker Session'}</div>
         <div class="text-grt-subtle text-[11px] mt-1">${meta.sessionKey || ''}</div>
+        ${_smImprovementPillHtml(x.ci)}
       </div>
       <button class="px-2 py-1 rounded-lg border border-grt-frame bg-grt-panel-soft text-white/80 hover:bg-white/10" onclick="closeSmDrilldown()">✕</button>
     </div>
@@ -7625,4 +7774,4 @@ function closeSmDrilldown(){
 </div>
 
 </body>
-        </html>
+         </html>
