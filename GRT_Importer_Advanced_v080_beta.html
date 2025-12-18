@@ -1,8 +1,8 @@
 
 <!DOCTYPE html>
 <!--
-GRT Importer Advanced v0.85.0 — Phase 1 Complete (ShotMarker Stable Baseline)
-Build date: 2025-12-17
+GRT Importer (Standard) v0.80 — Release
+Build date: 2025-12-12
 
 Changes in this build:
 - Export filename uses base .grtload stem + timestamp (YYYYMMDD_HHMM), no seconds.
@@ -20,7 +20,7 @@ Notes:
 <head>
 <meta charset="utf-8"/>
 <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
-<title>GRT Importer Advanced v0.85.0</title>
+<title>GRT Importer Advanced v0.87.0</title>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
 <script src="https://cdn.tailwindcss.com"></script>
 <style>
@@ -221,7 +221,7 @@ input[type="file"]::file-selector-button:active{background: rgba(255,255,255,0.1
                     </p>
 <div class="flex flex-wrap items-center gap-2 mt-2 text-xs">
 <p class="text-grt-subtle">
-                            GRT Importer Advanced v0.85.0 • XquiziT Arms
+                            GRT Importer Advanced v0.87.0 • XquiziT Arms
                         </p>
 <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full border border-grt-soft bg-grt-panel-soft text-[10px] md:text-[11px] text-grt-soft" id="sessionPill" title="Summary of imported sessions and current velocity unit.">
                             ⚙️ Standard • 0 files • ft/s
@@ -700,6 +700,23 @@ input[type="file"]::file-selector-button:active{background: rgba(255,255,255,0.1
 <input class="w-20 px-2 py-1 rounded border border-grt-frame bg-grt-panel-soft text-xs md:text-sm text-white focus:outline-none focus:ring-1 focus:ring-grt-accent" id="analysisTargetES" step="0.1" title="Target ES threshold for flagging groups as tight or wide." type="number"/>
 </div>
 </div>
+
+<div class="flex items-center gap-2">
+  <span class="text-grt-soft text-xs md:text-sm font-semibold">ShotMarker Phase 3:</span>
+  <label class="inline-flex items-center gap-1 text-grt-subtle text-[11px] md:text-xs">
+    <span>String ratio</span>
+    <input id="smP3RatioDom" type="number" step="0.05" class="w-20 px-2 py-1 rounded border border-grt-frame bg-grt-panel-soft text-xs md:text-sm text-white focus:outline-none focus:ring-1 focus:ring-grt-accent" />
+  </label>
+  <label class="inline-flex items-center gap-1 text-grt-subtle text-[11px] md:text-xs">
+    <span>Min MOA</span>
+    <input id="smP3StringMoaMin" type="number" step="0.01" class="w-20 px-2 py-1 rounded border border-grt-frame bg-grt-panel-soft text-xs md:text-sm text-white focus:outline-none focus:ring-1 focus:ring-grt-accent" />
+  </label>
+  <button id="smP3ResetBtn" type="button" class="px-2.5 py-1 rounded-md bg-grt-panel-soft border border-grt-frame text-[11px] md:text-xs text-grt-soft hover:bg-grt-highlight transition" title="Reset Phase 3 thresholds to defaults">
+    Reset
+  </button>
+</div>
+
+
 </div>
 <div class="flex flex-col lg:flex-row gap-4">
 <div class="flex-1 flex flex-col gap-2">
@@ -1030,6 +1047,56 @@ input[type="file"]::file-selector-button:active{background: rgba(255,255,255,0.1
                         if (typeof showStatus === 'function') showStatus('error', 'Lock auto links failed: ' + (e?.message || e));
                     }
                 }
+
+// ShotMarker Phase 3 tuning (persisted)
+let smPhase3Config = { ratioDom: 1.60, stringMoaMin: 0.35 };
+const LS_SM_P3_CONFIG = 'xqa_smPhase3Config_v1';
+
+function _loadSmPhase3Config(){
+  try{
+    const s = localStorage.getItem(LS_SM_P3_CONFIG);
+    if(s){
+      const o = JSON.parse(s);
+      if(o && typeof o === 'object'){
+        if(Number.isFinite(Number(o.ratioDom))) smPhase3Config.ratioDom = Number(o.ratioDom);
+        if(Number.isFinite(Number(o.stringMoaMin))) smPhase3Config.stringMoaMin = Number(o.stringMoaMin);
+      }
+    }
+  }catch(_e){}
+}
+
+function _saveSmPhase3Config(){
+  try{ localStorage.setItem(LS_SM_P3_CONFIG, JSON.stringify(smPhase3Config||{})); }catch(_e){}
+}
+
+function _bindSmPhase3Controls(){
+  const ratioEl = document.getElementById('smP3RatioDom');
+  const moaEl   = document.getElementById('smP3StringMoaMin');
+  const resetEl = document.getElementById('smP3ResetBtn');
+  if(ratioEl){ ratioEl.value = String(smPhase3Config.ratioDom); }
+  if(moaEl){ moaEl.value = String(smPhase3Config.stringMoaMin); }
+
+  const onChange = ()=>{
+    if(ratioEl && ratioEl.value !== '') smPhase3Config.ratioDom = Number(ratioEl.value);
+    if(moaEl && moaEl.value !== '') smPhase3Config.stringMoaMin = Number(moaEl.value);
+    _saveSmPhase3Config();
+    try{ renderShotMarkerSessionCards(); }catch(_e){}
+  };
+  if(ratioEl) ratioEl.addEventListener('change', onChange);
+  if(moaEl) moaEl.addEventListener('change', onChange);
+
+  if(resetEl){
+    resetEl.addEventListener('click', ()=>{
+      smPhase3Config = { ratioDom: 1.60, stringMoaMin: 0.35 };
+      _saveSmPhase3Config();
+      if(ratioEl) ratioEl.value = String(smPhase3Config.ratioDom);
+      if(moaEl) moaEl.value = String(smPhase3Config.stringMoaMin);
+      try{ renderShotMarkerSessionCards(); }catch(_e){}
+      try{ showToast('Phase 3 thresholds reset.','ok'); }catch(_e){}
+    });
+  }
+}
+
 function _saveShotMarkerScoreSettings() {
                     try { localStorage.setItem(LS_SM_SCORE_SETTINGS, JSON.stringify(shotMarkerScoreSettings || null)); } catch {}
                 }
@@ -1076,6 +1143,8 @@ function _saveShotMarkerScoreSettings() {
                 }
         
         _loadShotMarkerPrefs();
+        _loadSmPhase3Config();
+        try{ setTimeout(_bindSmPhase3Controls, 0); }catch(_e){}
 
         let unit = 'imperial';          // file unit: imperial(ft/s) or metric(m/s)
         let chronographType = 'garmin'; // 'garmin' or 'athlon'
@@ -3441,124 +3510,7 @@ function _computeGroupMetricsFromXY(xArr, yArr) {
             return den ? (num/den) : null;
         }
 
-        
-        // ==============================
-        // Phase 1.1: Velocity diagnostics
-        // (ES/SD already computed; add model + residual vertical)
-        // ==============================
-        function _smFitLinear(vArr, yArr){
-            const pairs = [];
-            for (let i=0;i<Math.min(vArr.length,yArr.length);i++){
-                const v = vArr[i], y = yArr[i];
-                if (isFinite(v) && isFinite(y)) pairs.push([Number(v), Number(y)]);
-            }
-            const n = pairs.length;
-            if (n < 4) return null;
-
-            let sv=0, sy=0;
-            for (const [v,y] of pairs){ sv += v; sy += y; }
-            const mv = sv / n, my = sy / n;
-
-            let sVV = 0, sVY = 0;
-            for (const [v,y] of pairs){
-                const dv = v - mv;
-                sVV += dv * dv;
-                sVY += dv * (y - my);
-            }
-            if (!sVV) return null;
-
-            const b = sVY / sVV;         // mm per fps
-            const a = my - b * mv;       // mm
-            return { n, a, b, mv, my, pairs };
-        }
-
-        function _smVelocityModelFromShots(shots){
-            const v = [], y = [];
-            for (const sh of (shots||[])){
-                if (!sh) continue;
-                if (isFinite(sh.vFps) && isFinite(sh.yMm)){
-                    v.push(Number(sh.vFps));
-                    y.push(Number(sh.yMm));
-                }
-            }
-            const fit = _smFitLinear(v, y);
-            if (!fit) return null;
-
-            const vMin = Math.min(...v);
-            const vMax = Math.max(...v);
-            const dv = vMax - vMin;
-
-            // RMSE
-            let sse = 0;
-            for (let i=0;i<v.length;i++){
-                const yHat = fit.a + fit.b * v[i];
-                const e = y[i] - yHat;
-                sse += e*e;
-            }
-            const rmseMm = Math.sqrt(sse / v.length);
-
-            // Predicted vertical span caused by ES velocity alone
-            const predictedVerticalSpanMm = Math.abs(fit.b) * dv;
-
-            return {
-                n: fit.n,
-                a: fit.a,
-                b: fit.b, // mm per fps
-                slopeMmPerFps: fit.b,
-                vMin, vMax,
-                rmseMm,
-                predictedVerticalSpanMm
-            };
-        }
-
-        function _smVelocityResidualVertical(shots, model){
-            if (!model || !isFinite(model.a) || !isFinite(model.b)) return null;
-
-            const resid = [];
-            for (const sh of (shots||[])){
-                if (!sh) continue;
-                if (!isFinite(sh.vFps) || !isFinite(sh.yMm)) continue;
-                const yHat = model.a + model.b * Number(sh.vFps);
-                resid.push(Number(sh.yMm) - yHat);
-            }
-            const n = resid.length;
-            if (n < 4) return null;
-
-            let minR = Infinity, maxR = -Infinity, sumAbs = 0;
-            for (const r of resid){
-                if (r < minR) minR = r;
-                if (r > maxR) maxR = r;
-                sumAbs += Math.abs(r);
-            }
-            return {
-                n,
-                residualVerticalESmm: (maxR - minR),
-                residualMeanAbsMm: sumAbs / n
-            };
-        }
-
-        function _smVelocityDiagFlags(gmVertMm, vCorr, residualESmm){
-            // conservative defaults; tuned later
-            const r2 = (isFinite(vCorr) ? (vCorr*vCorr) : null);
-            const flags = { weirdSign:false, velocityDominated:false, windDominated:false, mixed:false };
-
-            if (isFinite(vCorr) && vCorr <= -0.35) flags.weirdSign = true;
-
-            if (!isFinite(gmVertMm) || !isFinite(residualESmm) || r2 === null){
-                flags.mixed = true;
-                return { r2, residualShare:null, ...flags };
-            }
-
-            const residualShare = residualESmm / (gmVertMm || 1e-9);
-
-            if (r2 >= 0.45 && residualShare <= 0.55) flags.velocityDominated = true;
-            else if (r2 <= 0.15 && residualShare >= 0.80) flags.windDominated = true;
-            else flags.mixed = true;
-
-            return { r2, residualShare, ...flags };
-        }
-
-function parseShotMarkerShotslog(rawText) {
+        function parseShotMarkerShotslog(rawText) {
             const lines = String(rawText || '').replace(/\r\n/g,'\n').replace(/\r/g,'\n').split('\n');
             const sessionRe = /^(?:(Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec)\s+\d{1,2}(?:,)?\s+\d{4},|\d{4}-\d{2}-\d{2}\s*,)/;
             const strings = [];
@@ -3653,10 +3605,6 @@ function parseShotMarkerShotslog(rawText) {
                 const finalScore = (advScore && isFinite(advScore.finalScore)) ? advScore.finalScore : null;
 
                 const vVsY = (vel && shots.length) ? _corr(vs, ys) : null;
-                const vModel = _smVelocityModelFromShots(shots);
-                const vResid = _smVelocityResidualVertical(shots, vModel);
-                const vDiag = _smVelocityDiagFlags(gm && isFinite(gm.vert) ? gm.vert : null, vVsY, vResid && isFinite(vResid.residualVerticalESmm) ? vResid.residualVerticalESmm : null);
-
 
                 const sessionKey = [dateText, relay || '', label || '', img || '', targetName || '']
                     .map(x => String(x || '').trim()).join('|');
@@ -3680,9 +3628,6 @@ function parseShotMarkerShotslog(rawText) {
                         horizMm: gm.horiz,
                         mrMoa, vertMoa,
                         velocity: vel,
-                        velocityModel: vModel,
-                        velocityResidual: vResid,
-                        velocityDiag: vDiag,
                         verticalScore, precisionScore, confidenceScore,
                         finalScore,
                         scoreBreakdown: scoreBreakdown,
@@ -4071,9 +4016,12 @@ function renderShotMarkerSessionCards() {
             const strings = addon && Array.isArray(addon.sessions) ? addon.sessions : [];
             // Re-map on render so chrono imports/edits immediately reflect in cards
             mapShotMarkerSessionsToChronoCharges(strings);
+            try { computeShotMarkerPhase2(strings); } catch(e){ console.warn('Phase2 compute failed', e); }
+
             const picks = _pickSessionCards(strings);
             const rel = _shotMarkerRelativeStats(strings);
             const rankedHtml = _shotMarkerRankedListHtml(strings, rel);
+            const phase2TableHtml = _shotMarkerPhase2RankingTableHtml(strings);
             const nodeSection = _shotMarkerNodeSectionHtml(strings);
 
             if (!addon || !strings.length || (!picks.best && !picks.typical && !picks.worst)) {
@@ -4221,6 +4169,8 @@ function renderShotMarkerSessionCards() {
             };
 
             host.innerHTML = `
+              ${phase2TableHtml}
+
               ${nodeSection}
               <div class="bg-grt-panel-soft/40 border border-grt-frame rounded-2xl p-3 mb-3">
                 <details>
@@ -6824,7 +6774,790 @@ document.addEventListener('DOMContentLoaded', function setupHelpOverlay() {
       });
     }
   } catch (e) {}
-})();</script>
+})();
+// ==============================
+// Phase 2.1 (UI) + Phase 2.0 rank
+// ==============================
+
+// --- math helpers ---
+function _smConfFromN(n){ n = Number(n||0); if (!isFinite(n)||n<=0) return 0; const k=7.5; return 1-Math.exp(-n/k); }
+
+function _smPearson(x,y){
+  const n=x.length; if(n<2) return null;
+  const mx=x.reduce((a,v)=>a+v,0)/n, my=y.reduce((a,v)=>a+v,0)/n;
+  let num=0, dx2=0, dy2=0;
+  for(let i=0;i<n;i++){ const dx=x[i]-mx, dy=y[i]-my; num+=dx*dy; dx2+=dx*dx; dy2+=dy*dy; }
+  const den=Math.sqrt(dx2*dy2); if(!den) return null;
+  return num/den;
+}
+function _smLinReg(v,y){
+  const n=v.length; if(n<2) return null;
+  const mv=v.reduce((a,x)=>a+x,0)/n, my=y.reduce((a,x)=>a+x,0)/n;
+  let sVV=0, sVY=0;
+  for(let i=0;i<n;i++){ const dv=v[i]-mv; sVV+=dv*dv; sVY+=dv*(y[i]-my); }
+  if(!sVV) return null;
+  const b=sVY/sVV; // mm per fps
+  const a=my-b*mv; // mm
+  return {a,b};
+}
+
+function _smComputeVelocityModelMm(shots){
+  const valid = (shots||[]).filter(s=> Number.isFinite(s.v) && Number.isFinite(s.y));
+  const n=valid.length;
+  if(n<4) return {n, a:null,b:null, rmseMm:null, predictedSpanMm:null, corr:null, r2:null, vSD:null, vES:null};
+
+  const v=valid.map(s=>Number(s.v));
+  const y=valid.map(s=>Number(s.y));
+
+  // basic velocity stats
+  const vMin=Math.min(...v), vMax=Math.max(...v);
+  const vES=vMax-vMin;
+  const vMean=v.reduce((a,x)=>a+x,0)/n;
+  const vVar=v.reduce((a,x)=>a+(x-vMean)*(x-vMean),0)/(n-1);
+  const vSD=Math.sqrt(vVar);
+
+  const corr=_smPearson(v,y);
+  const r2=(corr==null)?null:(corr*corr);
+
+  const fit=_smLinReg(v,y);
+  if(!fit) return {n,a:null,b:null, rmseMm:null, predictedSpanMm:null, corr, r2, vSD, vES};
+
+  const resid = v.map((x,i)=> y[i] - (fit.a + fit.b*x));
+  const rmseMm = Math.sqrt(resid.reduce((a,e)=>a+e*e,0)/n);
+  const predictedSpanMm = Math.abs(fit.b) * vES;
+
+  let minR=Infinity,maxR=-Infinity,sumAbs=0;
+  for(const r of resid){ if(r<minR)minR=r; if(r>maxR)maxR=r; sumAbs+=Math.abs(r); }
+  const residualVerticalESmm = maxR-minR;
+  const residualMeanAbsMm = sumAbs/n;
+
+  return {
+    n,
+    a: fit.a,
+    b: fit.b,
+    slopeMmPerFps: fit.b,
+    rmseMm,
+    predictedSpanMm,
+    corr,
+    r2,
+    vSD,
+    vES,
+    residualVerticalESmm,
+    residualMeanAbsMm
+  };
+}
+
+function _smDiagFlagsFromModel(model, vertMm){
+  const flags={weirdSign:false, velocityDominated:false, windDominated:false, mixed:false};
+  const corr=Number.isFinite(model?.corr)?model.corr:null;
+  const r2=Number.isFinite(model?.r2)?model.r2:null;
+  const resid=Number.isFinite(model?.residualVerticalESmm)?model.residualVerticalESmm:null;
+
+  if(corr!=null && corr<=-0.35) flags.weirdSign=true;
+
+  if(!Number.isFinite(vertMm) || resid==null || r2==null){
+    flags.mixed=true; return flags;
+  }
+  const share = resid/(vertMm||1e-9);
+  if(r2>=0.45 && share<=0.55) flags.velocityDominated=true;
+  else if(r2<=0.15 && share>=0.80) flags.windDominated=true;
+  else flags.mixed=true;
+
+  return flags;
+}
+
+// attach Phase1-ish derived velocity fields to session (mm native)
+function _smEnsureVelocityDerived(session){
+  if(!session) return;
+  session.derived = session.derived || {};
+  // already computed?
+  if(session.derived.velocityModel && session.derived.velocityResidual && session.derived.velocityDiag) return;
+
+  const shots = Array.isArray(session.shots) ? session.shots : [];
+  // normalize shots fields we expect: {x,y,v}
+  const model=_smComputeVelocityModelMm(shots);
+  session.derived.velocityModel = {
+    n: model.n,
+    slopeMmPerFps: Number.isFinite(model.slopeMmPerFps)?model.slopeMmPerFps:null,
+    rmseMm: Number.isFinite(model.rmseMm)?model.rmseMm:null,
+    predictedSpanMm: Number.isFinite(model.predictedSpanMm)?model.predictedSpanMm:null
+  };
+  session.derived.velocityResidual = {
+    n: model.n,
+    residualVerticalESmm: Number.isFinite(model.residualVerticalESmm)?model.residualVerticalESmm:null,
+    residualMeanAbsMm: Number.isFinite(model.residualMeanAbsMm)?model.residualMeanAbsMm:null
+  };
+  const vertMm = Number.isFinite(session.derived.vertMm) ? session.derived.vertMm : null;
+  const flags=_smDiagFlagsFromModel(model, vertMm);
+  session.derived.velocityDiag = {
+    n: model.n,
+    corr: Number.isFinite(model.corr)?model.corr:null,
+    r2: Number.isFinite(model.r2)?model.r2:null,
+    vSD: Number.isFinite(model.vSD)?model.vSD:null,
+    vES: Number.isFinite(model.vES)?model.vES:null,
+    flags
+  };
+}
+
+// Phase 2.0 rank (headless)
+// Return the linked charge index for a ShotMarker session (manual map first, then derived match)
+function _smGetLinkedChargeIndex(session){
+  try{
+    const d = (session && session.derived) ? session.derived : {};
+    if (Number.isFinite(d.manualChargeIndex)) return Number(d.manualChargeIndex);
+    const cm = d.chargeMatch;
+    if (cm && Number.isFinite(cm.chargeIndex)) return Number(cm.chargeIndex);
+    const key = (session && session.meta && session.meta.sessionKey) ? session.meta.sessionKey : (typeof _smSessionKey === 'function' ? _smSessionKey(session) : '');
+    if (key && typeof shotMarkerManualMap === 'object' && shotMarkerManualMap && Object.prototype.hasOwnProperty.call(shotMarkerManualMap, key)) {
+      const v = Number(shotMarkerManualMap[key]);
+      if (Number.isFinite(v)) return v;
+    }
+  }catch(e){}
+  return null;
+}
+
+function _smRank2ForSession(session){
+  if(!session) return {score:null, label:'mixed', reasons:[]};
+  _smEnsureVelocityDerived(session);
+
+  const d=session.derived||{};
+  const meta=session.meta||{};
+  const distanceYd = (meta.distanceYd && Number.isFinite(meta.distanceYd)) ? meta.distanceYd : 1000;
+
+  const nShots = Number.isFinite(d.shots)?Number(d.shots):(Array.isArray(session.shots)?session.shots.length:0);
+  const conf=_smConfFromN(nShots);
+
+  const vertMoa = Number.isFinite(d.vertMoa) ? d.vertMoa : (Number.isFinite(d.vertMm)? _mmToMoa(d.vertMm, distanceYd): null);
+  const mrMoa   = Number.isFinite(d.mrMoa) ? d.mrMoa : (Number.isFinite(d.mrMm)? _mmToMoa(d.mrMm, distanceYd): null);
+
+  const residVertMm = (d.velocityResidual && Number.isFinite(d.velocityResidual.residualVerticalESmm)) ? d.velocityResidual.residualVerticalESmm : null;
+  const residVertMoa = (residVertMm!=null) ? _mmToMoa(residVertMm, distanceYd) : null;
+
+  const r2 = (d.velocityDiag && Number.isFinite(d.velocityDiag.r2)) ? d.velocityDiag.r2 : null;
+  const vSD = (d.velocityDiag && Number.isFinite(d.velocityDiag.vSD)) ? d.velocityDiag.vSD : null;
+
+  // weights (simple + tunable later)
+  const wResid=1.6, wVert=1.0, wMR=0.6, wVel=0.35;
+
+  // smaller is better -> convert to points
+  const cResid = Number.isFinite(residVertMoa) ? (wResid * (1/(residVertMoa+0.05))) : 0;
+  const cVert  = Number.isFinite(vertMoa) ? (wVert * (1/(vertMoa+0.05))) : 0;
+  const cMR    = Number.isFinite(mrMoa) ? (wMR * (1/(mrMoa+0.03))) : 0;
+
+  const r2Eff = Number.isFinite(r2)?Math.max(0,Math.min(1,r2)):0;
+  const cVel = (Number.isFinite(vSD) && vSD>0) ? (wVel * (1/(vSD+1)) * (0.5+0.5*r2Eff)) : 0;
+
+  let score = cResid + cVert + cMR + cVel;
+  score *= (0.35 + 0.65*conf);
+
+  const flags = d.velocityDiag?.flags || {};
+  if(flags.velocityDominated) score *= 1.05;
+  if(flags.windDominated) score *= 0.85;
+  if(flags.weirdSign) score *= 0.10;
+
+  const reasons=[];
+  if(Number.isFinite(residVertMoa)) reasons.push(`residualV ${residVertMoa.toFixed(2)} MOA`);
+  else if(Number.isFinite(vertMoa)) reasons.push(`vert ${vertMoa.toFixed(2)} MOA`);
+  if(Number.isFinite(vSD)) reasons.push(`SD ${vSD.toFixed(1)}`);
+  if(Number.isFinite(r2)) reasons.push(`r² ${r2.toFixed(2)}`);
+
+  let label='mixed';
+  if(flags.weirdSign) label='weird';
+  else if(flags.velocityDominated) label='velocity';
+  else if(flags.windDominated) label='wind';
+
+  return { score, label, reasons, confidence: conf, nShots };
+}
+
+function computeShotMarkerPhase2(strings){
+  const sessions = Array.isArray(strings)?strings:[];
+  sessions.forEach(s=>{
+    if(!s) return;
+    s.derived = s.derived || {};
+    // Phase 3: geometry diagnostics
+    s.derived.phase3 = _smPhase3ForSession(s);
+    s.derived.rank2 = _smRank2ForSession(s);
+    const ci = _smGetLinkedChargeIndex(s);
+    if(Number.isFinite(ci)) s.derived.rank2.chargeIndex = ci;
+  });
+  const chargeRollups = computeShotMarkerChargeRollups(sessions);
+  window.__xqaSmPhase2 = { updatedAt:new Date().toISOString(), sessionCount:sessions.length, chargeRollups };
+
+// =============================
+// Phase 3.0: Session diagnostics (geometry + outliers)
+// =============================
+function _smPhase3ForSession(session){
+  try{
+    if(!session) return { badges:[], notes:[] };
+    const d = session.derived || (session.derived = {});
+    const meta = session.meta || {};
+    const distanceYd = (meta.distanceYd && Number.isFinite(meta.distanceYd)) ? meta.distanceYd : 1000;
+
+    // Gather XY in mm from shot list
+    const shots = Array.isArray(session.shots) ? session.shots : (Array.isArray(d.shotList)?d.shotList:[]);
+    const xs=[], ys=[];
+    for(const sh of shots){
+      if(sh && Number.isFinite(sh.xMm) && Number.isFinite(sh.yMm)){
+        xs.push(Number(sh.xMm)); ys.push(Number(sh.yMm));
+      }
+    }
+    if(xs.length < 3){
+      const hasVel = Number.isFinite(d.velocityDiag?.vSD) || Number.isFinite(d.velocityDiag?.corr);
+      const badges = hasVel ? [] : [{ key:'targetOnly', icon:'📄', label:'target-only', sev:'info', detail:'No per-shot velocity in this file.' }];
+      return { badges, notes:[] };
+    }
+
+    const gm = _computeGroupMetricsFromXY(xs, ys);
+    if(!gm) return { badges:[], notes:[] };
+
+    const vertMm = Number.isFinite(d.vertMm) ? d.vertMm : gm.vert;
+    const horizMm = Number.isFinite(d.horizMm) ? d.horizMm : gm.horiz;
+    const esMm = Number.isFinite(d.esMm) ? d.esMm : gm.es;
+    const mrMm = Number.isFinite(d.mrMm) ? d.mrMm : gm.mr;
+
+    const vertMoa = _mmToMoa(vertMm, distanceYd);
+    const horizMoa = _mmToMoa(horizMm, distanceYd);
+    const mrMoa = _mmToMoa(mrMm, distanceYd);
+
+    const badges=[];
+    const notes=[];
+
+    // Target-only badge (if no velocity fields)
+    const hasVel = Number.isFinite(d.velocityDiag?.vSD) || Number.isFinite(d.velocityDiag?.corr) || Number.isFinite(d.velocityDiag?.r2);
+    if(!hasVel) badges.push({ key:'targetOnly', icon:'📄', label:'target-only', sev:'info', detail:'No per-shot velocity in this file.' });
+
+    // Vertical / horizontal stringing
+    const ratioVH = (horizMm>0) ? (vertMm/horizMm) : null;
+    const ratioHV = (vertMm>0) ? (horizMm/vertMm) : null;
+
+    if(ratioVH!=null && ratioVH >= smPhase3Config.ratioDom && vertMoa >= smPhase3Config.stringMoaMin){
+      badges.push({ key:'verticalString', icon:'⬆️', label:'vertical string', sev:'warn', detail:`Vertical dominates horizontal (${ratioVH.toFixed(2)}×).`});
+      notes.push('Vertical stringing often tracks velocity/temperature or elevation/hold consistency.');
+    } else if(ratioHV!=null && ratioHV >= smPhase3Config.ratioDom && horizMoa >= smPhase3Config.stringMoaMin){
+      badges.push({ key:'horizontalString', icon:'➡️', label:'horizontal string', sev:'warn', detail:`Horizontal dominates vertical (${ratioHV.toFixed(2)}×).`});
+      notes.push('Horizontal stringing often tracks wind, tracking, or aiming drift.');
+    }
+
+    
+    // If neither vertical nor horizontal dominates, tag the overall shape as "round/neutral"
+    if(!badges.some(b => b.key==='verticalString' || b.key==='horizontalString')){
+      if(ratioVH!=null){
+        badges.push({ key:'roundGroup', icon:'⭕', label:'round', sev:'ok', detail:`Aspect V/H ${ratioVH.toFixed(2)}×.`});
+      } else {
+        badges.push({ key:'roundGroup', icon:'⭕', label:'round', sev:'ok', detail:'No dominant axis detected.'});
+      }
+    }
+
+    // "Tight" badge (helps when everything is clean and other heuristics stay quiet)
+    if(mrMoa != null && vertMoa != null && mrMoa <= 0.25 && vertMoa <= 0.75){
+      badges.push({ key:'tightGroup', icon:'🟢', label:'tight', sev:'ok', detail:`MR ${mrMoa.toFixed(2)} MOA • Vert ${vertMoa.toFixed(2)} MOA.`});
+    }
+
+// Tight-but-off-center (centroid far from origin relative to group size)
+    const cDistMm = Math.sqrt(gm.cx*gm.cx + gm.cy*gm.cy);
+    const cDistMoa = _mmToMoa(cDistMm, distanceYd);
+    if(mrMoa <= 0.25 && cDistMoa >= 0.35){
+      badges.push({ key:'offCenter', icon:'🎯', label:'tight but off-center', sev:'info', detail:`Centroid offset ${cDistMoa.toFixed(2)} MOA.`});
+      notes.push('Tight group but displaced: confirm zero or aimpoint reference.');
+    }
+
+    // Outlier-driven ES
+    const radii = Array.isArray(gm.r) ? gm.r.slice().sort((a,b)=>a-b) : [];
+    if(radii.length >= 5){
+      const med = radii[Math.floor(radii.length*0.5)];
+      const r95 = radii[Math.floor(radii.length*0.95)];
+      const rMax = radii[radii.length-1];
+      if(med>0 && rMax >= 2.8*med && (rMax - r95) >= 0.15*esMm){
+        badges.push({ key:'outlier', icon:'⚠️', label:'outlier-driven', sev:'warn', detail:'One/few shots are inflating ES.'});
+        notes.push('Consider calling/factoring obvious outliers (wind break, shooter error) when evaluating load.');
+      }
+    }
+
+    // Double-group suspicion (1D gap test on Y then X)
+    function _largestGap(arr){
+      const a = arr.slice().sort((x,y)=>x-y);
+      let maxGap=0, idx=-1;
+      for(let i=0;i<a.length-1;i++){
+        const g = a[i+1]-a[i];
+        if(g>maxGap){ maxGap=g; idx=i; }
+      }
+      return { maxGap, idx, sorted:a };
+    }
+    const gy=_largestGap(ys);
+    const spanY = Math.max(...ys) - Math.min(...ys);
+    if(spanY>0 && gy.maxGap >= 0.35*spanY){
+      const left = gy.idx+1;
+      const right = ys.length-left;
+      if(left>=3 && right>=3){
+        badges.push({ key:'doubleGroupY', icon:'🧷', label:'double-group?', sev:'warn', detail:'Bimodal vertical spacing detected.'});
+        notes.push('Double-group patterns can indicate bedding/torque, bag/shoulder pressure shifts, or condition swings.');
+      }
+    } else {
+      const gx=_largestGap(xs);
+      const spanX = Math.max(...xs) - Math.min(...xs);
+      if(spanX>0 && gx.maxGap >= 0.35*spanX){
+        const left = gx.idx+1;
+        const right = xs.length-left;
+        if(left>=3 && right>=3){
+          badges.push({ key:'doubleGroupX', icon:'🧷', label:'double-group?', sev:'warn', detail:'Bimodal horizontal spacing detected.'});
+          notes.push('Double-group horizontal can be wind shifts, tracking changes, or position inconsistency.');
+        }
+      }
+    }
+
+    d.phase3 = { badges, notes };
+    return d.phase3;
+  } catch(e){
+    return { badges:[], notes:[] };
+  }
+}
+
+function _smPhase3BadgePills(badges){
+  const b = Array.isArray(badges)?badges:[];
+  if(!b.length) return '<span class="text-grt-subtle text-[11px]">—</span>';
+  return b.slice(0,4).map(x=>`
+    <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full border border-grt-frame bg-grt-panel-soft/50 text-[10px] text-white/85">
+      <span>${x.icon||'•'}</span><span>${x.label||''}</span>
+    </span>
+  `).join(' ');
+}
+window._smPhase3BadgePills = _smPhase3BadgePills;
+}
+
+
+// =============================
+// Phase 2.2: Charge rollups
+// =============================
+function _smMedian(arr){
+  const a = (arr||[]).filter(Number.isFinite).slice().sort((x,y)=>x-y);
+  const n=a.length; if(!n) return null;
+  const mid = Math.floor(n/2);
+  return (n%2)? a[mid] : (a[mid-1]+a[mid])/2;
+}
+function _smMin(arr){ const a=(arr||[]).filter(Number.isFinite); return a.length?Math.min(...a):null; }
+function _smMax(arr){ const a=(arr||[]).filter(Number.isFinite); return a.length?Math.max(...a):null; }
+
+function _smChargeConfidence(nShotsTotal, nSessions, velocityCoverage){
+  const confShots = _smConfFromN(nShotsTotal);
+  const confSess = 1 - Math.exp(-(Number(nSessions||0))/3);
+  const cov = Number.isFinite(velocityCoverage) ? velocityCoverage : 0;
+  return confShots * confSess * (0.7 + 0.3*cov);
+}
+
+function computeShotMarkerChargeRollups(sessions){
+  const list = Array.isArray(sessions)?sessions:[];
+  const by = new Map();
+  list.forEach(s=>{
+    const ci = s?.derived?.rank2?.chargeIndex;
+    if(!Number.isFinite(ci)) return;
+    if(!by.has(ci)) by.set(ci, []);
+    by.get(ci).push(s);
+  });
+
+  const rollups = [];
+  for(const [ci, arr] of by.entries()){
+    const scores = arr.map(s=>s?.derived?.rank2?.score);
+    const vertMoa = arr.map(s=>_smGetSessionVertMoa(s));
+    const mrMoa   = arr.map(s=>_smGetSessionMrMoa(s));
+    const residMoa = arr.map(s=>{
+      const mm = s?.derived?.velocityResidual?.residualVerticalESmm;
+      const yd = _smGetSessionDistanceYd(s);
+      return Number.isFinite(mm) ? _mmToMoa(mm, yd) : null;
+    });
+
+    const withVel = arr.filter(s=> Number.isFinite(s?.derived?.velocityDiag?.vSD) || Number.isFinite(s?.derived?.velocityDiag?.vES)).length;
+    const velocityCoverage = arr.length ? (withVel / arr.length) : 0;
+
+    const nShotsTotal = arr.reduce((a,s)=> a + Number(s?.meta?.shotCount || s?.meta?.shots || s?.shots?.length || 0), 0);
+    const bestScore = _smMin(scores);
+    const medianScore = _smMedian(scores);
+
+    // best session = lowest score
+    let bestSession = null;
+    arr.forEach(s=>{
+      const sc = s?.derived?.rank2?.score;
+      if(!Number.isFinite(sc)) return;
+      if(!bestSession || sc < bestSession.score){
+        bestSession = { key: s?.meta?.sessionKey || '', title: s?.meta?.matchStr || s?.name || 'Session', score: sc, session: s };
+      }
+    });
+
+    rollups.push({
+      chargeIndex: Number(ci),
+      nSessions: arr.length,
+      nShotsTotal,
+      velocityCoverage,
+      bestScore,
+      medianScore,
+      medianVerticalMoa: _smMedian(vertMoa),
+      medianMeanRadiusMoa: _smMedian(mrMoa),
+      medianResidualVerticalMoa: _smMedian(residMoa),
+      chargeConfidence: _smChargeConfidence(nShotsTotal, arr.length, velocityCoverage),
+      bestSessionKey: bestSession?.key || '',
+      sessions: arr
+    });
+  }
+
+  // sort: best medianScore ascending (fallback to bestScore)
+  rollups.sort((a,b)=>{
+    const am = Number.isFinite(a.medianScore) ? a.medianScore : a.bestScore;
+    const bm = Number.isFinite(b.medianScore) ? b.medianScore : b.bestScore;
+    if(Number.isFinite(am) && Number.isFinite(bm)) return am - bm;
+    if(Number.isFinite(am)) return -1;
+    if(Number.isFinite(bm)) return 1;
+    return a.chargeIndex - b.chargeIndex;
+  });
+
+  return rollups;
+}
+
+function _smGetSessionDistanceYd(s){
+  const yd = s?.meta?.distanceYd;
+  return Number.isFinite(yd) ? yd : 1000;
+}
+function _smGetSessionVertMoa(s){
+  const d = s?.derived || {};
+  const yd = _smGetSessionDistanceYd(s);
+  if(Number.isFinite(d.vertMoa)) return d.vertMoa;
+  if(Number.isFinite(d.vertMm)) return _mmToMoa(d.vertMm, yd);
+  return null;
+}
+function _smGetSessionMrMoa(s){
+  const d = s?.derived || {};
+  const yd = _smGetSessionDistanceYd(s);
+  if(Number.isFinite(d.mrMoa)) return d.mrMoa;
+  if(Number.isFinite(d.mrMm)) return _mmToMoa(d.mrMm, yd);
+  return null;
+}
+
+
+// UI table
+function _smRankIcon(label){
+  if(label==='velocity') return '⛽';
+  if(label==='wind') return '🌬️';
+  if(label==='weird') return '⚠️';
+  return '🎯';
+}
+
+function _shotMarkerPhase2RankingTableHtml(strings){
+  const sessions = Array.isArray(strings)?strings:[];
+  const rows = sessions
+    .map(s=>{
+      const key = s?.meta?.sessionKey || '';
+      const r = s?.derived?.rank2 || {};
+      const score = Number.isFinite(r.score)?Number(r.score):null;
+      const ci = _smGetLinkedChargeIndex(s);
+      return {s,key,r,score,ci};
+    })
+    .filter(x=>x.key && x.score!=null)
+    .sort((a,b)=>b.score-a.score);
+
+  if(!rows.length) return '';
+
+  const body = rows.map((x,i)=>`
+    <tr class="border-t border-grt-frame/60 hover:bg-white/5 cursor-pointer" onclick="openSmDrilldown(${i})">
+      <td class=\"py-2 px-2 text-[12px]\">${(x.s?.derived?.velocityDiag && (Number.isFinite(x.s.derived.velocityDiag.vSD)||Number.isFinite(x.s.derived.velocityDiag.vES)||Number.isFinite(x.s.derived.velocityDiag.r2)||Number.isFinite(x.s.derived.velocityDiag.corr))) ? _smRankIcon(x.r.label) : '📄'}</td>
+      <td class="py-2 px-3 text-[11px] text-white/90">${(x.ci!=null && Number.isFinite(x.ci)) ? ('Charge '+x.ci) : 'Unlinked'}</td>
+      <td class=\"py-2 px-3 text-[11px] text-grt-subtle\">${_smPhase3BadgePills(x.s?.derived?.phase3?.badges)}<div class="mt-1">${(x.r.reasons && x.r.reasons.length)? x.r.reasons.join(' • ') : (((x.s?.derived?.velocityDiag && (Number.isFinite(x.s.derived.velocityDiag.vSD)||Number.isFinite(x.s.derived.velocityDiag.vES)||Number.isFinite(x.s.derived.velocityDiag.r2)||Number.isFinite(x.s.derived.velocityDiag.corr))) ? '' : 'target-only (no velocity)'))}</div></td>
+      <td class="py-2 px-3 text-[11px] text-white/90">${x.score.toFixed(3)}</td>
+    </tr>`).join('');
+
+  // stash table rows for drilldown
+  window.__xqaSmPhase2Rows = rows;
+
+  return `
+    <div class="bg-grt-panel-soft/40 border border-grt-frame rounded-2xl p-3 mb-3">
+      <div class="flex items-center justify-between gap-3 mb-2">
+        <div class="text-white text-sm font-semibold">🏁 ShotMarker Ranking (Phase 2.1)</div>
+        <div class="text-grt-subtle text-[10px]">Click a row to expand details</div>
+      </div>
+      <div class="overflow-x-auto">
+        <table class="w-full text-left">
+          <thead>
+            <tr class="text-grt-subtle text-[10px] uppercase tracking-wide">
+              <th class="py-2 px-2"> </th>
+              <th class="py-2 px-3">Link</th>
+              <th class="py-2 px-3">Why</th>
+              <th class="py-2 px-3">Score</th>
+            </tr>
+          </thead>
+          <tbody>${body}</tbody>
+        </table>
+      </div>
+    </div>`;
+}
+
+
+function __fmtNum(v,d){ return Number.isFinite(v) ? Number(v).toFixed(d) : '—'; }
+
+// =============================
+// Phase 2.2 UI: Charge leaderboard + drilldown
+// =============================
+function _smChargeIcon(ru){
+  const cov = Number.isFinite(ru?.velocityCoverage) ? ru.velocityCoverage : 0;
+  if(cov >= 0.6) return '⛽';
+  if(cov <= 0.05) return '📄';
+  return '🎯';
+}
+
+function _shotMarkerChargeLeaderboardHtml(){
+  const rollups = window.__xqaSmPhase2?.chargeRollups || [];
+  if(!rollups.length) return '';
+
+  const rows = rollups.map((ru, idx)=>{
+    const ci = ru.chargeIndex;
+    const best = Number.isFinite(ru.bestScore) ? ru.bestScore.toFixed(3) : '—';
+    const med  = Number.isFinite(ru.medianScore) ? ru.medianScore.toFixed(3) : '—';
+    const conf = Number.isFinite(ru.chargeConfidence) ? ru.chargeConfidence.toFixed(2) : '—';
+    const nSess = ru.nSessions || 0;
+    const cov = Number.isFinite(ru.velocityCoverage) ? Math.round(ru.velocityCoverage*100) : 0;
+
+    const medVert = Number.isFinite(ru.medianVerticalMoa) ? ru.medianVerticalMoa.toFixed(3) : '—';
+    const medMR   = Number.isFinite(ru.medianMeanRadiusMoa) ? ru.medianMeanRadiusMoa.toFixed(3) : '—';
+    const medResid= Number.isFinite(ru.medianResidualVerticalMoa) ? ru.medianResidualVerticalMoa.toFixed(3) : '—';
+
+    return `
+      <tr class="border-t border-white/5 hover:bg-white/5 cursor-pointer" onclick="openSmChargeDrilldown(${ci})">
+        <td class="py-2 px-2 text-[12px]">${_smChargeIcon(ru)}</td>
+        <td class="py-2 px-3 text-[12px] text-white/90 font-medium">Charge ${ci}</td>
+        <td class="py-2 px-3 text-[11px] text-white/90">${best}</td>
+        <td class="py-2 px-3 text-[11px] text-white/90">${med}</td>
+        <td class="py-2 px-3 text-[11px] text-white/70">${medResid}</td>
+        <td class="py-2 px-3 text-[11px] text-white/70">${medVert}</td>
+        <td class="py-2 px-3 text-[11px] text-white/70">${medMR}</td>
+        <td class="py-2 px-3 text-[11px] text-white/70">${nSess}</td>
+        <td class="py-2 px-3 text-[11px] text-white/70">${cov}%</td>
+        <td class="py-2 px-3 text-[11px] text-white/90">${conf}</td>
+      </tr>`;
+  }).join('');
+
+  return `
+    <div class="bg-grt-panel-soft/40 border border-grt-frame rounded-2xl p-3 mb-3">
+      <div class="flex items-center justify-between gap-3 mb-2">
+        <div class="text-white text-sm font-semibold">🏁 Charge Leaderboard (Phase 2.2)</div>
+        <div class="text-grt-subtle text-[10px]">Click a charge row to drill down</div>
+      </div>
+      <div class="overflow-x-auto">
+        <table class="w-full text-left">
+          <thead>
+            <tr class="text-grt-subtle text-[10px] uppercase tracking-wide">
+              <th class="py-2 px-2"> </th>
+              <th class="py-2 px-3">Charge</th>
+              <th class="py-2 px-3">Best</th>
+              <th class="py-2 px-3">Median</th>
+              <th class="py-2 px-3">Med Resid</th>
+              <th class="py-2 px-3">Med Vert</th>
+              <th class="py-2 px-3">Med MR</th>
+              <th class="py-2 px-3">Sessions</th>
+              <th class="py-2 px-3">Vel Cov</th>
+              <th class="py-2 px-3">Conf</th>
+            </tr>
+          </thead>
+          <tbody>${rows}</tbody>
+        </table>
+      </div>
+    </div>
+  
+    ${_shotMarkerChargeLeaderboardHtml()}
+  `;
+}
+
+function openSmChargeDrilldown(chargeIndex){
+  try{
+  const rollups = window.__xqaSmPhase2?.chargeRollups || [];
+  const ru = rollups.find(x => Number(x.chargeIndex) === Number(chargeIndex));
+  if(!ru) return;
+
+  const sessions = ru.sessions || [];
+  const list = sessions
+    .slice()
+    .sort((a,b)=>{
+      const as = a?.derived?.rank2?.score;
+      const bs = b?.derived?.rank2?.score;
+      if(Number.isFinite(as) && Number.isFinite(bs)) return as - bs;
+      if(Number.isFinite(as)) return -1;
+      if(Number.isFinite(bs)) return 1;
+      return 0;
+    })
+    .map(s=>{
+      const key = s?.meta?.sessionKey || '';
+      const title = s?.meta?.relayStr ? `${s.meta.relayStr}` : (s?.name || 'Session');
+      const sc = s?.derived?.rank2?.score;
+      const scTxt = Number.isFinite(sc) ? sc.toFixed(3) : '—';
+      return `<div class="flex items-center justify-between gap-3 py-2 border-t border-white/5">
+        <div class="text-white/85 text-sm truncate">${key || title}</div>
+        <div class="flex items-center gap-2">
+          <div class="text-white/90 text-xs tabular-nums">${scTxt}</div>
+          <button class="px-2 py-1 rounded-lg border border-white/10 text-[11px] text-white/80 hover:bg-white/5"
+            onclick="event.stopPropagation(); openSmDrilldownBySessionKey(${JSON.stringify(key)})">View</button>
+        </div>
+      </div>`;
+    }).join('');
+
+  const cov = Number.isFinite(ru.velocityCoverage) ? Math.round(ru.velocityCoverage*100) : 0;
+  const html = `
+    <div class="flex items-start justify-between gap-3">
+      <div>
+        <div class="text-white text-xl font-semibold">Charge ${ru.chargeIndex}</div>
+        <div class="text-grt-subtle text-[12px]">Sessions: ${ru.nSessions} • Shots: ${ru.nShotsTotal} • Velocity coverage: ${cov}%</div>
+      </div>
+      <button class="h-10 w-10 rounded-xl border border-white/10 hover:bg-white/5 text-white/80" onclick="closeSmDrilldown()">✕</button>
+    </div>
+
+    <div class="grid grid-cols-2 gap-3 mt-4">
+      <div class="rounded-2xl border border-white/10 bg-white/5 p-3">
+        <div class="text-grt-subtle text-[11px] uppercase tracking-wide">Median Rank2</div>
+        <div class="text-white text-2xl font-semibold mt-1">${Number.isFinite(ru.medianScore)?ru.medianScore.toFixed(3):'—'}</div>
+      </div>
+      <div class="rounded-2xl border border-white/10 bg-white/5 p-3">
+        <div class="text-grt-subtle text-[11px] uppercase tracking-wide">Confidence</div>
+        <div class="text-white text-2xl font-semibold mt-1">${Number.isFinite(ru.chargeConfidence)?ru.chargeConfidence.toFixed(2):'—'}</div>
+      </div>
+      <div class="rounded-2xl border border-white/10 bg-white/5 p-3">
+        <div class="text-grt-subtle text-[11px] uppercase tracking-wide">Median Residual Vertical</div>
+        <div class="text-white text-2xl font-semibold mt-1">${Number.isFinite(ru.medianResidualVerticalMoa)?ru.medianResidualVerticalMoa.toFixed(3)+' MOA':'—'}</div>
+      </div>
+      <div class="rounded-2xl border border-white/10 bg-white/5 p-3">
+        <div class="text-grt-subtle text-[11px] uppercase tracking-wide">Median Vertical</div>
+        <div class="text-white text-2xl font-semibold mt-1">${Number.isFinite(ru.medianVerticalMoa)?ru.medianVerticalMoa.toFixed(3)+' MOA':'—'}</div>
+      </div>
+    </div>
+
+    <div class="rounded-2xl border border-white/10 bg-white/5 p-3 mt-4">
+      <div class="text-white text-base font-semibold mb-1">Sessions in this charge</div>
+      <div class="text-grt-subtle text-[11px] mb-2">Click “View” to open the session drilldown</div>
+      <div>${list || '<div class="text-grt-subtle text-sm">No sessions linked.</div>'}</div>
+    </div>
+  `;
+
+  const overlay=document.getElementById('smDrilldownOverlay');
+  const panel=document.getElementById('smDrilldownPanel');
+  if(!overlay||!panel) return;
+  panel.innerHTML=html;
+  overlay.classList.remove('hidden');
+
+  }catch(e){
+    console.error(e);
+    try{ showStatus('error','ShotMarker drilldown failed: '+(e?.message||e)); }catch(_e){}
+  }
+}
+
+function openSmDrilldownBySessionKey(sessionKey){
+  const rows = window.__xqaSmPhase2Rows || [];
+  const idx = rows.findIndex(r => r && r.key === sessionKey);
+  if(idx >= 0) openSmDrilldown(idx);
+}
+
+
+function openSmDrilldown(rowIndex){
+  try{
+  const rows = window.__xqaSmPhase2Rows || [];
+  const x = rows[rowIndex];
+  if(!x) return;
+
+  const s = x.s;
+  const d = s?.derived || {};
+  const meta = s?.meta || {};
+  const distanceYd = (meta.distanceYd && isFinite(meta.distanceYd)) ? meta.distanceYd : 1000;
+
+  const vertMoa = Number.isFinite(d.vertMoa) ? d.vertMoa : (Number.isFinite(d.vertMm)? _mmToMoa(d.vertMm, distanceYd): null);
+  const mrMoa   = Number.isFinite(d.mrMoa) ? d.mrMoa : (Number.isFinite(d.mrMm)? _mmToMoa(d.mrMm, distanceYd): null);
+
+  const residMm = d?.velocityResidual?.residualVerticalESmm;
+  const residMoa = Number.isFinite(residMm) ? _mmToMoa(residMm, distanceYd) : null;
+
+  const vSD = d?.velocityDiag?.vSD;
+  const vES = d?.velocityDiag?.vES;
+  const r2  = d?.velocityDiag?.r2;
+  const corr = d?.velocityDiag?.corr;
+  const flags = d?.velocityDiag?.flags || {};
+
+  const hasVel = Number.isFinite(vSD) || Number.isFinite(vES) || Number.isFinite(r2) || Number.isFinite(corr);
+  const velLabel = hasVel ? (d?.rank2?.label || 'mixed') : 'target-only';
+  const velIcon  = hasVel ? _smRankIcon(velLabel) : '📄';
+
+
+  const html = `
+    <div class="flex items-start justify-between gap-3">
+      <div>
+        <div class="text-white font-semibold text-base">${meta.targetName || 'ShotMarker Session'}</div>
+        <div class="text-grt-subtle text-[11px] mt-1">${meta.sessionKey || ''}</div>
+      </div>
+      <button class="px-2 py-1 rounded-lg border border-grt-frame bg-grt-panel-soft text-white/80 hover:bg-white/10" onclick="closeSmDrilldown()">✕</button>
+    </div>
+
+    <div class="mt-4 grid grid-cols-2 gap-3 text-sm">
+      <div class="bg-grt-panel-soft/40 border border-grt-frame rounded-xl p-3">
+        <div class="text-grt-subtle text-[10px] uppercase">Residual Vertical</div>
+        <div class="text-white text-lg font-semibold mt-1">${hasVel && Number.isFinite(residMoa) ? (__fmtNum(residMoa,3)+' MOA') : '—'}</div>
+      </div>
+      <div class="bg-grt-panel-soft/40 border border-grt-frame rounded-xl p-3">
+        <div class="text-grt-subtle text-[10px] uppercase">Vertical ES</div>
+        <div class="text-white text-lg font-semibold mt-1">${isFinite(vertMoa)?__fmtNum(vertMoa,3):'—'} MOA</div>
+      </div>
+
+      <div class="bg-grt-panel-soft/40 border border-grt-frame rounded-xl p-3">
+        <div class="text-grt-subtle text-[10px] uppercase">Mean Radius</div>
+        <div class="text-white text-lg font-semibold mt-1">${isFinite(mrMoa)?__fmtNum(mrMoa,3):'—'} MOA</div>
+      </div>
+      <div class="bg-grt-panel-soft/40 border border-grt-frame rounded-xl p-3">
+        <div class="text-grt-subtle text-[10px] uppercase">Confidence</div>
+        <div class="text-white text-lg font-semibold mt-1">${isFinite(d?.rank2?.confidence)?__fmtNum(d.rank2.confidence,2):'—'}</div>
+      </div>
+    </div>
+
+
+    <div class="mt-4 bg-grt-panel-soft/40 border border-grt-frame rounded-xl p-3">
+      <div class="flex items-center justify-between">
+        <div class="text-white font-semibold">Diagnostics</div>
+        <div class="text-grt-subtle text-[11px]">Phase 3</div>
+      </div>
+      <div class="mt-2 flex flex-wrap gap-2">${_smPhase3BadgePills((d.phase3 && d.phase3.badges) ? d.phase3.badges : [])}</div>
+      <div class="mt-3 text-[12px] text-grt-subtle space-y-1">
+        ${(d.phase3 && Array.isArray(d.phase3.notes) && d.phase3.notes.length) ? d.phase3.notes.slice(0,3).map(n=>`<div>• ${n}</div>`).join('') : '<div>• —</div>'}
+      </div>
+    </div>
+
+    <div class="mt-4 bg-grt-panel-soft/40 border border-grt-frame rounded-xl p-3">
+      <div class="flex items-center justify-between">
+        <div class="text-white font-semibold">Velocity ↔ Vertical</div>
+        <div class="text-grt-subtle text-[11px]">${velIcon} ${velLabel}</div>
+      </div>
+      <div class="mt-2 text-sm text-white/90">
+        SD: <span class="text-white">${isFinite(vSD)?__fmtNum(vSD,1):'—'}</span> fps •
+        ES: <span class="text-white">${isFinite(vES)?__fmtNum(vES,0):'—'}</span> fps •
+        r²: <span class="text-white">${isFinite(r2)?__fmtNum(r2,2):'—'}</span> •
+        corr: <span class="text-white">${isFinite(corr)?__fmtNum(corr,2):'—'}</span>
+      </div>
+      <div class="mt-2 text-[12px] text-grt-subtle">
+        Flags: ${hasVel ? (flags.weirdSign?'⚠ weirdSign ':'')+(flags.velocityDominated?'⛽ velocityDominated ':'')+(flags.windDominated?'🌬 windDominated ':'')+(flags.mixed?'🎯 mixed':'') : '📄 target-only (no velocity)'}
+      </div>
+    </div>
+
+    <div class="mt-4 bg-grt-panel-soft/40 border border-grt-frame rounded-xl p-3">
+      <div class="text-grt-subtle text-[10px] uppercase">Rank2</div>
+      <div class="text-white text-lg font-semibold mt-1">${isFinite(d?.rank2?.score)?__fmtNum(d.rank2.score,4):'—'}</div>
+      <div class="mt-2 text-[12px] text-grt-subtle">${(d?.rank2?.reasons||[]).join(' • ')}</div>
+    </div>
+  `;
+
+  const overlay=document.getElementById('smDrilldownOverlay');
+  const panel=document.getElementById('smDrilldownPanel');
+  if(!overlay||!panel) return;
+  panel.innerHTML=html;
+  overlay.classList.remove('hidden');
+
+  }catch(e){
+    console.error(e);
+    try{ showStatus('error','ShotMarker drilldown failed: '+(e?.message||e)); }catch(_e){}
+  }
+}
+function closeSmDrilldown(){
+  const overlay=document.getElementById('smDrilldownOverlay');
+  if(overlay) overlay.classList.add('hidden');
+}
+
+</script>
 
 <!-- How-to overlay -->
 <div id="helpOverlay"
@@ -6882,5 +7615,14 @@ document.addEventListener('DOMContentLoaded', function setupHelpOverlay() {
 <!-- Hidden canvas used to generate the optional "Chrono vs Sim" PNG for .grtload export -->
 <canvas id="chronoSimChart" style="display:none"></canvas>
 
+
+<!-- ShotMarker drilldown overlay (Phase 2.1) -->
+<div id="smDrilldownOverlay" class="hidden fixed inset-0 z-[80]">
+  <div class="absolute inset-0 bg-black/70" onclick="closeSmDrilldown()"></div>
+  <div class="absolute right-0 top-0 h-full w-full sm:w-[520px] bg-grt-panel border-l border-grt-frame p-4 overflow-y-auto shadow-2xl">
+    <div id="smDrilldownPanel"></div>
+  </div>
+</div>
+
 </body>
-</html>
+        </html>
