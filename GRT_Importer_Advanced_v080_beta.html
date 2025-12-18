@@ -1,8 +1,8 @@
 
 <!DOCTYPE html>
 <!--
-GRT Importer (Standard) v0.80 — Release
-Build date: 2025-12-12
+GRT Importer Advanced v0.85.0 — Phase 1 Complete (ShotMarker Stable Baseline)
+Build date: 2025-12-17
 
 Changes in this build:
 - Export filename uses base .grtload stem + timestamp (YYYYMMDD_HHMM), no seconds.
@@ -20,7 +20,7 @@ Notes:
 <head>
 <meta charset="utf-8"/>
 <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
-<title>GRT Importer Advanced v0.80</title>
+<title>GRT Importer Advanced v0.85.0</title>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
 <script src="https://cdn.tailwindcss.com"></script>
 <style>
@@ -221,7 +221,7 @@ input[type="file"]::file-selector-button:active{background: rgba(255,255,255,0.1
                     </p>
 <div class="flex flex-wrap items-center gap-2 mt-2 text-xs">
 <p class="text-grt-subtle">
-                            GRT Importer Advanced v0.80 • XquiziT Arms
+                            GRT Importer Advanced v0.85.0 • XquiziT Arms
                         </p>
 <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full border border-grt-soft bg-grt-panel-soft text-[10px] md:text-[11px] text-grt-soft" id="sessionPill" title="Summary of imported sessions and current velocity unit.">
                             ⚙️ Standard • 0 files • ft/s
@@ -3441,7 +3441,124 @@ function _computeGroupMetricsFromXY(xArr, yArr) {
             return den ? (num/den) : null;
         }
 
-        function parseShotMarkerShotslog(rawText) {
+        
+        // ==============================
+        // Phase 1.1: Velocity diagnostics
+        // (ES/SD already computed; add model + residual vertical)
+        // ==============================
+        function _smFitLinear(vArr, yArr){
+            const pairs = [];
+            for (let i=0;i<Math.min(vArr.length,yArr.length);i++){
+                const v = vArr[i], y = yArr[i];
+                if (isFinite(v) && isFinite(y)) pairs.push([Number(v), Number(y)]);
+            }
+            const n = pairs.length;
+            if (n < 4) return null;
+
+            let sv=0, sy=0;
+            for (const [v,y] of pairs){ sv += v; sy += y; }
+            const mv = sv / n, my = sy / n;
+
+            let sVV = 0, sVY = 0;
+            for (const [v,y] of pairs){
+                const dv = v - mv;
+                sVV += dv * dv;
+                sVY += dv * (y - my);
+            }
+            if (!sVV) return null;
+
+            const b = sVY / sVV;         // mm per fps
+            const a = my - b * mv;       // mm
+            return { n, a, b, mv, my, pairs };
+        }
+
+        function _smVelocityModelFromShots(shots){
+            const v = [], y = [];
+            for (const sh of (shots||[])){
+                if (!sh) continue;
+                if (isFinite(sh.vFps) && isFinite(sh.yMm)){
+                    v.push(Number(sh.vFps));
+                    y.push(Number(sh.yMm));
+                }
+            }
+            const fit = _smFitLinear(v, y);
+            if (!fit) return null;
+
+            const vMin = Math.min(...v);
+            const vMax = Math.max(...v);
+            const dv = vMax - vMin;
+
+            // RMSE
+            let sse = 0;
+            for (let i=0;i<v.length;i++){
+                const yHat = fit.a + fit.b * v[i];
+                const e = y[i] - yHat;
+                sse += e*e;
+            }
+            const rmseMm = Math.sqrt(sse / v.length);
+
+            // Predicted vertical span caused by ES velocity alone
+            const predictedVerticalSpanMm = Math.abs(fit.b) * dv;
+
+            return {
+                n: fit.n,
+                a: fit.a,
+                b: fit.b, // mm per fps
+                slopeMmPerFps: fit.b,
+                vMin, vMax,
+                rmseMm,
+                predictedVerticalSpanMm
+            };
+        }
+
+        function _smVelocityResidualVertical(shots, model){
+            if (!model || !isFinite(model.a) || !isFinite(model.b)) return null;
+
+            const resid = [];
+            for (const sh of (shots||[])){
+                if (!sh) continue;
+                if (!isFinite(sh.vFps) || !isFinite(sh.yMm)) continue;
+                const yHat = model.a + model.b * Number(sh.vFps);
+                resid.push(Number(sh.yMm) - yHat);
+            }
+            const n = resid.length;
+            if (n < 4) return null;
+
+            let minR = Infinity, maxR = -Infinity, sumAbs = 0;
+            for (const r of resid){
+                if (r < minR) minR = r;
+                if (r > maxR) maxR = r;
+                sumAbs += Math.abs(r);
+            }
+            return {
+                n,
+                residualVerticalESmm: (maxR - minR),
+                residualMeanAbsMm: sumAbs / n
+            };
+        }
+
+        function _smVelocityDiagFlags(gmVertMm, vCorr, residualESmm){
+            // conservative defaults; tuned later
+            const r2 = (isFinite(vCorr) ? (vCorr*vCorr) : null);
+            const flags = { weirdSign:false, velocityDominated:false, windDominated:false, mixed:false };
+
+            if (isFinite(vCorr) && vCorr <= -0.35) flags.weirdSign = true;
+
+            if (!isFinite(gmVertMm) || !isFinite(residualESmm) || r2 === null){
+                flags.mixed = true;
+                return { r2, residualShare:null, ...flags };
+            }
+
+            const residualShare = residualESmm / (gmVertMm || 1e-9);
+
+            if (r2 >= 0.45 && residualShare <= 0.55) flags.velocityDominated = true;
+            else if (r2 <= 0.15 && residualShare >= 0.80) flags.windDominated = true;
+            else flags.mixed = true;
+
+            return { r2, residualShare, ...flags };
+        }
+
+function parseShotMarkerShotslog(rawText) {
             const lines = String(rawText || '').replace(/\r\n/g,'\n').replace(/\r/g,'\n').split('\n');
             const sessionRe = /^(?:(Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec)\s+\d{1,2}(?:,)?\s+\d{4},|\d{4}-\d{2}-\d{2}\s*,)/;
             const strings = [];
@@ -3536,6 +3653,10 @@ function _computeGroupMetricsFromXY(xArr, yArr) {
                 const finalScore = (advScore && isFinite(advScore.finalScore)) ? advScore.finalScore : null;
 
                 const vVsY = (vel && shots.length) ? _corr(vs, ys) : null;
+                const vModel = _smVelocityModelFromShots(shots);
+                const vResid = _smVelocityResidualVertical(shots, vModel);
+                const vDiag = _smVelocityDiagFlags(gm && isFinite(gm.vert) ? gm.vert : null, vVsY, vResid && isFinite(vResid.residualVerticalESmm) ? vResid.residualVerticalESmm : null);
+
 
                 const sessionKey = [dateText, relay || '', label || '', img || '', targetName || '']
                     .map(x => String(x || '').trim()).join('|');
@@ -3559,6 +3680,9 @@ function _computeGroupMetricsFromXY(xArr, yArr) {
                         horizMm: gm.horiz,
                         mrMoa, vertMoa,
                         velocity: vel,
+                        velocityModel: vModel,
+                        velocityResidual: vResid,
+                        velocityDiag: vDiag,
                         verticalScore, precisionScore, confidenceScore,
                         finalScore,
                         scoreBreakdown: scoreBreakdown,
@@ -6759,4 +6883,4 @@ document.addEventListener('DOMContentLoaded', function setupHelpOverlay() {
 <canvas id="chronoSimChart" style="display:none"></canvas>
 
 </body>
-        </html>
+</html>
