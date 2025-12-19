@@ -20,8 +20,22 @@ Notes:
 <head>
 <meta charset="utf-8"/>
 <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
-<title>GRT Importer Advanced v0.88</title>
+<title>GRT Importer Advanced v0.88.4</title>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+<script>
+/* Silence Tailwind CDN production warning in this single-file tool */
+(function(){
+  try{
+    const _w = console.warn;
+    console.warn = function(){
+      try{
+        if(arguments && typeof arguments[0]==='string' && arguments[0].indexOf('cdn.tailwindcss.com should not be used in production')>=0) return;
+      }catch(_e){}
+      return _w.apply(console, arguments);
+    };
+  }catch(_e){}
+})();
+</script>
 <script src="https://cdn.tailwindcss.com"></script>
 <style>
         :root {
@@ -221,7 +235,7 @@ input[type="file"]::file-selector-button:active{background: rgba(255,255,255,0.1
                     </p>
 <div class="flex flex-wrap items-center gap-2 mt-2 text-xs">
 <p class="text-grt-subtle">
-                            GRT Importer Advanced v0.88 • XquiziT Arms
+                            GRT Importer Advanced v0.88.4 • XquiziT Arms
                         </p>
 <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full border border-grt-soft bg-grt-panel-soft text-[10px] md:text-[11px] text-grt-soft" id="sessionPill" title="Summary of imported sessions and current velocity unit.">
                             ⚙️ Standard • 0 files • ft/s
@@ -6864,13 +6878,171 @@ function _smConfFromN(n){ n = Number(n||0); if (!isFinite(n)||n<=0) return 0; co
 
 
 
+// score scaling: raw composite -> 0–100 rating (higher is better)
+function _smClamp(v, lo, hi){ v=Number(v); if(!isFinite(v)) return lo; return Math.max(lo, Math.min(hi, v)); }
+function _smGetScoreK(){
+  try{
+    const k = Number(localStorage.getItem('grt_sm_score_k'));
+    return (isFinite(k) && k>0) ? k : 0.447;
+  }catch(_e){ return 0.447; }
+}
+function _smSetScoreK(k){
+  k = Number(k);
+  if(!isFinite(k) || k<=0) return false;
+  try{ localStorage.setItem('grt_sm_score_k', String(k)); }catch(_e){}
+  return true;
+}
+// Suggest k from currently loaded data so that P75 raw score maps to ~80.
+// Uses your real imported sessions (scoring shots only).
+function _smSuggestScoreKFromData(targetRating){
+  targetRating = Number.isFinite(targetRating) ? targetRating : 80;
+  try{
+    const rows = (window.__xqaSmPhase2Rows||[]);
+    const raws = rows.map(r => Number(r?.s?.derived?.rank2?.rawScore)).filter(x=>isFinite(x) && x>=0).sort((a,b)=>a-b);
+    if(raws.length < 5) return null;
+    const p75 = raws[Math.floor(0.75*(raws.length-1))];
+    if(!isFinite(p75) || p75<=0) return null;
+    const y = _smClamp(targetRating/100, 0.01, 0.99); // avoid inf
+    // rating = 100*(1-exp(-k*raw))  =>  k = -ln(1-y)/raw
+    const k = -Math.log(1 - y) / p75;
+    return (isFinite(k) && k>0) ? k : null;
+  }catch(_e){ return null; }
+}
+function _smScoreTo100(raw){
+  raw = Number(raw);
+  if(!isFinite(raw)) return null;
+  // Map raw>=0 to 0..100 using a smooth saturating curve.
+  // k is user-tuneable (stored in localStorage as 'grt_sm_score_k').
+  const k = _smGetScoreK();
+  const rating = 100 * (1 - Math.exp(-k * Math.max(0, raw)));
+  return _smClamp(rating, 0, 100);
+}
+
+
+function _smLogPhase2SanityTable(force){
+  try{
+    const rows = (window.__xqaSmPhase2Rows||[]);
+    if(!rows.length){ console.warn('No ShotMarker Phase 2 rows available.'); return; }
+    if(!force && window.__SM_SANITY_PRINTED__){ return (window.__SM_SANITY_ROWS__||null); }
+    window.__SM_SANITY_PRINTED__ = true;
+    const out = rows.map((x,i)=>{
+      const s=x.s||{};
+      const d=s.derived||{};
+      const r=d.rank2||{};
+      const meta=s.meta||{};
+
+      const sd =
+        (d.velocityDerived && Number.isFinite(d.velocityDerived.sd)) ? d.velocityDerived.sd :
+        (d.velocityDiag && Number.isFinite(d.velocityDiag.sd)) ? d.velocityDiag.sd : null;
+
+      const raw =
+        (Number.isFinite(r.rawScore) ? r.rawScore :
+         (Number.isFinite(r.raw) ? r.raw : null));
+
+      const score100 =
+        (Number.isFinite(r.score100) ? r.score100 :
+         (Number.isFinite(r.score) ? r.score : null));
+
+      return {
+        idx:i,
+        charge: (Number.isFinite(r.chargeIndex)?('Charge '+r.chargeIndex): (Number.isFinite(x.ci)?('Charge '+x.ci):'Unlinked')),
+        session: (meta.sessionKey||x.key||'').split('|')[1]|| (meta.sessionKey||x.key||''),
+        nShots: Number.isFinite(r.nShots)?r.nShots:null,
+        mrMOA: (Number.isFinite(d.mrMoa)? +d.mrMoa.toFixed(3): null),
+        vertMOA: (Number.isFinite(d.vertMoa)? +d.vertMoa.toFixed(3): null),
+        sdFPS: (sd==null ? null : +sd.toFixed(1)),
+        raw: (raw==null ? null : +raw.toFixed(3)),
+        score100: (score100==null ? null : +score100.toFixed(1))
+      };
+    });
+    console.table(out);
+    // stash for quick ad-hoc debugging / copy-paste
+    window.__SM_SANITY_ROWS__ = out;
+    return out;
+  }catch(e){ console.error(e); return null; }
+}
+
+
+
+function _smEscHtml(s){
+  return String(s==null?'':s)
+    .replace(/&/g,'&amp;').replace(/</g,'&lt;')
+    .replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;');
+}
+
+function _smRenderSanityPanelRows(rows){
+  if(!Array.isArray(rows) || !rows.length){
+    return '<div class="text-[11px] text-grt-subtle">No rows available yet. Load ShotMarker data, then open this panel again.</div>';
+  }
+  const head = ['Charge','Session','Shots','MR (MOA)','Vert (MOA)','SD (fps)','Raw','Score'];
+  const ths = head.map(h=>`<th class="py-1 px-2 text-[10px] uppercase tracking-wide text-grt-subtle whitespace-nowrap">${_smEscHtml(h)}</th>`).join('');
+  const trs = rows.map(r=>`<tr class="border-t border-grt-frame/40">
+      <td class="py-1 px-2 text-[11px] text-white/90 whitespace-nowrap">${_smEscHtml(r.charge)}</td>
+      <td class="py-1 px-2 text-[11px] text-white/80 whitespace-nowrap">${_smEscHtml(r.session)}</td>
+      <td class="py-1 px-2 text-[11px] text-white/80 text-right">${_smEscHtml(r.nShots)}</td>
+      <td class="py-1 px-2 text-[11px] text-white/80 text-right">${_smEscHtml(r.mrMOA)}</td>
+      <td class="py-1 px-2 text-[11px] text-white/80 text-right">${_smEscHtml(r.vertMOA)}</td>
+      <td class="py-1 px-2 text-[11px] text-white/80 text-right">${_smEscHtml(r.sdFPS==null?'—':r.sdFPS)}</td>
+      <td class="py-1 px-2 text-[11px] text-white/80 text-right">${_smEscHtml(r.raw)}</td>
+      <td class="py-1 px-2 text-[11px] text-white/90 text-right font-semibold">${_smEscHtml(r.score100)}</td>
+    </tr>`).join('');
+  return `<table class="min-w-full text-left">
+    <thead><tr class="border-b border-grt-frame/60">${ths}</tr></thead>
+    <tbody>${trs}</tbody>
+  </table>`;
+}
+
+function _smToggleSanityPanel(force, hide){
+  try{
+    const panel = document.getElementById('smSanityPanel');
+    const body = document.getElementById('smSanityPanelBody');
+    if(!panel || !body){
+      console.warn('Sanity panel DOM not found (render ShotMarker Ranking first).');
+      // still allow console logging
+      return _smLogPhase2SanityTable(!!force);
+    }
+    if(hide){
+      panel.classList.add('hidden');
+      return;
+    }
+    // toggle visibility
+    const willShow = panel.classList.contains('hidden');
+    if(willShow){
+      panel.classList.remove('hidden');
+    }
+    const rows = _smLogPhase2SanityTable(true);
+    body.innerHTML = _smRenderSanityPanelRows(rows||[]);
+    return rows;
+  }catch(e){ console.error(e); return null; }
+}
+
+
 // --- Current Tune + Improvement helpers (v0.88) ---
 function _smParseDateISOFromMeta(meta){
   try{
     const dt = (meta && meta.dateText) ? String(meta.dateText) : '';
     if(!dt) return null;
     const first = dt.split('|')[0].trim(); // e.g. "Sep 25 2025"
-    const d = new Date(first);
+    if(!first) return null;
+
+    // Prefer Date.parse for portability; fall back to manual month parse.
+    let t = Date.parse(first);
+    if(!isFinite(t)){
+      const m = /^([A-Za-z]{3,})\s+(\d{1,2})\s+(\d{4})$/.exec(first);
+      if(m){
+        const mon = m[1].slice(0,3).toLowerCase();
+        const map = {jan:0,feb:1,mar:2,apr:3,may:4,jun:5,jul:6,aug:7,sep:8,oct:9,nov:10,dec:11};
+        const mm = map[mon];
+        if(mm!=null){
+          const dd = Number(m[2]), yy = Number(m[3]);
+          const d = new Date(yy, mm, dd);
+          t = d.getTime();
+        }
+      }
+    }
+    if(!isFinite(t)) return null;
+
+    const d = new Date(t);
     if(!isFinite(d.getTime())) return null;
     const yyyy = d.getFullYear();
     const mm = String(d.getMonth()+1).padStart(2,'0');
@@ -6878,6 +7050,7 @@ function _smParseDateISOFromMeta(meta){
     return yyyy + '-' + mm + '-' + dd;
   }catch(e){ return null; }
 }
+
 function _smDecayWeight(ageDays, halfLifeDays=14, floor=0.15){
   ageDays = Number(ageDays||0);
   if(!isFinite(ageDays) || ageDays<0) ageDays = 0;
@@ -6902,15 +7075,17 @@ function _smCurrentTuneVertical(sessions, nowDate){
   const elig = (Array.isArray(sessions)?sessions:[]).filter(s=>{
     const m=s?.meta||{}; const d=s?.derived||{};
     const dist = (m.distanceYd && isFinite(m.distanceYd)) ? Number(m.distanceYd) : 1000;
-    const shots = Number.isFinite(d.shots)?Number(d.shots):Number(m.shots||0);
+    const shots = Number.isFinite(d.scoringShots) ? Number(d.scoringShots)
+                 : (Number.isFinite(d.shots) ? Number(d.shots) : Number(m.shots||0));
     const v = Number.isFinite(d.vertMoa)?Number(d.vertMoa):null;
-    return dist===1000 && shots>=10 && isFinite(v);
+    return (Math.abs(dist-1000) <= 2) && shots>=10 && isFinite(v);
   });
   if(!elig.length) return null;
   let num=0, den=0;
   for(const s of elig){
     const m=s?.meta||{}; const d=s?.derived||{};
-    const shots = Number.isFinite(d.shots)?Number(d.shots):Number(m.shots||0);
+    const shots = Number.isFinite(d.scoringShots) ? Number(d.scoringShots)
+                 : (Number.isFinite(d.shots) ? Number(d.shots) : Number(m.shots||0));
     const v = Number(d.vertMoa);
     const iso=_smParseDateISOFromMeta(m);
     const dt = iso ? new Date(iso) : null;
@@ -6920,15 +7095,17 @@ function _smCurrentTuneVertical(sessions, nowDate){
   }
   return den>0 ? (num/den) : null;
 }
+
 function _smSupportScore(sessions, nowDate){
   const now = nowDate || new Date();
   let support = 0;
   for(const s of (Array.isArray(sessions)?sessions:[])){
     const m=s?.meta||{}; const d=s?.derived||{};
     const dist = (m.distanceYd && isFinite(m.distanceYd)) ? Number(m.distanceYd) : 1000;
-    const shots = Number.isFinite(d.shots)?Number(d.shots):Number(m.shots||0);
+    const shots = Number.isFinite(d.scoringShots) ? Number(d.scoringShots)
+                 : (Number.isFinite(d.shots) ? Number(d.shots) : Number(m.shots||0));
     const v = Number.isFinite(d.vertMoa)?Number(d.vertMoa):null;
-    if(dist!==1000 || shots<10 || !isFinite(v)) continue;
+    if(Math.abs(dist-1000) > 2 || shots<10 || !isFinite(v)) continue;
     const iso=_smParseDateISOFromMeta(m);
     const dt = iso ? new Date(iso) : null;
     const ageDays = dt ? ((now - dt)/(1000*60*60*24)) : 0;
@@ -6936,6 +7113,7 @@ function _smSupportScore(sessions, nowDate){
   }
   return support;
 }
+
 function _smImprovementForCharge(chargeSessions, nowDate){
   const now = nowDate || new Date();
   const recentWindowDays = 14;
@@ -7181,7 +7359,11 @@ function _smRank2ForSession(session){
   if(flags.windDominated) score *= 0.85;
   if(flags.weirdSign) score *= 0.10;
 
-  const reasons=[];
+    const rawScore = score;
+  const score100 = _smScoreTo100(rawScore);
+  score = (score100==null? null : score100);
+
+const reasons=[];
   if(Number.isFinite(residVertMoa)) reasons.push(`residualV ${residVertMoa.toFixed(2)} MOA`);
   else if(Number.isFinite(vertMoa)) reasons.push(`vert ${vertMoa.toFixed(2)} MOA`);
   if(Number.isFinite(vSD)) reasons.push(`SD ${vSD.toFixed(1)}`);
@@ -7192,7 +7374,7 @@ function _smRank2ForSession(session){
   else if(flags.velocityDominated) label='velocity';
   else if(flags.windDominated) label='wind';
 
-  return { score, label, reasons, confidence: conf, nShots };
+  return { score, rawScore, label, reasons, confidence: conf, nShots };
 }
 
 function computeShotMarkerPhase2(strings){
@@ -7398,7 +7580,7 @@ function computeShotMarkerChargeRollups(sessions){
     const velocityCoverage = arr.length ? (withVel / arr.length) : 0;
 
     const nShotsTotal = arr.reduce((a,s)=> a + Number(s?.meta?.shotCount || s?.meta?.shots || s?.shots?.length || 0), 0);
-    const bestScore = _smMin(scores);
+    const bestScore = _smMax(scores);
     const medianScore = _smMedian(scores);
 
     // best session = lowest score
@@ -7427,11 +7609,11 @@ function computeShotMarkerChargeRollups(sessions){
     });
   }
 
-  // sort: best medianScore ascending (fallback to bestScore)
+  // sort: best medianScore descending (fallback to bestScore)
   rollups.sort((a,b)=>{
     const am = Number.isFinite(a.medianScore) ? a.medianScore : a.bestScore;
     const bm = Number.isFinite(b.medianScore) ? b.medianScore : b.bestScore;
-    if(Number.isFinite(am) && Number.isFinite(bm)) return am - bm;
+    if(Number.isFinite(am) && Number.isFinite(bm)) return bm - am;
     if(Number.isFinite(am)) return -1;
     if(Number.isFinite(bm)) return 1;
     return a.chargeIndex - b.chargeIndex;
@@ -7530,7 +7712,7 @@ function _shotMarkerPhase2RankingTableHtml(strings){
       <td class=\"py-2 px-2 text-[12px]\">${(((x.s?.derived?.velocityDiag && (Number.isFinite(x.s.derived.velocityDiag.vSD)||Number.isFinite(x.s.derived.velocityDiag.vES)||Number.isFinite(x.s.derived.velocityDiag.r2)||Number.isFinite(x.s.derived.velocityDiag.corr))) ? _smRankIcon(x.r.label) : '📄') + _smDominantDiagHtml(x.s?.derived?.dominantDiag))}</td>
       <td class="py-2 px-3 text-[11px] text-white/90">${((x.ci!=null && Number.isFinite(x.ci)) ? ("Charge "+x.ci) : "Unlinked") + _smImprovementIconHtml(x.ci)}</td>
       <td class=\"py-2 px-3 text-[11px] text-grt-subtle\">${_smPhase3BadgePills(x.s?.derived?.phase3?.badges)}<div class="mt-1">${(x.r.reasons && x.r.reasons.length)? x.r.reasons.join(' • ') : (((x.s?.derived?.velocityDiag && (Number.isFinite(x.s.derived.velocityDiag.vSD)||Number.isFinite(x.s.derived.velocityDiag.vES)||Number.isFinite(x.s.derived.velocityDiag.r2)||Number.isFinite(x.s.derived.velocityDiag.corr))) ? '' : 'target-only (no velocity)'))}</div></td>
-      <td class="py-2 px-3 text-[11px] text-white/90">${x.score.toFixed(3)}</td>
+      <td class="py-2 px-3 text-[11px] text-white/90">${x.score.toFixed(1)}</td>
     </tr>`).join('');
 
   // stash table rows for drilldown
@@ -7540,7 +7722,30 @@ function _shotMarkerPhase2RankingTableHtml(strings){
     <div class="bg-grt-panel-soft/40 border border-grt-frame rounded-2xl p-3 mb-3">
       <div class="flex items-center justify-between gap-3 mb-2">
         <div class="text-white text-sm font-semibold">🏁 ShotMarker Ranking (Phase 2.1)</div>
-        <div class="text-grt-subtle text-[10px]">Click a row to expand details</div>
+        <div class="flex items-center gap-3">
+          <button class="text-[10px] text-white/70 hover:text-white underline decoration-white/20 hover:decoration-white/40"
+            title="Show a side-by-side sanity table (MR, Vertical, SD, raw score, 0–100 score)."
+            onclick="event.stopPropagation(); try{ _smToggleSanityPanel(true); }catch(e){ console.error(e);}">
+            Sanity</button>
+          <button class="text-[10px] text-white/70 hover:text-white underline decoration-white/20 hover:decoration-white/40"
+            title="Auto-tunes the 0–100 score scale using your currently loaded data (sets k so P75 raw ≈ 80)."
+            onclick="event.stopPropagation(); try{ const k=_smSuggestScoreKFromData(80); if(!k){alert('Not enough data to calibrate. Load more sessions.'); return;} _smSetScoreK(k); alert('Score scale calibrated. k=' + k.toFixed(3) + ' (saved).'); if(typeof renderShotMarkerSessionCards==='function') renderShotMarkerSessionCards(); }catch(e){ console.error(e);}">Calibrate</button>
+          <div class="text-grt-subtle text-[10px]">Click a row to expand details</div>
+        </div>
+      </div>
+      <div id="smSanityPanel" class="hidden mt-2 mb-2 bg-black/20 border border-grt-frame/60 rounded-xl p-2">
+        <div class="flex items-center justify-between gap-2 mb-2">
+          <div class="text-[11px] text-white/90 font-semibold">Sanity output</div>
+          <div class="flex items-center gap-3">
+            <button class="text-[10px] text-white/70 hover:text-white underline decoration-white/20 hover:decoration-white/40"
+              title="Refresh the sanity table from current Phase 2 rows."
+              onclick="event.stopPropagation(); try{ _smToggleSanityPanel(true); }catch(e){ console.error(e);}">Refresh</button>
+            <button class="text-[10px] text-white/70 hover:text-white underline decoration-white/20 hover:decoration-white/40"
+              title="Hide this panel."
+              onclick="event.stopPropagation(); try{ _smToggleSanityPanel(false,true); }catch(e){ console.error(e);}">Hide</button>
+          </div>
+        </div>
+        <div id="smSanityPanelBody" class="overflow-x-auto"></div>
       </div>
       <div class="overflow-x-auto">
         <table class="w-full text-left">
@@ -7549,7 +7754,7 @@ function _shotMarkerPhase2RankingTableHtml(strings){
               <th class="py-2 px-2"> </th>
               <th class="py-2 px-3">Link</th>
               <th class="py-2 px-3">Why</th>
-              <th class="py-2 px-3">Score</th>
+              <th class="py-2 px-3" title="Composite 0–100 (higher is better). Mean-radius score × vertical & velocity penalties (sighters excluded).">Score</th>
             </tr>
           </thead>
           <tbody>${body}</tbody>
@@ -7577,8 +7782,8 @@ function _shotMarkerChargeLeaderboardHtml(){
 
   const rows = rollups.map((ru, idx)=>{
     const ci = ru.chargeIndex;
-    const best = Number.isFinite(ru.bestScore) ? ru.bestScore.toFixed(3) : '—';
-    const med  = Number.isFinite(ru.medianScore) ? ru.medianScore.toFixed(3) : '—';
+    const best = Number.isFinite(ru.bestScore) ? ru.bestScore.toFixed(1) : '—';
+    const med  = Number.isFinite(ru.medianScore) ? ru.medianScore.toFixed(1) : '—';
     const conf = Number.isFinite(ru.chargeConfidence) ? ru.chargeConfidence.toFixed(2) : '—';
     const nSess = ru.nSessions || 0;
     const cov = Number.isFinite(ru.velocityCoverage) ? Math.round(ru.velocityCoverage*100) : 0;
@@ -7678,7 +7883,7 @@ function openSmChargeDrilldown(chargeIndex){
     <div class="grid grid-cols-2 gap-3 mt-4">
       <div class="rounded-2xl border border-white/10 bg-white/5 p-3">
         <div class="text-grt-subtle text-[11px] uppercase tracking-wide">Median Rank2</div>
-        <div class="text-white text-2xl font-semibold mt-1">${Number.isFinite(ru.medianScore)?ru.medianScore.toFixed(3):'—'}</div>
+        <div class="text-white text-2xl font-semibold mt-1">${Number.isFinite(ru.medianScore)?ru.medianScore.toFixed(1):'—'}</div>
       </div>
       <div class="rounded-2xl border border-white/10 bg-white/5 p-3">
         <div class="text-grt-subtle text-[11px] uppercase tracking-wide">Confidence</div>
@@ -7839,6 +8044,30 @@ function closeSmDrilldown(){
   const overlay=document.getElementById('smDrilldownOverlay');
   if(overlay) overlay.classList.add('hidden');
 }
+
+
+// --- v0.88.8: ShotMarker sanity button (delegated binding, survives re-renders) ---
+(function(){
+  try{
+    if(window.__smSanityDelegated) return;
+    window.__smSanityDelegated = true;
+    document.addEventListener('click', function(e){
+      const btn = e.target && e.target.closest ? e.target.closest('[data-sm-sanity]') : null;
+      if(!btn) return;
+      e.preventDefault();
+      e.stopPropagation();
+      try{
+        if(typeof _smLogPhase2SanityTable === 'function'){
+          _smLogPhase2SanityTable(true);
+        }else{
+          console.warn('Sanity check function not available.');
+        }
+      }catch(err){
+        console.error(err);
+      }
+    }, true);
+  }catch(_e){}
+})();
 
 </script>
 
