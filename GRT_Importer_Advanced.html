@@ -1,14 +1,13 @@
 
 <!DOCTYPE html>
 <!--
-GRT Importer (Standard) v0.80 — Release
-Build date: 2025-12-12
+GRT Importer Advanced v0.89 — Release
+Build date: 2025-12-19
 
-Changes in this build:
-- Export filename uses base .grtload stem + timestamp (YYYYMMDD_HHMM), no seconds.
-- Fix: grtBaseFilename TDZ crash (single declaration, no pre-use assignments).
-- Fix: Ladder UI clears/locks until a base .grtload with a real ladder (2+ steps) is loaded.
-- Fix: Start New Session fully resets ladder state + re-applies ladder visibility/lock state.
+Release highlights:
+- Session Save: download-only JSON (no new-tab preview).
+- Session Load: verified round-trip stability (shots/charges/units/badges preserved).
+- Phase 3 confidence: tightened for 1000y realism (shot-count gravity + target-first when ShotMarker disagrees).
 
 Notes:
 - localStorage keys are namespaced (xqa_*).
@@ -20,7 +19,7 @@ Notes:
 <head>
 <meta charset="utf-8"/>
 <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
-<title>GRT Importer Advanced v0.88.4</title>
+<title>GRT Importer Advanced v0.89</title>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
 <script>
 /* Silence Tailwind CDN production warning in this single-file tool */
@@ -235,7 +234,7 @@ input[type="file"]::file-selector-button:active{background: rgba(255,255,255,0.1
                     </p>
 <div class="flex flex-wrap items-center gap-2 mt-2 text-xs">
 <p class="text-grt-subtle">
-                            GRT Importer Advanced v0.88.4 • XquiziT Arms
+                            GRT Importer Advanced v0.89 • XquiziT Arms
                         </p>
 <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full border border-grt-soft bg-grt-panel-soft text-[10px] md:text-[11px] text-grt-soft" id="sessionPill" title="Summary of imported sessions and current velocity unit.">
                             ⚙️ Standard • 0 files • ft/s
@@ -687,6 +686,15 @@ input[type="file"]::file-selector-button:active{background: rgba(255,255,255,0.1
 <span>💾</span>
 <span>Export .grtload</span>
 </button>
+
+<button class="inline-flex items-center gap-1 px-3 py-1.5 rounded-full bg-grt-panel-soft border border-grt-frame text-[11px] md:text-xs text-grt-soft hover:bg-grt-highlight transition" id="saveSessionBtn" type="button" title="Save the current imported data (chronograph + add-ons + analysis state) so you can reload it later without GRT.">
+  <span>🧾</span><span>Save session</span>
+</button>
+<button class="inline-flex items-center gap-1 px-3 py-1.5 rounded-full bg-grt-panel-soft border border-grt-frame text-[11px] md:text-xs text-grt-soft hover:bg-grt-highlight transition" onclick="document.getElementById('standaloneJsonInput').click()" type="button" title="Load a previously saved session (.json) from this tool.">
+  <span>📂</span><span>Load session</span>
+</button>
+<input id="standaloneJsonInput" type="file" accept=".json" class="hidden" onchange="importStandaloneJsonFile(this.files && this.files[0])"/>
+
 </div>
 </div>
 <!-- Analysis Dashboard -->
@@ -1401,6 +1409,101 @@ let chronoSimPngData = '';
                 }
             };
         }
+
+        // =======================
+        // Velocity SD (explicit)
+        // =======================
+        function xqaFmtNum(x, digits = 1, fallback = '—') {
+            const n = Number(x);
+            return Number.isFinite(n) ? n.toFixed(digits) : fallback;
+        }
+        // Tooltip helper for score cards (safe default)
+        function _xqaScoreHintTitle(row){
+            try{
+                const parts = [];
+                if (row && typeof row.velocitySDSource === 'string' && row.velocitySDSource){
+                    parts.push(`SD src: ${row.velocitySDSource}`);
+                }
+                // Chrono SD / ES if present (most rows)
+                if (row && Number.isFinite(Number(row.sd))){
+                    parts.push(`SD: ${xqaFmtNum(row.sd, 1)} fps`);
+                } else if (row && Number.isFinite(Number(row.velocitySD))){
+                    parts.push(`SD: ${xqaFmtNum(row.velocitySD, 1)} fps`);
+                }
+                if (row && Number.isFinite(Number(row.es))){
+                    parts.push(`ES: ${xqaFmtNum(row.es, 1)} fps`);
+                }
+                if (row && Number.isFinite(Number(row.vertMOA))){
+                    parts.push(`Vert: ${xqaFmtNum(row.vertMOA, 3)} MOA`);
+                }
+                if (row && Number.isFinite(Number(row.mrMOA))){
+                    parts.push(`MR: ${xqaFmtNum(row.mrMOA, 3)} MOA`);
+                }
+                return parts.length ? parts.join(' • ') : 'Score details';
+            }catch(_e){
+                return 'Score details';
+            }
+        }
+
+
+        // Sample SD (n-1). Returns null if <3 values.
+        function xqaIsSighter(tags){ return String(tags||'').toLowerCase().includes('sighter'); }
+
+function xqaSampleSD(values) {
+            const arr = Array.isArray(values) ? values.map(Number).filter(Number.isFinite) : [];
+            const n = arr.length;
+            if (n < 3) return null;
+            const mean = arr.reduce((a,b)=>a+b,0) / n;
+            const ss = arr.reduce((a,b)=>a + (b-mean)*(b-mean), 0);
+            return Math.sqrt(ss / (n - 1));
+        }
+
+        // Attach explicit SD fields to a stats object derived from a velocity array.
+        // - Never silently invent SD: if <3 shots, SD becomes null and source=insufficient.
+        function xqaAugmentVelocityStats(stats, velocities) {
+            try {
+                const vAll = Array.isArray(velocities) ? velocities.map(Number).filter(Number.isFinite) : [];
+                const nAll = vAll.length;
+
+                let velocitySD = null;
+                let velocitySDSource = 'missing';
+
+                if (nAll === 0) {
+                    velocitySDSource = 'missing';
+                } else if (nAll < 3) {
+                    velocitySDSource = 'insufficient';
+                } else {
+                    velocitySD = xqaSampleSD(vAll);
+                    velocitySDSource = 'computed';
+                }
+
+                if (stats && typeof stats === 'object') {
+                    stats.velocitySD = velocitySD;
+                    stats.velocitySDSource = velocitySDSource;
+                    stats.velocityShotCount = nAll;
+                    stats.velocityExcludedCount = 0; // Chrono imports have no sighters/quality yet
+
+                    // Make "SD handling" explicit by preventing silent SD usage for n<3
+                    if (velocitySDSource !== 'computed' && velocitySDSource !== 'measured') {
+                        stats.sd = null;
+                    } else if (Number.isFinite(velocitySD)) {
+                        // Prefer sample SD for analysis/scoring going forward
+                        stats.sd = velocitySD;
+                    }
+                }
+            } catch (e) {
+                console.error('xqaAugmentVelocityStats failed', e);
+            }
+        }
+
+        function xqaGetVelocitySD(stats) {
+            const v = stats && Number.isFinite(stats.velocitySD) ? stats.velocitySD
+                      : (stats && Number.isFinite(stats.sd) ? stats.sd : null);
+            const src = stats && stats.velocitySDSource ? stats.velocitySDSource
+                      : (Number.isFinite(v) ? 'computed' : 'missing');
+            return { v, src };
+        }
+
 
 
 
@@ -3328,6 +3431,15 @@ function lockShotMarkerAutoLinks(strings){
 // =======================
 // /ShotMarker Advanced scoring + chrono mapping
 // =======================
+
+// -----------------------
+// ShotMarker helpers
+// -----------------------
+function _xqaIsSighterTag(tags){
+  const t = String(tags || '').toLowerCase();
+  // treat 'sighter' as a standalone token or substring (ShotMarker exports vary)
+  return (t.split(/[^a-z0-9_]+/).includes('sighter')) || t.includes(' sighter') || t.startsWith('sighter') || t.endsWith('sighter');
+}
 function _computeGroupMetricsFromXY(xArr, yArr) {
             const n = Math.min(xArr.length, yArr.length);
             if (!n) return null;
@@ -3639,7 +3751,7 @@ const shots = [];
                     shots.push(shot);
                                         // intent: sighters never count toward scoring
                     const __tagStr = String(shot.tags||'').toLowerCase();
-                    shot.isSighter = (__tagStr.split(/[^a-z0-9_]+/).includes('sighter'));
+                    shot.isSighter = _xqaIsSighterTag(shot.tags);
 if (!shot.isSighter) {
                         if (x !== null && y !== null) { xs.push(x); ys.push(y); }
                         if (v !== null) vs.push(v);
@@ -3693,7 +3805,7 @@ if (!shot.isSighter) {
                 const confidenceScore = (advScore && isFinite(advScore.finalScore)) ? advScore.finalScore : null;
                 const finalScore = (advScore && isFinite(advScore.finalScore)) ? advScore.finalScore : null;
 
-                const vVsY = (vel && shots.length) ? _corr(vs, ys) : null;
+                const vVsY = (vel && (vs && vs.length >= 3) && (ys && ys.length >= 3)) ? _corr(vs, ys) : null;
 
                 const sessionKey = [dateText, relay || '', label || '', img || '', targetName || '']
                     .map(x => String(x || '').trim()).join('|');
@@ -4229,7 +4341,7 @@ function renderShotMarkerSessionCards() {
                 <div class="bg-grt-panel rounded-2xl shadow-xl p-4 border ${borderClass} ${relBorder}">
                   <div class="flex items-start justify-between gap-3">
                     <div class="min-w-0">
-                      <div class="text-white text-base font-semibold">${title}</div>
+                      <div class="text-white text-base font-semibold" title="${_xqaScoreHintTitle(d.scoreBreakdown || d || {})}">${title}</div>
                       <div class="text-grt-subtle text-xs mt-0.5">
                         ${m.date || ''}${m.relay ? ` • ${m.relay}` : ''}${m.label ? ` • ${m.label}` : ''}
                       </div>
@@ -4588,7 +4700,20 @@ function refreshPicturesStatus() {
             const picInput = document.getElementById('pictureInput');
             const notesInput = document.getElementById('notesInput');
             const smInput = document.getElementById('shotMarkerInput');
-            //  removed
+
+            // ShotMarker CSV (add-on)
+            if (smInput) {
+                smInput.addEventListener('change', (e) => {
+                    try {
+                        const file = (e && e.target && e.target.files) ? e.target.files[0] : null;
+                        if (!file) return;
+                        handleAddonFile('shotmarker', file);
+                    } finally {
+                        // allow selecting the same file again
+                        try { smInput.value = ''; } catch(_e) {}
+                    }
+                });
+            }
 if (picInput) {
                 picInput.addEventListener('change', (e) => {
                     const files = Array.from(e.target.files || []);
@@ -4876,7 +5001,9 @@ if (picInput) {
 
             const stats = computeStats(velocities);
 
-            if (!isValidNumber(garminStats.avg)) garminStats.avg = stats.mean;
+            
+            xqaAugmentVelocityStats(stats, velocities);
+if (!isValidNumber(garminStats.avg)) garminStats.avg = stats.mean;
             if (!isValidNumber(garminStats.sd))  garminStats.sd  = stats.sd;
             if (!isValidNumber(garminStats.es))  garminStats.es  = stats.es;
             if (!isValidNumber(garminStats.min)) garminStats.min = stats.min;
@@ -5098,7 +5225,9 @@ function processExcel(arrayBuffer) {
 
             const stats = computeStats(velocities);
 
-            if (!isValidNumber(garminStats.avg)) garminStats.avg = stats.mean;
+            
+            xqaAugmentVelocityStats(stats, velocities);
+if (!isValidNumber(garminStats.avg)) garminStats.avg = stats.mean;
             if (!isValidNumber(garminStats.sd))  garminStats.sd  = stats.sd;
             if (!isValidNumber(garminStats.es))  garminStats.es  = stats.es;
             if (!isValidNumber(garminStats.min)) garminStats.min = stats.min;
@@ -5224,7 +5353,9 @@ function processExcel(arrayBuffer) {
 
             const stats = computeStats(velocities);
 
-            if (!isValidNumber(garminStats.avg)) garminStats.avg = stats.mean;
+            
+            xqaAugmentVelocityStats(stats, velocities);
+if (!isValidNumber(garminStats.avg)) garminStats.avg = stats.mean;
             if (!isValidNumber(garminStats.sd))  garminStats.sd  = stats.sd;
             if (!isValidNumber(garminStats.es))  garminStats.es  = stats.es;
             if (!isValidNumber(garminStats.min)) garminStats.min = stats.min;
@@ -5338,7 +5469,9 @@ function processExcel(arrayBuffer) {
 
             const stats = computeStats(velocities);
 
-            if (!isValidNumber(garminStats.avg)) garminStats.avg = stats.mean;
+            
+            xqaAugmentVelocityStats(stats, velocities);
+if (!isValidNumber(garminStats.avg)) garminStats.avg = stats.mean;
             if (!isValidNumber(garminStats.sd))  garminStats.sd  = stats.sd;
             if (!isValidNumber(garminStats.es))  garminStats.es  = stats.es;
             if (!isValidNumber(garminStats.min)) garminStats.min = stats.min;
@@ -5545,7 +5678,8 @@ function stripExistingImportedGallery(inner) {
             const avgLabel = 'AVG-E=';
             if (isFinite(avgFileUnit)) notes.push(avgLabel + fmt(avgFileUnit));
             if (isFinite(sdFileUnit))  notes.push('SD=' + fmt(sdFileUnit));
-            if (isFinite(esFileUnit))  notes.push('ES=' + fmt(esFileUnit));
+                        try{ const _sd = xqaGetVelocitySD(s); notes.push('SD_SRC=' + String(_sd.src||'').replace(/\s+/g,'_')); }catch(_e){}
+if (isFinite(esFileUnit))  notes.push('ES=' + fmt(esFileUnit));
             if (isFinite(minFileUnit)) notes.push('MIN=' + fmt(minFileUnit));
             if (isFinite(maxFileUnit)) notes.push('MAX=' + fmt(maxFileUnit));
 
@@ -6319,18 +6453,31 @@ function showResults() {
                 // Multiplier for "near target" band (blue). Tweak here if you want looser/tighter.
                 const NEAR_RATIO = 1.2;
 
-                const hasSDTarget = tSD > 0 && typeof s.sd === 'number' && !isNaN(s.sd);
-                const hasESTarget = tES > 0 && typeof s.es === 'number' && !isNaN(s.es);
+                                const _vSD = xqaGetVelocitySD(s);
+                const vSD = _vSD.v;
+                const vSDsrc = _vSD.src;
 
-                const sdRatio = hasSDTarget ? (s.sd / tSD) : null;
+                const hasSDTarget = tSD > 0 && typeof vSD === "number" && !isNaN(vSD);
+                const hasESTarget = tES > 0 && typeof s.es === 'number' && !isNaN(s.es);
+                const sdRatio = hasSDTarget ? (vSD / tSD) : null;
                 const esRatio = hasESTarget ? (s.es / tES) : null;
+
+                
+                const _xqaScoreHints = (function(){
+                  const bits=[];
+                  if(_vSD && _vSD.src) bits.push(`SD src: ${_vSD.src}`);
+                  if(typeof vSD==='number' && hasSDTarget) bits.push(`SD ${vSD.toFixed(1)} / target ${tSD}`);
+                  if(typeof s.es==='number' && hasESTarget) bits.push(`ES ${s.es.toFixed(1)} / target ${tES}`);
+                  if(bits.length===0) bits.push('No velocity SD/ES available for scoring.');
+                  return bits.join(' • ');
+                })();                const _xqaScoreHintTitle = String(_xqaScoreHints||'').replace(/\"/g,'&quot;');
 
                 const withinSD = hasSDTarget && sdRatio <= 1;
                 const withinES = hasESTarget && esRatio <= 1;
 
                 // Target-aware SD color (green / blue / rose), with sdBands fallback when no SD target is set
                 let sdColorClass = 'text-grt-soft';
-                if (typeof s.sd === 'number' && !isNaN(s.sd)) {
+                if (typeof vSD === "number" && !isNaN(vSD)) {
                     if (hasSDTarget) {
                         if (sdRatio <= 1) {
                             sdColorClass = 'text-emerald-300'; // within target
@@ -6340,7 +6487,7 @@ function showResults() {
                             sdColorClass = 'text-rose-300';    // outside / wide
                         }
                     } else {
-                        const band = pickSdBand(s.sd);
+                        const band = pickSdBand(vSD);
                         if (band) {
                             if (band.key === 'tight') {
                                 sdColorClass = 'text-emerald-300';
@@ -6371,7 +6518,7 @@ function showResults() {
                     esColorClass = sdColorClass;
                 }
 
-                const healthBadge = renderSdBadge(s.sd);
+                const healthBadge = renderSdBadge(vSD);
 
                 // Threshold-based status badge leveraging ratios (blue = "near node / partial hit")
                 let statusLabel = '';
@@ -6447,8 +6594,8 @@ function showResults() {
                             <div class="flex justify-between">
                                 <span class="text-grt-subtle" title="SD: standard deviation of velocity; lower means more consistent.">SD:</span>
                                 <span class="flex items-center gap-1">
-                                    <span class="${sdColorClass} font-semibold">${s.sd.toFixed(1)} ${uLabel}</span>
-                                    ${renderSdBadge(s.sd)}
+                                    <span class="${sdColorClass} font-semibold">${(vSDsrc==="insufficient") ? "⚠ <3" : ((typeof vSD==="number" && !isNaN(vSD)) ? xqaFmtNum(vSD,1) : "—")} ${uLabel}</span>
+                                    ${renderSdBadge(vSD)}
                                 </span>
                             </div>
                             <div class="flex justify-between">
@@ -6636,25 +6783,190 @@ function showResults() {
             }
         }
 
-        function copySessionSummary() {
-            if (!allStats.length) {
-                showStatus('error', 'No session stats yet. Load chronograph files first.');
-                return;
-            }
-            const text = buildSessionSummaryText();
-            if (navigator.clipboard && navigator.clipboard.writeText) {
-                navigator.clipboard.writeText(text)
-                    .then(() => {
-                        showStatus('success', 'Session summary copied to clipboard.');
-                    })
-                    .catch(() => {
-                        fallbackCopyToClipboard(text);
-                    });
-            } else {
-                fallbackCopyToClipboard(text);
-            }
+        
+function copySessionSummary() {
+  try{
+    if (!allStats || !allStats.length) {
+      showStatus('error', 'No session stats yet. Load chronograph files first.');
+      return;
+    }
+    const text = (typeof buildSessionSummaryText === 'function')
+      ? buildSessionSummaryText()
+      : JSON.stringify(allStats, null, 2);
+
+    // Clipboard (modern) + fallback
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+      navigator.clipboard.writeText(text).then(()=>{
+        showStatus('success', 'Session summary copied to clipboard.');
+      }).catch((_e)=>{
+        try{ fallbackCopyToClipboard(text); }catch(e){ showStatus('error','Unable to copy summary.'); }
+      });
+    } else {
+      try{ fallbackCopyToClipboard(text); }catch(e){ showStatus('error','Unable to copy summary.'); }
+    }
+  }catch(e){
+    console.error(e);
+    try{ showStatus('error','Copy summary failed: ' + (e?.message || e)); }catch(_e){}
+  }
+}
+
+// =======================
+// Standalone session save/load (neutral JSON)
+// =======================
+function _xqaBuildStandalonePayload(){
+  return {
+    tool: 'GRT Importer Advanced',
+    schemaVersion: 1,
+    version: (document.title || '').replace(/\s+/g,' ').trim(),
+    savedAtIso: new Date().toISOString(),
+    state: {
+      chronographType,
+      unit,
+      mode,
+      sessionsLayout,
+      ladderNameMode,
+      ladderSteps,
+      analysisConfig,
+      smPhase3Config,
+      shotMarkerManualMap,
+      shotMarkerScoreSettings,
+      shotMarkerAddons,
+      allStats,
+      importedPictures,
+      importedNotesText
+    }
+  };
+}
+
+function exportStandaloneJson(){
+  try{
+    const nCharges = Array.isArray(allStats) ? allStats.length : 0;
+    const nSM = Array.isArray(shotMarkerAddons) ? shotMarkerAddons.length : 0;
+
+    // Never silently do nothing
+    try{ showStatus('info', `Preparing session save… (${nCharges} charge(s), ${nSM} ShotMarker file(s))`); }catch(_e){}
+
+    if (!nCharges){
+      try{ showStatus('error','Nothing to save yet — import chronograph files first.'); }catch(_e){}
+      return;
+    }
+
+    const payload = _xqaBuildStandalonePayload();
+    const jsonText = JSON.stringify(payload, null, 2);
+    const blob = new Blob([jsonText], {type:'application/json;charset=utf-8'});
+
+    const ts = new Date();
+    const y = ts.getFullYear();
+    const mo = String(ts.getMonth()+1).padStart(2,'0');
+    const d = String(ts.getDate()).padStart(2,'0');
+    const hh = String(ts.getHours()).padStart(2,'0');
+    const mm = String(ts.getMinutes()).padStart(2,'0');
+    const ss = String(ts.getSeconds()).padStart(2,'0');
+    const fname = `xqa_session_${y}${mo}${d}_${hh}${mm}${ss}.json`;
+
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = fname;
+    a.style.display = 'none';
+    document.body.appendChild(a);
+
+    // Attempt download
+    a.click();
+
+    // Download-only: no new tab preview
+
+    setTimeout(()=>{
+      try{ a.remove(); }catch(_e){}
+      try{ URL.revokeObjectURL(url); }catch(_e){}
+    }, 4000);
+
+    try{ showStatus('success', `Saved session JSON: ${fname}`); }catch(_e){}
+  }catch(e){
+    console.error(e);
+    try{ showStatus('error','Save session failed: ' + (e?.message || e)); }catch(_e){}
+  }
+}
+
+// Ensure global access for inline handlers / cross-scope callbacks
+try{ window.exportStandaloneJson = exportStandaloneJson; }catch(_e){}
+
+
+function importStandaloneJsonFile(file){
+  try{
+    if(!file) return;
+    const r = new FileReader();
+    r.onload = ()=>{
+      try{
+        const obj = JSON.parse(String(r.result||'{}'));
+        const schemaV = (obj && typeof obj.schemaVersion === 'number') ? obj.schemaVersion : 0;
+        const st = obj && obj.state ? obj.state : null;
+        if(!st || !Array.isArray(st.allStats)){
+          showStatus('error','That JSON does not look like a saved session from this tool.');
+          return;
+        }
+        if (schemaV > 1) {
+          try{ showToast('Note: session schema v'+schemaV+' is newer; attempting best-effort load.','warn'); }catch(_e){}
         }
 
+        // Restore state (best-effort)
+        chronographType = st.chronographType || chronographType;
+        unit = st.unit || unit;
+        mode = st.mode || mode;
+        sessionsLayout = st.sessionsLayout || sessionsLayout;
+        ladderNameMode = st.ladderNameMode || ladderNameMode;
+        ladderSteps = (typeof st.ladderSteps === 'number') ? st.ladderSteps : ladderSteps;
+
+        analysisConfig = st.analysisConfig || analysisConfig;
+        smPhase3Config = st.smPhase3Config || smPhase3Config;
+        shotMarkerManualMap = st.shotMarkerManualMap || shotMarkerManualMap;
+        shotMarkerScoreSettings = (st.shotMarkerScoreSettings !== undefined) ? st.shotMarkerScoreSettings : shotMarkerScoreSettings;
+
+        shotMarkerAddons = st.shotMarkerAddons || shotMarkerAddons;
+        allStats = st.allStats || allStats;
+
+        importedPictures = st.importedPictures || importedPictures;
+        importedNotesText = (st.importedNotesText !== undefined) ? st.importedNotesText : importedNotesText;
+
+        // Sync UI controls
+        try{ document.getElementById('deviceSelect').value = chronographType; }catch(_e){}
+        try{ document.getElementById('unitSelect').value = unit; }catch(_e){}
+        try{ document.getElementById('modeSelect').value = mode; }catch(_e){}
+        try{
+          const r1=document.querySelector('input[name="sessionsLayout"][value="sessions"]');
+          const r2=document.querySelector('input[name="sessionsLayout"][value="files"]');
+          if (sessionsLayout==='sessions' && r1) r1.checked=true;
+          if (sessionsLayout==='files' && r2) r2.checked=true;
+        }catch(_e){}
+        try{ updateModeUI(); }catch(_e){}
+
+        try{
+          const c = document.getElementById('analysisTargetSD'); if(c) c.value = analysisConfig.targetSD;
+          const e = document.getElementById('analysisTargetES'); if(e) e.value = analysisConfig.targetES;
+        }catch(_e){}
+        try{ updateSessionPill(); }catch(_e){}
+        try{ setCurrentStep(4); }catch(_e){}
+
+        // Re-render
+        showResults();
+        try{ renderShotMarkerInlineCards(); }catch(_e){}
+        try{ renderShotMarkerSessionCards(); }catch(_e){}
+        try{ updateRunSummary(); }catch(_e){}
+
+        showStatus('success','Loaded saved session JSON.');
+      }catch(e){
+        console.error(e);
+        showStatus('error','Load session failed: ' + (e?.message || e));
+      }
+    };
+    r.readAsText(file);
+  }catch(e){
+    console.error(e);
+    showStatus('error','Load session failed: ' + (e?.message || e));
+  }
+}
+
+try{ window.importStandaloneJsonFile = importStandaloneJsonFile; }catch(_e){}
 
 function downloadGRT() {
             setCurrentStep(4);
@@ -6908,6 +7220,29 @@ function _smSuggestScoreKFromData(targetRating){
     return (isFinite(k) && k>0) ? k : null;
   }catch(_e){ return null; }
 }
+
+function _smOnCalibrateClick(ev){
+  try{
+    const k = _smSuggestScoreKFromData(80);
+    if(k == null){
+      try{ if(typeof showToast==='function') showToast('Not enough sessions to calibrate (need ~5+ rows).','warn'); }catch(_e){}
+      try{ if(typeof showToast!=='function') alert('Not enough sessions to calibrate. Load more sessions.'); }catch(_e){}
+      return;
+    }
+    _smSetScoreK(k);
+    const msg = `Calibrated score scale (k=${k.toFixed(3)}; P75 raw ≈ 80).`;
+    try{ if(typeof showToast==='function') showToast(msg,'ok'); else alert(msg); }catch(_e){ try{ alert(msg);}catch(__){} }
+    try{ renderShotMarkerSessionCards(); }catch(_e){}
+    try{
+      const p = document.getElementById('smSanityPanel');
+      if(p && !p.classList.contains('hidden')) _smToggleSanityPanel(true);
+    }catch(_e){}
+  }catch(e){
+    console.error(e);
+    try{ if(typeof showToast==='function') showToast('Calibrate failed: '+(e?.message||e),'error'); else alert('Calibrate failed.'); }catch(_e){}
+  }
+}
+
 function _smScoreTo100(raw){
   raw = Number(raw);
   if(!isFinite(raw)) return null;
@@ -6925,15 +7260,51 @@ function _smLogPhase2SanityTable(force){
     if(!rows.length){ console.warn('No ShotMarker Phase 2 rows available.'); return; }
     if(!force && window.__SM_SANITY_PRINTED__){ return (window.__SM_SANITY_ROWS__||null); }
     window.__SM_SANITY_PRINTED__ = true;
+
+    function _smChronoStatsForCharge(ci){
+      try{
+        if(!Number.isFinite(ci)) return null;
+        const idx = Number(ci) - 1; // charges are 1-based in UI
+        const a = (window.allStats || allStats || []);
+        const item = (Array.isArray(a) && a[idx]) ? a[idx] : null;
+        const st = item && item.stats ? item.stats : null;
+        return st && typeof st === 'object' ? st : null;
+      }catch(_e){ return null; }
+    }
+
     const out = rows.map((x,i)=>{
       const s=x.s||{};
       const d=s.derived||{};
       const r=d.rank2||{};
       const meta=s.meta||{};
 
-      const sd =
-        (d.velocityDerived && Number.isFinite(d.velocityDerived.sd)) ? d.velocityDerived.sd :
-        (d.velocityDiag && Number.isFinite(d.velocityDiag.sd)) ? d.velocityDiag.sd : null;
+      // ShotMarker model-fit velocity (target-derived)
+      const modelVsd = (d.velocityDiag && Number.isFinite(d.velocityDiag.vSD)) ? d.velocityDiag.vSD : null;
+      const modelVes = (d.velocityDiag && Number.isFinite(d.velocityDiag.vES)) ? d.velocityDiag.vES : null;
+
+      // Chrono-linked velocity SD (if linked to a charge)
+      const ci = (Number.isFinite(r.chargeIndex) ? r.chargeIndex : (Number.isFinite(x.ci) ? x.ci : null));
+      const chronoStats = _smChronoStatsForCharge(ci);
+      const chronoV = (typeof xqaGetVelocitySD === 'function') ? xqaGetVelocitySD(chronoStats) : {v:null, src:'missing'};
+      const chronoVsd = Number.isFinite(chronoV.v) ? chronoV.v : null;
+      const chronoSrc = chronoV && chronoV.src ? chronoV.src : (chronoVsd!=null ? 'computed' : 'missing');
+
+      // prefer a single "SD for sanity" display:
+      // - if model-fit exists, call it model-fit
+      // - else if chrono SD exists, show that with its src
+      // - else missing/insufficient per chronoSrc
+      let sdDisplay = null;
+      let sdSource = 'missing';
+      if (Number.isFinite(modelVsd)) {
+        sdDisplay = modelVsd;
+        sdSource = 'model-fit';
+      } else if (Number.isFinite(chronoVsd)) {
+        sdDisplay = chronoVsd;
+        sdSource = chronoSrc;
+      } else {
+        sdDisplay = null;
+        sdSource = chronoSrc || 'missing';
+      }
 
       const raw =
         (Number.isFinite(r.rawScore) ? r.rawScore :
@@ -6943,20 +7314,37 @@ function _smLogPhase2SanityTable(force){
         (Number.isFinite(r.score100) ? r.score100 :
          (Number.isFinite(r.score) ? r.score : null));
 
+      const flags = (d.velocityDiag && d.velocityDiag.flags) ? d.velocityDiag.flags : {};
+      const hasAnyVelocity = Number.isFinite(modelVsd) || Number.isFinite(chronoVsd);
+      const why = (r.reasons && r.reasons.length) ? r.reasons.join(' • ') : (hasAnyVelocity ? '' : 'target-only (no velocity)');
+
       return {
         idx:i,
-        charge: (Number.isFinite(r.chargeIndex)?('Charge '+r.chargeIndex): (Number.isFinite(x.ci)?('Charge '+x.ci):'Unlinked')),
+        charge: (Number.isFinite(ci)?('Charge '+ci):'Unlinked'),
         session: (meta.sessionKey||x.key||'').split('|')[1]|| (meta.sessionKey||x.key||''),
-        nShots: Number.isFinite(r.nShots)?r.nShots:null,
+        totalShots: (Number.isFinite(d.totalShots)?d.totalShots:null),
+        sighterShots: (Number.isFinite(d.sighterShots)?d.sighterShots:null),
+        scoringShots: (Number.isFinite(d.scoringShots)?d.scoringShots:null),
+        nShots: (Number.isFinite(d.scoringShots)?d.scoringShots:(Number.isFinite(r.nShots)?r.nShots:null)),
         mrMOA: (Number.isFinite(d.mrMoa)? +d.mrMoa.toFixed(3): null),
         vertMOA: (Number.isFinite(d.vertMoa)? +d.vertMoa.toFixed(3): null),
-        sdFPS: (sd==null ? null : +sd.toFixed(1)),
+
+        // new fields
+        modelVsdFPS: (modelVsd==null ? null : +modelVsd.toFixed(1)),
+        modelVesFPS: (modelVes==null ? null : +modelVes.toFixed(1)),
+        chronoVsdFPS: (chronoVsd==null ? null : +chronoVsd.toFixed(1)),
+        chronoVsdSource: chronoSrc,
+        sdFPS: (sdDisplay==null ? null : +sdDisplay.toFixed(1)),
+        sdSource: sdSource,
+        why: why,
+        flags: flags,
+
         raw: (raw==null ? null : +raw.toFixed(3)),
         score100: (score100==null ? null : +score100.toFixed(1))
       };
     });
+
     console.table(out);
-    // stash for quick ad-hoc debugging / copy-paste
     window.__SM_SANITY_ROWS__ = out;
     return out;
   }catch(e){ console.error(e); return null; }
@@ -6974,19 +7362,42 @@ function _smRenderSanityPanelRows(rows){
   if(!Array.isArray(rows) || !rows.length){
     return '<div class="text-[11px] text-grt-subtle">No rows available yet. Load ShotMarker data, then open this panel again.</div>';
   }
-  const head = ['Charge','Session','Shots','MR (MOA)','Vert (MOA)','SD (fps)','Raw','Score'];
+  const head = ['Charge','Session','Shots (SC)','MR (MOA)','Vert (MOA)','SD (fps)','SD source','Model SD','Chrono SD','Chrono src','Why','Score'];
   const ths = head.map(h=>`<th class="py-1 px-2 text-[10px] uppercase tracking-wide text-grt-subtle whitespace-nowrap">${_smEscHtml(h)}</th>`).join('');
-  const trs = rows.map(r=>`<tr class="border-t border-grt-frame/40">
+  const pill = (txt, cls)=>`<span class="inline-flex items-center px-2 py-0.5 rounded-full border ${cls} text-[10px] whitespace-nowrap">${_smEscHtml(txt)}</span>`;
+  const srcPill = (src)=>{
+    const s = String(src||'missing').toLowerCase();
+    if(s==='model-fit') return pill('model-fit','border-sky-400/40 bg-sky-500/10 text-sky-200');
+    if(s==='computed' || s==='measured') return pill(s,'border-emerald-400/40 bg-emerald-500/10 text-emerald-200');
+    if(s==='insufficient') return pill('insufficient','border-amber-400/40 bg-amber-500/10 text-amber-200');
+    if(s==='missing') return pill('missing','border-slate-400/30 bg-slate-500/10 text-slate-200');
+    return pill(s,'border-slate-400/30 bg-slate-500/10 text-slate-200');
+  };
+
+  const trs = rows.map(r=>{
+    const sd = (r.sdFPS==null) ? '—' : r.sdFPS;
+    const modelSd = (r.modelVsdFPS==null) ? '—' : r.modelVsdFPS;
+    const chronoSd = (r.chronoVsdFPS==null) ? '—' : r.chronoVsdFPS;
+    const why = r.why || '';
+    return `<tr class="border-t border-grt-frame/40 align-top">
       <td class="py-1 px-2 text-[11px] text-white/90 whitespace-nowrap">${_smEscHtml(r.charge)}</td>
       <td class="py-1 px-2 text-[11px] text-white/80 whitespace-nowrap">${_smEscHtml(r.session)}</td>
-      <td class="py-1 px-2 text-[11px] text-white/80 text-right">${_smEscHtml(r.nShots)}</td>
+      <td class="py-1 px-2 text-[11px] text-white/80 text-right" title="${Number.isFinite(r.totalShots)?(`Total: ${r.totalShots} • Sighters: ${r.sighterShots||0}`):``}">${_smEscHtml(r.nShots)}</td>
       <td class="py-1 px-2 text-[11px] text-white/80 text-right">${_smEscHtml(r.mrMOA)}</td>
       <td class="py-1 px-2 text-[11px] text-white/80 text-right">${_smEscHtml(r.vertMOA)}</td>
-      <td class="py-1 px-2 text-[11px] text-white/80 text-right">${_smEscHtml(r.sdFPS==null?'—':r.sdFPS)}</td>
-      <td class="py-1 px-2 text-[11px] text-white/80 text-right">${_smEscHtml(r.raw)}</td>
+      <td class="py-1 px-2 text-[11px] text-white/90 text-right font-semibold">${_smEscHtml(sd)}</td>
+      <td class="py-1 px-2 text-[11px] text-white/80">${srcPill(r.sdSource)}</td>
+      <td class="py-1 px-2 text-[11px] text-white/80 text-right">${_smEscHtml(modelSd)}</td>
+      <td class="py-1 px-2 text-[11px] text-white/80 text-right">${_smEscHtml(chronoSd)}</td>
+      <td class="py-1 px-2 text-[11px] text-white/80">${srcPill(r.chronoVsdSource)}</td>
+      <td class="py-1 px-2 text-[11px] text-white/70 max-w-[260px]">${_smEscHtml(why)}</td>
       <td class="py-1 px-2 text-[11px] text-white/90 text-right font-semibold">${_smEscHtml(r.score100)}</td>
-    </tr>`).join('');
-  return `<table class="min-w-full text-left">
+    </tr>`;
+  }).join('');
+  return `<div class="text-[10px] text-grt-subtle mb-2">
+    SD (fps) prefers <span class="text-white/80">model-fit</span> when available; otherwise uses linked chrono SD (computed/insufficient/missing).
+  </div>
+  <table class="min-w-full text-left">
     <thead><tr class="border-b border-grt-frame/60">${ths}</tr></thead>
     <tbody>${trs}</tbody>
   </table>`;
@@ -7017,7 +7428,7 @@ function _smToggleSanityPanel(force, hide){
 }
 
 
-// --- Current Tune + Improvement helpers (v0.88) ---
+// --- Current Tune + Improvement helpers (v0.89) ---
 function _smParseDateISOFromMeta(meta){
   try{
     const dt = (meta && meta.dateText) ? String(meta.dateText) : '';
@@ -7294,6 +7705,7 @@ function _smEnsureVelocityDerived(session){
   const vertMm = Number.isFinite(session.derived.vertMm) ? session.derived.vertMm : null;
   const flags=_smDiagFlagsFromModel(model, vertMm);
   session.derived.velocityDiag = {
+    source: "model-fit",
     n: model.n,
     corr: Number.isFinite(model.corr)?model.corr:null,
     r2: Number.isFinite(model.r2)?model.r2:null,
@@ -7338,7 +7750,15 @@ function _smRank2ForSession(session){
   const residVertMoa = (residVertMm!=null) ? _mmToMoa(residVertMm, distanceYd) : null;
 
   const r2 = (d.velocityDiag && Number.isFinite(d.velocityDiag.r2)) ? d.velocityDiag.r2 : null;
-  const vSD = (d.velocityDiag && Number.isFinite(d.velocityDiag.vSD)) ? d.velocityDiag.vSD : null;
+  const vSD_src = (d.velocityDiag && typeof d.velocityDiag.source==='string') ? d.velocityDiag.source : ((d.velocityDiag && typeof d.velocityDiag.vSDSource==='string') ? d.velocityDiag.vSDSource : null);
+  let vSD = (d.velocityDiag && Number.isFinite(d.velocityDiag.vSD)) ? d.velocityDiag.vSD : null;
+  // Score gating: only allow velocity SD to influence score when it has an explicit, trustworthy source.
+  // (model-fit from ShotMarker OR chrono-computed/measured if you ever feed it in)
+  if(vSD != null){
+    const okSrc = (vSD_src === 'model-fit' || vSD_src === 'computed' || vSD_src === 'measured');
+    if(!okSrc) vSD = null;
+  }
+
 
   // weights (simple + tunable later)
   const wResid=1.6, wVert=1.0, wMR=0.6, wVel=0.35;
@@ -7651,7 +8071,7 @@ function _smRankIcon(label){
 }
 
 
-// v0.88: dominant diagnostic icons + confidence bars (ShotMarker intent-aware)
+// v0.89: session verification baseline + tightened Phase 3 confidence
 function _smConfBars(label){
   const l = String(label||'').toLowerCase();
   const n = (l==='high')?3:((l==='medium')?2:((l==='low')?1:0));
@@ -7729,7 +8149,7 @@ function _shotMarkerPhase2RankingTableHtml(strings){
             Sanity</button>
           <button class="text-[10px] text-white/70 hover:text-white underline decoration-white/20 hover:decoration-white/40"
             title="Auto-tunes the 0–100 score scale using your currently loaded data (sets k so P75 raw ≈ 80)."
-            onclick="event.stopPropagation(); try{ const k=_smSuggestScoreKFromData(80); if(!k){alert('Not enough data to calibrate. Load more sessions.'); return;} _smSetScoreK(k); alert('Score scale calibrated. k=' + k.toFixed(3) + ' (saved).'); if(typeof renderShotMarkerSessionCards==='function') renderShotMarkerSessionCards(); }catch(e){ console.error(e);}">Calibrate</button>
+            onclick="event.stopPropagation(); try{ _smOnCalibrateClick(event); }catch(e){ console.error(e);} ">Calibrate</button>
           <div class="text-grt-subtle text-[10px]">Click a row to expand details</div>
         </div>
       </div>
@@ -7959,6 +8379,14 @@ function openSmDrilldown(rowIndex){
   const hasAnyVel = Number.isFinite(vSD) || Number.isFinite(vES);
 
   const velLabel = hasModelVel ? (d?.rank2?.label || 'mixed') : (hasAnyVel ? 'linked-chrono' : 'target-only');
+
+// Chrono-linked SD details (from the matched charge stats, if available)
+const chronoChargeIndex = Number.isFinite(x?.ci) ? Number(x.ci) : null;
+const chronoRow = (chronoChargeIndex !== null && Array.isArray(allStats)) ? allStats[chronoChargeIndex] : null;
+const chronoSD = chronoRow && Number.isFinite(chronoRow.velocitySD) ? chronoRow.velocitySD : null;
+const chronoSDSource = chronoRow && chronoRow.velocitySDSource ? chronoRow.velocitySDSource : null;
+const chronoSDShots = chronoRow && Number.isFinite(chronoRow.velocityShotCount) ? chronoRow.velocityShotCount : null;
+const chronoSDExcluded = chronoRow && Number.isFinite(chronoRow.velocityExcludedCount) ? chronoRow.velocityExcludedCount : null;
   const velIcon  = hasModelVel ? _smRankIcon(velLabel) : (hasAnyVel ? '⛭' : '📄');
 
 
@@ -8018,6 +8446,16 @@ ${_smImprovementPillHtml(x.ci)}
         corr: <span class="text-white">${isFinite(corr)?__fmtNum(corr,2):'—'}</span>
       </div>
       <div class="mt-2 text-[12px] text-grt-subtle">
+  SD source: <span class="text-white/90">${
+    hasModelVel && Number.isFinite(vSD_model) ? 'model-fit'
+      : (chronoSDSource ? ('chrono-'+chronoSDSource) : (hasAnyVel ? 'linked-chrono' : 'missing'))
+  }</span>${
+    (chronoSDShots!==null) ? (' • shots used: <span class="text-white/90">'+chronoSDShots+'</span>') : ''
+  }${
+    (chronoSDExcluded!==null) ? (' • excluded: <span class="text-white/90">'+chronoSDExcluded+'</span>') : ''
+  }
+</div>
+<div class="mt-2 text-[12px] text-grt-subtle">
         Flags: ${hasModelVel ? (flags.weirdSign?'⚠ weirdSign ':'')+(flags.velocityDominated?'⛽ velocityDominated ':'')+(flags.windDominated?'🌬 windDominated ':'')+(flags.mixed?'🎯 mixed':'') : (hasAnyVel ? '⛭ linked chrono (no per-shot)' : '📄 target-only (no velocity)')}
       </div>
     </div>
@@ -8046,7 +8484,7 @@ function closeSmDrilldown(){
 }
 
 
-// --- v0.88.8: ShotMarker sanity button (delegated binding, survives re-renders) ---
+// --- v0.89: ShotMarker sanity button (delegated binding, survives re-renders) ---
 (function(){
   try{
     if(window.__smSanityDelegated) return;
@@ -8069,6 +8507,20 @@ function closeSmDrilldown(){
   }catch(_e){}
 })();
 
+
+
+// --- Standalone Save/Load button wiring (no inline onclick dependency) ---
+try{
+  const _saveBtn = document.getElementById('saveSessionBtn');
+  if(_saveBtn) _saveBtn.addEventListener('click', (e)=>{ e.preventDefault(); try{ window.exportStandaloneJson && window.exportStandaloneJson(); }catch(err){ console.error(err); try{ showStatus('error','Save session failed: ' + (err?.message||err)); }catch(_e){} }});
+  const _loadBtn = document.getElementById('loadSessionBtn');
+  if(_loadBtn) _loadBtn.addEventListener('click', (e)=>{ e.preventDefault(); try{ window.importStandaloneJson && window.importStandaloneJson(); }catch(err){ console.error(err); try{ showStatus('error','Load session failed: ' + (err?.message||err)); }catch(_e){} }});
+}catch(_e){}
+
+
+// Ensure standalone save/load functions are globally accessible for inline onclick handlers
+try{ window.exportStandaloneJson = exportStandaloneJson; }catch(_e){}
+try{ window.importStandaloneJson = importStandaloneJson; }catch(_e){}
 </script>
 
 <!-- How-to overlay -->
