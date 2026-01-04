@@ -1,26 +1,11 @@
 
 <!DOCTYPE html>
-<!--
-GRT Importer Advanced v0.89 — Release
-Build date: 2025-12-19
+<!-- saved from url=(0046)https://mrimp.github.io/GRT-Importer-Advanced/ -->
+<html lang="en"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
 
-Release highlights:
-- Session Save: download-only JSON (no new-tab preview).
-- Session Load: verified round-trip stability (shots/charges/units/badges preserved).
-- Phase 3 confidence: tightened for 1000y realism (shot-count gravity + target-first when ShotMarker disagrees).
-
-Notes:
-- localStorage keys are namespaced (xqa_*).
-- Expected state (no base loaded) is not an error.
--->
-
-
-<html lang="en">
-<head>
-<meta charset="utf-8"/>
-<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport">
 <title>GRT Importer Advanced v0.89</title>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+<script src="./GRT Importer Advanced v0.89_files/xlsx.full.min.js.download"></script>
 <script>
 /* Silence Tailwind CDN production warning in this single-file tool */
 (function(){
@@ -35,7 +20,7 @@ Notes:
   }catch(_e){}
 })();
 </script>
-<script src="https://cdn.tailwindcss.com"></script>
+<script src="./GRT Importer Advanced v0.89_files/saved_resource"></script>
 <style>
         :root {
             --grt-bg: #10141c;
@@ -208,7 +193,13 @@ input[type="file"]::file-selector-button:active{background: rgba(255,255,255,0.1
   opacity:.8;
 }
 </style>
-</head>
+<style>*, ::before, ::after{--tw-border-spacing-x:0;--tw-border-spacing-y:0;--tw-translate-x:0;--tw-translate-y:0;--tw-rotate:0;--tw-skew-x:0;--tw-skew-y:0;--tw-scale-x:1;--tw-scale-y:1;--tw-pan-x: ;--tw-pan-y: ;--tw-pinch-zoom: ;--tw-scroll-snap-strictness:proximity;--tw-gradient-from-position: ;--tw-gradient-via-position: ;--tw-gradient-to-position: ;--tw-ordinal: ;--tw-slashed-zero: ;--tw-numeric-figure: ;--tw-numeric-spacing: ;--tw-numeric-fraction: ;--tw-ring-inset: ;--tw-ring-offset-width:0px;--tw-ring-offset-color:#fff;--tw-ring-color:rgb(59 130 246 / 0.5);--tw-ring-offset-shadow:0 0 #0000;--tw-ring-shadow:0 0 #0000;--tw-shadow:0 0 #0000;--tw-shadow-colored:0 0 #0000;--tw-blur: ;--tw-brightness: ;--tw-contrast: ;--tw-grayscale: ;--tw-hue-rotate: ;--tw-invert: ;--tw-saturate: ;--tw-sepia: ;--tw-drop-shadow: ;--tw-backdrop-blur: ;--tw-backdrop-brightness: ;--tw-backdrop-contrast: ;--tw-backdrop-grayscale: ;--tw-backdrop-hue-rotate: ;--tw-backdrop-invert: ;--tw-backdrop-opacity: ;--tw-backdrop-saturate: ;--tw-backdrop-sepia: ;--tw-contain-size: ;--tw-contain-layout: ;--tw-contain-paint: ;--tw-contain-style: }::backdrop{--tw-border-spacing-x:0;--tw-border-spacing-y:0;--tw-translate-x:0;--tw-translate-y:0;--tw-rotate:0;--tw-skew-x:0;--tw-skew-y:0;--tw-scale-x:1;--tw-scale-y:1;--tw-pan-x: ;--tw-pan-y: ;--tw-pinch-zoom: ;--tw-scroll-snap-strictness:proximity;--tw-gradient-from-position: ;--tw-gradient-via-position: ;--tw-gradient-to-position: ;--tw-ordinal: ;--tw-slashed-zero: ;--tw-numeric-figure: ;--tw-numeric-spacing: ;--tw-numeric-fraction: ;--tw-ring-inset: ;--tw-ring-offset-width:0px;--tw-ring-offset-color:#fff;--tw-ring-color:rgb(59 130 246 / 0.5);--tw-ring-offset-shadow:0 0 #0000;--tw-ring-shadow:0 0 #0000;--tw-shadow:0 0 #0000;--tw-shadow-colored:0 0 #0000;--tw-blur: ;--tw-brightness: ;--tw-contrast: ;--tw-grayscale: ;--tw-hue-rotate: ;--tw-invert: ;--tw-saturate: ;--tw-sepia: ;--tw-drop-shadow: ;--tw-backdrop-blur: ;--tw-backdrop-brightness: ;--tw-backdrop-contrast: ;--tw-backdrop-grayscale: ;--tw-backdrop-hue-rotate: ;--tw-backdrop-invert: ;--tw-backdrop-opacity: ;--tw-backdrop-saturate: ;--tw-backdrop-sepia: ;--tw-contain-size: ;--tw-contain-layout: ;--tw-contain-paint: ;--tw-contain-style: }/* ! tailwindcss v3.4.17 | MIT License | https://tailwindcss.com */*,::after,::before{box-sizing:border-box;border-width:0;border-style:solid;border-color:#e5e7eb}::after,::before{--tw-content:''}:host,html{line-height:1.5;-webkit-text-size-adjust:100%;-moz-tab-size:4;tab-size:4;font-family:ui-sans-serif, system-ui, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji";font-feature-settings:normal;font-variation-settings:normal;-webkit-tap-highlight-color:transparent}body{margin:0;line-height:inherit}hr{height:0;color:inherit;border-top-width:1px}abbr:where([title]){-webkit-text-decoration:underline dotted;text-decoration:underline dotted}h1,h2,h3,h4,h5,h6{font-size:inherit;font-weight:inherit}a{color:inherit;text-decoration:inherit}b,strong{font-weight:bolder}code,kbd,pre,samp{font-family:ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;font-feature-settings:normal;font-variation-settings:normal;font-size:1em}small{font-size:80%}sub,sup{font-size:75%;line-height:0;position:relative;vertical-align:baseline}sub{bottom:-.25em}sup{top:-.5em}table{text-indent:0;border-color:inherit;border-collapse:collapse}button,input,optgroup,select,textarea{font-family:inherit;font-feature-settings:inherit;font-variation-settings:inherit;font-size:100%;font-weight:inherit;line-height:inherit;letter-spacing:inherit;color:inherit;margin:0;padding:0}button,select{text-transform:none}button,input:where([type=button]),input:where([type=reset]),input:where([type=submit]){-webkit-appearance:button;background-color:transparent;background-image:none}:-moz-focusring{outline:auto}:-moz-ui-invalid{box-shadow:none}progress{vertical-align:baseline}::-webkit-inner-spin-button,::-webkit-outer-spin-button{height:auto}[type=search]{-webkit-appearance:textfield;outline-offset:-2px}::-webkit-search-decoration{-webkit-appearance:none}::-webkit-file-upload-button{-webkit-appearance:button;font:inherit}summary{display:list-item}blockquote,dd,dl,figure,h1,h2,h3,h4,h5,h6,hr,p,pre{margin:0}fieldset{margin:0;padding:0}legend{padding:0}menu,ol,ul{list-style:none;margin:0;padding:0}dialog{padding:0}textarea{resize:vertical}input::placeholder,textarea::placeholder{opacity:1;color:#9ca3af}[role=button],button{cursor:pointer}:disabled{cursor:default}audio,canvas,embed,iframe,img,object,svg,video{display:block;vertical-align:middle}img,video{max-width:100%;height:auto}[hidden]:where(:not([hidden=until-found])){display:none}.fixed{position:fixed}.absolute{position:absolute}.relative{position:relative}.inset-0{inset:0px}.right-0{right:0px}.right-2{right:0.5rem}.top-0{top:0px}.top-2{top:0.5rem}.z-50{z-index:50}.z-\[80\]{z-index:80}.mx-1{margin-left:0.25rem;margin-right:0.25rem}.mx-auto{margin-left:auto;margin-right:auto}.mb-1{margin-bottom:0.25rem}.mb-1\.5{margin-bottom:0.375rem}.mb-2{margin-bottom:0.5rem}.mb-3{margin-bottom:0.75rem}.mb-4{margin-bottom:1rem}.mb-5{margin-bottom:1.25rem}.ml-2{margin-left:0.5rem}.mt-1{margin-top:0.25rem}.mt-2{margin-top:0.5rem}.mt-3{margin-top:0.75rem}.mt-4{margin-top:1rem}.mt-6{margin-top:1.5rem}.block{display:block}.inline-block{display:inline-block}.flex{display:flex}.inline-flex{display:inline-flex}.grid{display:grid}.hidden{display:none}.h-1\.5{height:0.375rem}.h-10{height:2.5rem}.h-4{height:1rem}.h-5{height:1.25rem}.h-px{height:1px}.h-full{height:100%}.min-h-screen{min-height:100vh}.w-1\.5{width:0.375rem}.w-10{width:2.5rem}.w-20{width:5rem}.w-36{width:9rem}.w-4{width:1rem}.w-5{width:1.25rem}.w-full{width:100%}.w-\[90\%\]{width:90%}.max-w-5xl{max-width:64rem}.max-w-xl{max-width:36rem}.max-w-\[120px\]{max-width:120px}.flex-1{flex:1 1 0%}.flex-shrink-0{flex-shrink:0}.transform{transform:translate(var(--tw-translate-x), var(--tw-translate-y)) rotate(var(--tw-rotate)) skewX(var(--tw-skew-x)) skewY(var(--tw-skew-y)) scaleX(var(--tw-scale-x)) scaleY(var(--tw-scale-y))}@keyframes pulse{50%{opacity:.5}}.animate-pulse{animation:pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite}.cursor-help{cursor:help}.cursor-not-allowed{cursor:not-allowed}.cursor-pointer{cursor:pointer}.list-inside{list-style-position:inside}.list-decimal{list-style-type:decimal}.list-disc{list-style-type:disc}.grid-cols-1{grid-template-columns:repeat(1, minmax(0, 1fr))}.flex-col{flex-direction:column}.flex-wrap{flex-wrap:wrap}.items-start{align-items:flex-start}.items-end{align-items:flex-end}.items-center{align-items:center}.justify-end{justify-content:flex-end}.justify-center{justify-content:center}.justify-between{justify-content:space-between}.gap-1{gap:0.25rem}.gap-2{gap:0.5rem}.gap-3{gap:0.75rem}.gap-4{gap:1rem}.gap-x-4{column-gap:1rem}.gap-y-1{row-gap:0.25rem}.space-y-1 > :not([hidden]) ~ :not([hidden]){--tw-space-y-reverse:0;margin-top:calc(0.25rem * calc(1 - var(--tw-space-y-reverse)));margin-bottom:calc(0.25rem * var(--tw-space-y-reverse))}.space-y-1\.5 > :not([hidden]) ~ :not([hidden]){--tw-space-y-reverse:0;margin-top:calc(0.375rem * calc(1 - var(--tw-space-y-reverse)));margin-bottom:calc(0.375rem * var(--tw-space-y-reverse))}.space-y-2 > :not([hidden]) ~ :not([hidden]){--tw-space-y-reverse:0;margin-top:calc(0.5rem * calc(1 - var(--tw-space-y-reverse)));margin-bottom:calc(0.5rem * var(--tw-space-y-reverse))}.space-y-4 > :not([hidden]) ~ :not([hidden]){--tw-space-y-reverse:0;margin-top:calc(1rem * calc(1 - var(--tw-space-y-reverse)));margin-bottom:calc(1rem * var(--tw-space-y-reverse))}.space-y-5 > :not([hidden]) ~ :not([hidden]){--tw-space-y-reverse:0;margin-top:calc(1.25rem * calc(1 - var(--tw-space-y-reverse)));margin-bottom:calc(1.25rem * var(--tw-space-y-reverse))}.space-y-3 > :not([hidden]) ~ :not([hidden]){--tw-space-y-reverse:0;margin-top:calc(0.75rem * calc(1 - var(--tw-space-y-reverse)));margin-bottom:calc(0.75rem * var(--tw-space-y-reverse))}.overflow-y-auto{overflow-y:auto}.truncate{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.rounded{border-radius:0.25rem}.rounded-2xl{border-radius:1rem}.rounded-full{border-radius:9999px}.rounded-lg{border-radius:0.5rem}.rounded-md{border-radius:0.375rem}.rounded-xl{border-radius:0.75rem}.border{border-width:1px}.border-l{border-left-width:1px}.border-t{border-top-width:1px}.border-dashed{border-style:dashed}.border-emerald-500\/40{border-color:rgb(16 185 129 / 0.4)}.border-emerald-500\/80{border-color:rgb(16 185 129 / 0.8)}.border-emerald-600\/70{border-color:rgb(5 150 105 / 0.7)}.border-emerald-700\/70{border-color:rgb(4 120 87 / 0.7)}.bg-\[var\(--grt-accent\)\]{background-color:var(--grt-accent)}.bg-emerald-400{--tw-bg-opacity:1;background-color:rgb(52 211 153 / var(--tw-bg-opacity, 1))}.bg-emerald-500\/20{background-color:rgb(16 185 129 / 0.2)}.bg-emerald-600{--tw-bg-opacity:1;background-color:rgb(5 150 105 / var(--tw-bg-opacity, 1))}.bg-emerald-900\/70{background-color:rgb(6 78 59 / 0.7)}.bg-emerald-950\/70{background-color:rgb(2 44 34 / 0.7)}.bg-rose-400{--tw-bg-opacity:1;background-color:rgb(251 113 133 / var(--tw-bg-opacity, 1))}.bg-sky-400{--tw-bg-opacity:1;background-color:rgb(56 189 248 / var(--tw-bg-opacity, 1))}.bg-slate-500{--tw-bg-opacity:1;background-color:rgb(100 116 139 / var(--tw-bg-opacity, 1))}.bg-slate-800\/70{background-color:rgb(30 41 59 / 0.7)}.bg-slate-800\/80{background-color:rgb(30 41 59 / 0.8)}.bg-black\/70{background-color:rgb(0 0 0 / 0.7)}.p-2\.5{padding:0.625rem}.p-3{padding:0.75rem}.p-4{padding:1rem}.p-5{padding:1.25rem}.p-6{padding:1.5rem}.px-1{padding-left:0.25rem;padding-right:0.25rem}.px-2{padding-left:0.5rem;padding-right:0.5rem}.px-2\.5{padding-left:0.625rem;padding-right:0.625rem}.px-3{padding-left:0.75rem;padding-right:0.75rem}.px-4{padding-left:1rem;padding-right:1rem}.px-5{padding-left:1.25rem;padding-right:1.25rem}.py-0\.5{padding-top:0.125rem;padding-bottom:0.125rem}.py-1{padding-top:0.25rem;padding-bottom:0.25rem}.py-1\.5{padding-top:0.375rem;padding-bottom:0.375rem}.py-2{padding-top:0.5rem;padding-bottom:0.5rem}.py-2\.5{padding-top:0.625rem;padding-bottom:0.625rem}.pb-10{padding-bottom:2.5rem}.pt-3{padding-top:0.75rem}.font-mono{font-family:ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace}.text-3xl{font-size:1.875rem;line-height:2.25rem}.text-\[10px\]{font-size:10px}.text-\[11px\]{font-size:11px}.text-\[9px\]{font-size:9px}.text-lg{font-size:1.125rem;line-height:1.75rem}.text-sm{font-size:0.875rem;line-height:1.25rem}.text-xl{font-size:1.25rem;line-height:1.75rem}.text-xs{font-size:0.75rem;line-height:1rem}.font-bold{font-weight:700}.font-extrabold{font-weight:800}.font-medium{font-weight:500}.font-semibold{font-weight:600}.uppercase{text-transform:uppercase}.leading-relaxed{line-height:1.625}.leading-snug{line-height:1.375}.tracking-wide{letter-spacing:0.025em}.text-amber-300{--tw-text-opacity:1;color:rgb(252 211 77 / var(--tw-text-opacity, 1))}.text-emerald-200{--tw-text-opacity:1;color:rgb(167 243 208 / var(--tw-text-opacity, 1))}.text-emerald-300{--tw-text-opacity:1;color:rgb(110 231 183 / var(--tw-text-opacity, 1))}.text-rose-300{--tw-text-opacity:1;color:rgb(253 164 175 / var(--tw-text-opacity, 1))}.text-slate-100{--tw-text-opacity:1;color:rgb(241 245 249 / var(--tw-text-opacity, 1))}.text-slate-200{--tw-text-opacity:1;color:rgb(226 232 240 / var(--tw-text-opacity, 1))}.text-white{--tw-text-opacity:1;color:rgb(255 255 255 / var(--tw-text-opacity, 1))}.opacity-60{opacity:0.6}.opacity-90{opacity:0.9}.shadow-2xl{--tw-shadow:0 25px 50px -12px rgb(0 0 0 / 0.25);--tw-shadow-colored:0 25px 50px -12px var(--tw-shadow-color);box-shadow:var(--tw-ring-offset-shadow, 0 0 #0000), var(--tw-ring-shadow, 0 0 #0000), var(--tw-shadow)}.shadow-inner{--tw-shadow:inset 0 2px 4px 0 rgb(0 0 0 / 0.05);--tw-shadow-colored:inset 0 2px 4px 0 var(--tw-shadow-color);box-shadow:var(--tw-ring-offset-shadow, 0 0 #0000), var(--tw-ring-shadow, 0 0 #0000), var(--tw-shadow)}.shadow-lg{--tw-shadow:0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);--tw-shadow-colored:0 10px 15px -3px var(--tw-shadow-color), 0 4px 6px -4px var(--tw-shadow-color);box-shadow:var(--tw-ring-offset-shadow, 0 0 #0000), var(--tw-ring-shadow, 0 0 #0000), var(--tw-shadow)}.shadow-md{--tw-shadow:0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);--tw-shadow-colored:0 4px 6px -1px var(--tw-shadow-color), 0 2px 4px -2px var(--tw-shadow-color);box-shadow:var(--tw-ring-offset-shadow, 0 0 #0000), var(--tw-ring-shadow, 0 0 #0000), var(--tw-shadow)}.shadow-sm{--tw-shadow:0 1px 2px 0 rgb(0 0 0 / 0.05);--tw-shadow-colored:0 1px 2px 0 var(--tw-shadow-color);box-shadow:var(--tw-ring-offset-shadow, 0 0 #0000), var(--tw-ring-shadow, 0 0 #0000), var(--tw-shadow)}.shadow-xl{--tw-shadow:0 20px 25px -5px rgb(0 0 0 / 0.1), 0 8px 10px -6px rgb(0 0 0 / 0.1);--tw-shadow-colored:0 20px 25px -5px var(--tw-shadow-color), 0 8px 10px -6px var(--tw-shadow-color);box-shadow:var(--tw-ring-offset-shadow, 0 0 #0000), var(--tw-ring-shadow, 0 0 #0000), var(--tw-shadow)}.backdrop-blur-sm{--tw-backdrop-blur:blur(4px);-webkit-backdrop-filter:var(--tw-backdrop-blur) var(--tw-backdrop-brightness) var(--tw-backdrop-contrast) var(--tw-backdrop-grayscale) var(--tw-backdrop-hue-rotate) var(--tw-backdrop-invert) var(--tw-backdrop-opacity) var(--tw-backdrop-saturate) var(--tw-backdrop-sepia);backdrop-filter:var(--tw-backdrop-blur) var(--tw-backdrop-brightness) var(--tw-backdrop-contrast) var(--tw-backdrop-grayscale) var(--tw-backdrop-hue-rotate) var(--tw-backdrop-invert) var(--tw-backdrop-opacity) var(--tw-backdrop-saturate) var(--tw-backdrop-sepia)}.transition{transition-property:color, background-color, border-color, fill, stroke, opacity, box-shadow, transform, filter, -webkit-text-decoration-color, -webkit-backdrop-filter;transition-property:color, background-color, border-color, text-decoration-color, fill, stroke, opacity, box-shadow, transform, filter, backdrop-filter;transition-property:color, background-color, border-color, text-decoration-color, fill, stroke, opacity, box-shadow, transform, filter, backdrop-filter, -webkit-text-decoration-color, -webkit-backdrop-filter;transition-timing-function:cubic-bezier(0.4, 0, 0.2, 1);transition-duration:150ms}.transition-colors{transition-property:color, background-color, border-color, fill, stroke, -webkit-text-decoration-color;transition-property:color, background-color, border-color, text-decoration-color, fill, stroke;transition-property:color, background-color, border-color, text-decoration-color, fill, stroke, -webkit-text-decoration-color;transition-timing-function:cubic-bezier(0.4, 0, 0.2, 1);transition-duration:150ms}.transition-transform{transition-property:transform;transition-timing-function:cubic-bezier(0.4, 0, 0.2, 1);transition-duration:150ms}.file\:mr-2::file-selector-button{margin-right:0.5rem}.file\:rounded-md::file-selector-button{border-radius:0.375rem}.file\:border-0::file-selector-button{border-width:0px}.file\:px-3::file-selector-button{padding-left:0.75rem;padding-right:0.75rem}.file\:py-1::file-selector-button{padding-top:0.25rem;padding-bottom:0.25rem}.file\:text-white::file-selector-button{--tw-text-opacity:1;color:rgb(255 255 255 / var(--tw-text-opacity, 1))}.hover\:-translate-y-0\.5:hover{--tw-translate-y:-0.125rem;transform:translate(var(--tw-translate-x), var(--tw-translate-y)) rotate(var(--tw-rotate)) skewX(var(--tw-skew-x)) skewY(var(--tw-skew-y)) scaleX(var(--tw-scale-x)) scaleY(var(--tw-scale-y))}.hover\:bg-\[var\(--grt-accent-soft\)\]:hover{background-color:var(--grt-accent-soft)}.hover\:bg-emerald-500:hover{--tw-bg-opacity:1;background-color:rgb(16 185 129 / var(--tw-bg-opacity, 1))}.hover\:bg-emerald-700\/40:hover{background-color:rgb(4 120 87 / 0.4)}.hover\:text-white:hover{--tw-text-opacity:1;color:rgb(255 255 255 / var(--tw-text-opacity, 1))}.hover\:shadow-lg:hover{--tw-shadow:0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);--tw-shadow-colored:0 10px 15px -3px var(--tw-shadow-color), 0 4px 6px -4px var(--tw-shadow-color);box-shadow:var(--tw-ring-offset-shadow, 0 0 #0000), var(--tw-ring-shadow, 0 0 #0000), var(--tw-shadow)}.focus\:border-\[var\(--grt-accent\)\]:focus{border-color:var(--grt-accent)}.focus\:outline-none:focus{outline:2px solid transparent;outline-offset:2px}.focus\:ring-1:focus{--tw-ring-offset-shadow:var(--tw-ring-inset) 0 0 0 var(--tw-ring-offset-width) var(--tw-ring-offset-color);--tw-ring-shadow:var(--tw-ring-inset) 0 0 0 calc(1px + var(--tw-ring-offset-width)) var(--tw-ring-color);box-shadow:var(--tw-ring-offset-shadow), var(--tw-ring-shadow), var(--tw-shadow, 0 0 #0000)}.focus\:ring-2:focus{--tw-ring-offset-shadow:var(--tw-ring-inset) 0 0 0 var(--tw-ring-offset-width) var(--tw-ring-offset-color);--tw-ring-shadow:var(--tw-ring-inset) 0 0 0 calc(2px + var(--tw-ring-offset-width)) var(--tw-ring-color);box-shadow:var(--tw-ring-offset-shadow), var(--tw-ring-shadow), var(--tw-shadow, 0 0 #0000)}.focus\:ring-\[var\(--grt-accent\)\]:focus{--tw-ring-color:var(--grt-accent)}@media (min-width: 640px){.sm\:w-\[520px\]{width:520px}.sm\:flex-row{flex-direction:row}.sm\:flex-wrap{flex-wrap:wrap}}@media (min-width: 768px){.md\:mb-5{margin-bottom:1.25rem}.md\:flex{display:flex}.md\:h-12{height:3rem}.md\:w-12{width:3rem}.md\:max-w-\[40\%\]{max-width:40%}.md\:max-w-\[60\%\]{max-width:60%}.md\:max-w-\[160px\]{max-width:160px}.md\:grid-cols-1{grid-template-columns:repeat(1, minmax(0, 1fr))}.md\:grid-cols-3{grid-template-columns:repeat(3, minmax(0, 1fr))}.md\:flex-row{flex-direction:row}.md\:items-start{align-items:flex-start}.md\:items-center{align-items:center}.md\:items-baseline{align-items:baseline}.md\:justify-between{justify-content:space-between}.md\:gap-3{gap:0.75rem}.md\:space-y-5 > :not([hidden]) ~ :not([hidden]){--tw-space-y-reverse:0;margin-top:calc(1.25rem * calc(1 - var(--tw-space-y-reverse)));margin-bottom:calc(1.25rem * var(--tw-space-y-reverse))}.md\:space-y-6 > :not([hidden]) ~ :not([hidden]){--tw-space-y-reverse:0;margin-top:calc(1.5rem * calc(1 - var(--tw-space-y-reverse)));margin-bottom:calc(1.5rem * var(--tw-space-y-reverse))}.md\:p-4{padding:1rem}.md\:p-6{padding:1.5rem}.md\:text-4xl{font-size:2.25rem;line-height:2.5rem}.md\:text-\[11px\]{font-size:11px}.md\:text-base{font-size:1rem;line-height:1.5rem}.md\:text-sm{font-size:0.875rem;line-height:1.25rem}.md\:text-xl{font-size:1.25rem;line-height:1.75rem}.md\:text-xs{font-size:0.75rem;line-height:1rem}}@media (min-width: 1024px){.lg\:w-64{width:16rem}.lg\:grid-cols-3{grid-template-columns:repeat(3, minmax(0, 1fr))}.lg\:flex-row{flex-direction:row}}</style><style>
+            .captureFixedShim { position: absolute !important; }
+            .captureStickyShim { position: static !important; }
+            .captureHeaderShim { position: relative !important; }
+        </style><link href="./GRT Importer Advanced v0.89_files/css2" rel="stylesheet"><style id="ar2b2a445c13style">
+				.ar2b2a445c13hidden{ position:absolute !important; opacity:0 !important; pointer-events:none !important}
+			</style></head>
 <body class="min-h-screen p-4 md:p-6">
 <main class="max-w-5xl mx-auto">
 <!-- Header -->
@@ -236,15 +227,13 @@ input[type="file"]::file-selector-button:active{background: rgba(255,255,255,0.1
 <p class="text-grt-subtle">
                             GRT Importer Advanced v0.89 • XquiziT Arms
                         </p>
-<span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full border border-grt-soft bg-grt-panel-soft text-[10px] md:text-[11px] text-grt-soft" id="sessionPill" title="Summary of imported sessions and current velocity unit.">
-                            ⚙️ Standard • 0 files • ft/s
-                        </span>
+<span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full border border-grt-soft bg-grt-panel-soft text-[10px] md:text-[11px] text-grt-soft" id="sessionPill" title="Summary of imported sessions and current velocity unit.">⚙️ Standard • 0 chrono files • ft/s</span>
 </div>
 </div>
 <div class="flex flex-col items-end gap-3">
 <div class="flex items-center gap-2">
 <button aria-label="Start new session" class="p-2.5 rounded-full bg-grt-panel-soft hover:bg-grt-highlight text-slate-100 border border-grt-frame shadow-md transition-transform transform hover:-translate-y-0.5 hover:shadow-lg" id="newSessionBtn" title="Start new session">
-<svg class="h-5 w-5" fill="none" stroke="currentColor" stroke-width="2" viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+<svg class="h-5 w-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
 <path d="M4.5 12a7.5 7.5 0 0112.62-5.303L19.5 9M7.5 9H4.5V6m15 6a7.5 7.5 0 01-12.62 5.303L4.5 15m12 0h3v3" stroke-linecap="round" stroke-linejoin="round"></path>
 </svg>
 </button>
@@ -252,8 +241,7 @@ input[type="file"]::file-selector-button:active{background: rgba(255,255,255,0.1
 </div>
 
 <div class="hidden md:flex items-start justify-end">
-    <button id="helpOverlayButton"
-            class="inline-flex items-center gap-1 px-3 py-1.5 rounded-full border border-grt-frame text-grt-soft text-[11px] md:text-xs bg-grt-panel-soft hover:border-grt-accent hover:text-grt-accent transition">
+    <button id="helpOverlayButton" class="inline-flex items-center gap-1 px-3 py-1.5 rounded-full border border-grt-frame text-grt-soft text-[11px] md:text-xs bg-grt-panel-soft hover:border-grt-accent hover:text-grt-accent transition">
         <span>❓ How to use this</span>
     </button>
 </div>
@@ -320,13 +308,11 @@ input[type="file"]::file-selector-button:active{background: rgba(255,255,255,0.1
                                     <code class="bg-slate-800/70 px-1 rounded text-[10px]">.grtload</code> as a gallery tab.
                                 </p>
 <div class="flex flex-wrap items-center gap-2">
-<input accept="image/*" class="hidden" id="pictureInput" multiple="" type="file"/>
-<button class="px-3 py-1.5 bg-grt-panel hover:bg-grt-highlight text-white rounded-md text-[11px] md:text-xs border border-grt-frame" id="pictureBtn" onclick="document.getElementById('pictureInput').click()" type="button">
+<input accept="image/*" class="hidden" id="pictureInput" multiple="" type="file">
+<button class="px-3 py-1.5 bg-grt-panel hover:bg-grt-highlight text-white rounded-md text-[11px] md:text-xs border border-grt-frame" id="pictureBtn" onclick="document.getElementById(&#39;pictureInput&#39;).click()" type="button">
                                         Select Pictures
                                     </button>
-<span class="text-grt-subtle text-[11px] md:text-xs" id="picturesStatus">
-                                        No pictures selected
-                                    </span>
+<span class="text-grt-subtle text-[11px] md:text-xs" id="picturesStatus">No pictures selected</span>
 </div>
 </div>
 <!-- Notes -->
@@ -337,13 +323,11 @@ input[type="file"]::file-selector-button:active{background: rgba(255,255,255,0.1
                                     <code class="bg-slate-800/70 px-1 rounded text-[10px]">.md</code>, etc.). Files are merged into one notes tab.
                                 </p>
 <div class="flex flex-wrap items-center gap-2">
-<input accept=".txt,.md,.rtf,.log" class="hidden" id="notesInput" multiple="" type="file"/>
-<button class="px-3 py-1.5 bg-grt-panel hover:bg-grt-highlight text-white rounded-md text-[11px] md:text-xs border border-grt-frame" id="notesBtn" onclick="document.getElementById('notesInput').click()" type="button">
+<input accept=".txt,.md,.rtf,.log" class="hidden" id="notesInput" multiple="" type="file">
+<button class="px-3 py-1.5 bg-grt-panel hover:bg-grt-highlight text-white rounded-md text-[11px] md:text-xs border border-grt-frame" id="notesBtn" onclick="document.getElementById(&#39;notesInput&#39;).click()" type="button">
                                         Select Notes Files
                                     </button>
-<span class="text-grt-subtle text-[11px] md:text-xs" id="notesStatus">
-                                        No notes added
-                                    </span>
+<span class="text-grt-subtle text-[11px] md:text-xs" id="notesStatus">No notes added</span>
 </div>
 </div>
 </div>
@@ -378,24 +362,23 @@ input[type="file"]::file-selector-button:active{background: rgba(255,255,255,0.1
           </div>
 
           <div class="flex flex-wrap items-center gap-2 mb-2">
-            <input accept=".csv" class="hidden" id="shotMarkerInput" type="file"/>
-            <button class="px-3 py-1.5 bg-grt-panel hover:bg-grt-highlight text-white rounded-md text-[11px] md:text-xs border border-grt-frame"
-                    type="button" onclick="document.getElementById('shotMarkerInput').click()">
+            <input accept=".csv" class="hidden" id="shotMarkerInput" type="file">
+            <button class="px-3 py-1.5 bg-grt-panel hover:bg-grt-highlight text-white rounded-md text-[11px] md:text-xs border border-grt-frame" type="button" onclick="document.getElementById(&#39;shotMarkerInput&#39;).click()">
               Select ShotMarker CSV
             </button>
-            <button class="px-3 py-1.5 bg-grt-panel hover:bg-grt-highlight text-white rounded-md text-[11px] md:text-xs border border-grt-frame"
-                    type="button" onclick="clearShotMarkerAddons()">
+            <button class="px-3 py-1.5 bg-grt-panel hover:bg-grt-highlight text-white rounded-md text-[11px] md:text-xs border border-grt-frame" type="button" onclick="clearShotMarkerAddons()">
               Clear
             </button>
           </div>
 
-          <div id="shotMarkerInlineCards" class="space-y-2"></div>
+          <div id="shotMarkerInlineCards" class="space-y-2"><div class="text-grt-subtle text-[11px] md:text-xs">No file loaded</div></div>
         </div>
 
         
         
       </div>
     </div>
+</div>
 </div>
 
 <!-- 1. GRT Base File -->
@@ -415,8 +398,8 @@ input[type="file"]::file-selector-button:active{background: rgba(255,255,255,0.1
                             <strong>Imported Ladder</strong> tab.
                         </p>
 <div class="flex flex-wrap items-center gap-3">
-<input accept=".grtload,.grt" class="hidden" id="grtBaseInput" title="Optional: choose a base .grtload file to merge ladder data into." type="file"/>
-<button class="px-4 py-2 bg-grt-panel-soft hover:bg-grt-highlight text-white rounded-lg text-sm font-medium border border-grt-frame shadow-sm transition-colors" id="grtBaseBtn" onclick="document.getElementById('grtBaseInput').click()" title="Browse for the base .grtload file used for ladder imports.">
+<input accept=".grtload,.grt" class="hidden" id="grtBaseInput" title="Optional: choose a base .grtload file to merge ladder data into." type="file">
+<button class="px-4 py-2 bg-grt-panel-soft hover:bg-grt-highlight text-white rounded-lg text-sm font-medium border border-grt-frame shadow-sm transition-colors" id="grtBaseBtn" onclick="document.getElementById(&#39;grtBaseInput&#39;).click()" title="Browse for the base .grtload file used for ladder imports.">
                                 Select .grtload
                             </button>
 <span class="text-emerald-300 text-xs md:text-sm" id="grtBaseStatus"></span>
@@ -483,12 +466,12 @@ input[type="file"]::file-selector-button:active{background: rgba(255,255,255,0.1
 
   <div class="flex flex-col sm:flex-row sm:flex-wrap gap-3">
     <label class="inline-flex items-center gap-2 text-grt-subtle text-[11px] md:text-xs" title="If enabled, we’ll write extended metrics into the charge notes when exporting.">
-      <input id="analysisIncludeInNotes" type="checkbox" class="rounded border-grt-frame bg-grt-panel-soft" />
+      <input id="analysisIncludeInNotes" type="checkbox" class="rounded border-grt-frame bg-grt-panel-soft">
       <span>Write extended metrics into charge notes</span>
     </label>
 
     <label class="inline-flex items-center gap-2 text-grt-subtle text-[11px] md:text-xs" title="If enabled, we’ll add the Analysis summary note/tab to the .grtload appendix.">
-      <input id="exportAnalysisTab" type="checkbox" class="rounded border-grt-frame bg-grt-panel-soft" />
+      <input id="exportAnalysisTab" type="checkbox" class="rounded border-grt-frame bg-grt-panel-soft">
       <span>Export “Analysis” tab (summary note)</span>
     </label>
   </div>
@@ -500,8 +483,8 @@ input[type="file"]::file-selector-button:active{background: rgba(255,255,255,0.1
 <!-- Standard multi-file panel inside drag-and-drop zone -->
 <div class="border border-dashed border-grt-frame rounded-xl p-3 hover:border-grt-accent hover:bg-grt-panel-soft/60 transition-colors" id="multiFileDropzone" title="Drop chronograph exports here or click to browse from disk.">
 <div class="flex flex-wrap items-center gap-3" id="multiFilePanel">
-<input accept=".csv,.xls,.xlsx" class="hidden" id="garminInput" multiple="" title="Load a Garmin session workbook (.xls/.xlsx) with one sheet per string." type="file"/>
-<button class="px-5 py-2.5 bg-[var(--grt-accent)] hover:bg-[var(--grt-accent-soft)] text-white rounded-lg text-sm font-semibold shadow-md border border-grt-accent transition-transform transform hover:-translate-y-0.5 hover:shadow-lg" onclick="document.getElementById('garminInput').click()">
+<input accept=".csv,.xls,.xlsx" class="hidden" id="garminInput" multiple="" title="Load a Garmin session workbook (.xls/.xlsx) with one sheet per string." type="file">
+<button class="px-5 py-2.5 bg-[var(--grt-accent)] hover:bg-[var(--grt-accent-soft)] text-white rounded-lg text-sm font-semibold shadow-md border border-grt-accent transition-transform transform hover:-translate-y-0.5 hover:shadow-lg" onclick="document.getElementById(&#39;garminInput&#39;).click()">
                                     Select Chronograph Files
                                 </button>
 <span class="text-grt-subtle text-[11px] md:text-xs">
@@ -510,11 +493,11 @@ input[type="file"]::file-selector-button:active{background: rgba(255,255,255,0.1
 <div class="mt-1 text-grt-subtle text-[11px] md:text-xs">
     <span class="font-semibold">Sessions layout (Sessions mode only):</span>
     <label class="inline-flex items-center gap-1 ml-2">
-        <input type="radio" name="sessionsLayout" value="compact" id="sessionsLayoutCompact" checked />
+        <input type="radio" name="sessionsLayout" value="compact" id="sessionsLayoutCompact" checked="">
         <span>Single tab – compact sessions</span>
     </label>
     <label class="inline-flex items-center gap-1 ml-2">
-        <input type="radio" name="sessionsLayout" value="legacy" id="sessionsLayoutLegacy" />
+        <input type="radio" name="sessionsLayout" value="legacy" id="sessionsLayoutLegacy">
         <span>One tab per session (legacy)</span>
     </label>
 </div>
@@ -534,11 +517,11 @@ input[type="file"]::file-selector-button:active{background: rgba(255,255,255,0.1
                             </p>
 <!-- Ladder state badge -->
 <div class="inline-flex items-center gap-2 px-2.5 py-1 rounded-full border border-grt-frame bg-grt-panel text-[11px] md:text-xs text-grt-subtle mb-3" id="ladderStateBadge">
-<span class="h-1.5 w-1.5 rounded-full bg-slate-500"></span>
-<span>Base .grtload not loaded — ladder state unknown</span>
-</div>
+                <span class="h-1.5 w-1.5 rounded-full bg-slate-500"></span>
+                <span>Base .grtload not loaded — ladder state unknown</span>
+            </div>
 <!-- Hidden if ladder disabled in base -->
-<div id="ladderControls">
+<div id="ladderControls" class="hidden">
 <!-- Advanced ladder options toggle -->
 <button class="inline-flex items-center gap-1 px-2.5 py-1 rounded-md bg-grt-panel border border-grt-frame text-[11px] md:text-xs text-grt-soft hover:bg-grt-highlight transition-colors mb-2" id="ladderAdvancedToggle" type="button">
 <span>Advanced ladder options</span>
@@ -585,8 +568,7 @@ input[type="file"]::file-selector-button:active{background: rgba(255,255,255,0.1
         Chrono vs Sim export:
     </span>
     <label class="inline-flex items-center gap-1 text-grt-subtle text-[11px] md:text-xs">
-        <input id="ladderIncludeChronoSim" type="checkbox"
-               class="rounded border-grt-frame bg-grt-panel-soft" />
+        <input id="ladderIncludeChronoSim" type="checkbox" class="rounded border-grt-frame bg-grt-panel-soft">
         <span>Export “Chrono vs Sim” tab for ladder</span>
     </label>
     <span class="text-grt-subtle text-[10px] md:text-xs">
@@ -596,30 +578,28 @@ input[type="file"]::file-selector-button:active{background: rgba(255,255,255,0.1
 
 <div class="flex flex-wrap items-center gap-2 mt-1">
   <span class="text-grt-soft text-xs md:text-sm font-semibold">GRT Simulation Export (JSON):</span>
-  <input id="grtSimJsonInput" type="file" accept=".json"
-         class="block text-xs md:text-sm text-grt-soft file:mr-2 file:py-1 file:px-3 file:rounded-md file:border-0 file:bg-grt-highlight file:text-white hover:file:bg-grt-accent cursor-pointer"/>
+  <input id="grtSimJsonInput" type="file" accept=".json" class="block text-xs md:text-sm text-grt-soft file:mr-2 file:py-1 file:px-3 file:rounded-md file:border-0 file:bg-grt-highlight file:text-white hover:file:bg-grt-accent cursor-pointer">
   <span id="grtSimJsonStatus" class="text-grt-subtle text-[10px] md:text-xs">
     No file loaded. Requires GRT export with “Loading ladder complete (all charges)”.
   </span>
 </div>
 <div class="flex flex-wrap items-center gap-3 mt-1">
   <label class="inline-flex items-center gap-1 text-grt-subtle text-[11px] md:text-xs">
-    <input id="exportAdvancedDiagnostics" type="checkbox" class="rounded border-grt-frame bg-grt-panel-soft" checked />
+    <input id="exportAdvancedDiagnostics" type="checkbox" class="rounded border-grt-frame bg-grt-panel-soft" checked="">
     <span>Export “Advanced Diagnostics” dashboard (single tab)</span>
   </label>
   <label class="inline-flex items-center gap-1 text-grt-subtle text-[11px] md:text-xs">
-    <input id="exportSimOverlays" type="checkbox" class="rounded border-grt-frame bg-grt-panel-soft" checked />
+    <input id="exportSimOverlays" type="checkbox" class="rounded border-grt-frame bg-grt-panel-soft" checked="">
     <span>Enable Sim overlays (Pressure / Barrel Time / Optimal BT)</span>
   </label>
   <label class="inline-flex items-center gap-1 text-grt-subtle text-[11px] md:text-xs">
-    <input id="alsoExportIndividualOverlays" type="checkbox" class="rounded border-grt-frame bg-grt-panel-soft" />
+    <input id="alsoExportIndividualOverlays" type="checkbox" class="rounded border-grt-frame bg-grt-panel-soft">
     <span>Also export individual overlay pictures</span>
   </label>
 </div>
 <div class="flex flex-wrap items-center gap-2 mt-1">
   <span class="text-grt-soft text-xs md:text-sm font-semibold">Peak pressure “soft limit”:</span>
-  <input id="softLimitPsi" type="number" inputmode="numeric" placeholder="e.g. 62000"
-         class="px-2.5 py-1.5 rounded-lg bg-grt-panel text-white text-xs md:text-sm border border-grt-frame focus:outline-none focus:ring-2 focus:ring-[var(--grt-accent)] focus:border-[var(--grt-accent)] w-36"/>
+  <input id="softLimitPsi" type="number" inputmode="numeric" placeholder="e.g. 62000" class="px-2.5 py-1.5 rounded-lg bg-grt-panel text-white text-xs md:text-sm border border-grt-frame focus:outline-none focus:ring-2 focus:ring-[var(--grt-accent)] focus:border-[var(--grt-accent)] w-36">
   <span class="text-grt-subtle text-[11px] md:text-xs">psi (optional)</span>
 </div>
 
@@ -627,7 +607,7 @@ input[type="file"]::file-selector-button:active{background: rgba(255,255,255,0.1
 </div>
 </div>
 <!-- Ladder rows -->
-<div class="grid grid-cols-1 md:grid-cols-1 gap-2 mb-3" id="ladderRows"></div>
+<div class="grid grid-cols-1 md:grid-cols-1 gap-2 mb-3" id="ladderRows"><div id="ladderRow1" data-charge-index="1" class="flex items-center justify-between gap-2 text-xs md:text-sm"><span class="text-grt-soft ladder-charge-label" data-role="ladderChargeLabel">Charge 1</span><div class="flex items-center gap-2"><input type="file" accept=".csv,.xls,.xlsx" class="hidden" id="ladderInput1"><button type="button" class="px-2.5 py-1 bg-grt-panel hover:bg-grt-highlight text-white rounded-md border border-grt-frame text-[11px] md:text-xs">Select File</button><span id="ladderLabel1" class="text-grt-subtle text-[10px] md:text-[11px] truncate max-w-[120px] md:max-w-[160px]"></span></div></div><div id="ladderRow2" data-charge-index="2" class="flex items-center justify-between gap-2 text-xs md:text-sm"><span class="text-grt-soft ladder-charge-label" data-role="ladderChargeLabel">Charge 2</span><div class="flex items-center gap-2"><input type="file" accept=".csv,.xls,.xlsx" class="hidden" id="ladderInput2"><button type="button" class="px-2.5 py-1 bg-grt-panel hover:bg-grt-highlight text-white rounded-md border border-grt-frame text-[11px] md:text-xs">Select File</button><span id="ladderLabel2" class="text-grt-subtle text-[10px] md:text-[11px] truncate max-w-[120px] md:max-w-[160px]"></span></div></div><div id="ladderRow3" data-charge-index="3" class="flex items-center justify-between gap-2 text-xs md:text-sm"><span class="text-grt-soft ladder-charge-label" data-role="ladderChargeLabel">Charge 3</span><div class="flex items-center gap-2"><input type="file" accept=".csv,.xls,.xlsx" class="hidden" id="ladderInput3"><button type="button" class="px-2.5 py-1 bg-grt-panel hover:bg-grt-highlight text-white rounded-md border border-grt-frame text-[11px] md:text-xs">Select File</button><span id="ladderLabel3" class="text-grt-subtle text-[10px] md:text-[11px] truncate max-w-[120px] md:max-w-[160px]"></span></div></div><div id="ladderRow4" data-charge-index="4" class="flex items-center justify-between gap-2 text-xs md:text-sm"><span class="text-grt-soft ladder-charge-label" data-role="ladderChargeLabel">Charge 4</span><div class="flex items-center gap-2"><input type="file" accept=".csv,.xls,.xlsx" class="hidden" id="ladderInput4"><button type="button" class="px-2.5 py-1 bg-grt-panel hover:bg-grt-highlight text-white rounded-md border border-grt-frame text-[11px] md:text-xs">Select File</button><span id="ladderLabel4" class="text-grt-subtle text-[10px] md:text-[11px] truncate max-w-[120px] md:max-w-[160px]"></span></div></div><div id="ladderRow5" data-charge-index="5" class="flex items-center justify-between gap-2 text-xs md:text-sm"><span class="text-grt-soft ladder-charge-label" data-role="ladderChargeLabel">Charge 5</span><div class="flex items-center gap-2"><input type="file" accept=".csv,.xls,.xlsx" class="hidden" id="ladderInput5"><button type="button" class="px-2.5 py-1 bg-grt-panel hover:bg-grt-highlight text-white rounded-md border border-grt-frame text-[11px] md:text-xs">Select File</button><span id="ladderLabel5" class="text-grt-subtle text-[10px] md:text-[11px] truncate max-w-[120px] md:max-w-[160px]"></span></div></div><div id="ladderRow6" data-charge-index="6" class="flex items-center justify-between gap-2 text-xs md:text-sm"><span class="text-grt-soft ladder-charge-label" data-role="ladderChargeLabel">Charge 6</span><div class="flex items-center gap-2"><input type="file" accept=".csv,.xls,.xlsx" class="hidden" id="ladderInput6"><button type="button" class="px-2.5 py-1 bg-grt-panel hover:bg-grt-highlight text-white rounded-md border border-grt-frame text-[11px] md:text-xs">Select File</button><span id="ladderLabel6" class="text-grt-subtle text-[10px] md:text-[11px] truncate max-w-[120px] md:max-w-[160px]"></span></div></div><div id="ladderRow7" data-charge-index="7" class="flex items-center justify-between gap-2 text-xs md:text-sm"><span class="text-grt-soft ladder-charge-label" data-role="ladderChargeLabel">Charge 7</span><div class="flex items-center gap-2"><input type="file" accept=".csv,.xls,.xlsx" class="hidden" id="ladderInput7"><button type="button" class="px-2.5 py-1 bg-grt-panel hover:bg-grt-highlight text-white rounded-md border border-grt-frame text-[11px] md:text-xs">Select File</button><span id="ladderLabel7" class="text-grt-subtle text-[10px] md:text-[11px] truncate max-w-[120px] md:max-w-[160px]"></span></div></div><div id="ladderRow8" data-charge-index="8" class="flex items-center justify-between gap-2 text-xs md:text-sm"><span class="text-grt-soft ladder-charge-label" data-role="ladderChargeLabel">Charge 8</span><div class="flex items-center gap-2"><input type="file" accept=".csv,.xls,.xlsx" class="hidden" id="ladderInput8"><button type="button" class="px-2.5 py-1 bg-grt-panel hover:bg-grt-highlight text-white rounded-md border border-grt-frame text-[11px] md:text-xs">Select File</button><span id="ladderLabel8" class="text-grt-subtle text-[10px] md:text-[11px] truncate max-w-[120px] md:max-w-[160px]"></span></div></div><div id="ladderRow9" data-charge-index="9" class="flex items-center justify-between gap-2 text-xs md:text-sm"><span class="text-grt-soft ladder-charge-label" data-role="ladderChargeLabel">Charge 9</span><div class="flex items-center gap-2"><input type="file" accept=".csv,.xls,.xlsx" class="hidden" id="ladderInput9"><button type="button" class="px-2.5 py-1 bg-grt-panel hover:bg-grt-highlight text-white rounded-md border border-grt-frame text-[11px] md:text-xs">Select File</button><span id="ladderLabel9" class="text-grt-subtle text-[10px] md:text-[11px] truncate max-w-[120px] md:max-w-[160px]"></span></div></div><div id="ladderRow10" data-charge-index="10" class="flex items-center justify-between gap-2 text-xs md:text-sm"><span class="text-grt-soft ladder-charge-label" data-role="ladderChargeLabel">Charge 10</span><div class="flex items-center gap-2"><input type="file" accept=".csv,.xls,.xlsx" class="hidden" id="ladderInput10"><button type="button" class="px-2.5 py-1 bg-grt-panel hover:bg-grt-highlight text-white rounded-md border border-grt-frame text-[11px] md:text-xs">Select File</button><span id="ladderLabel10" class="text-grt-subtle text-[10px] md:text-[11px] truncate max-w-[120px] md:max-w-[160px]"></span></div></div></div>
 <div class="flex justify-end">
 <button class="px-4 py-2 bg-[var(--grt-accent)] hover:bg-[var(--grt-accent-soft)] text-white rounded-lg text-xs md:text-sm font-semibold shadow-md border border-grt-accent transition-transform transform hover:-translate-y-0.5 hover:shadow-lg opacity-60 cursor-not-allowed" disabled="" id="processLadderBtn" type="button">
                                         Process Ladder
@@ -639,7 +619,7 @@ input[type="file"]::file-selector-button:active{background: rgba(255,255,255,0.1
 </div>
 </div>
 </div>
-</section>
+</div></section>
 <!-- Changelog panel (small text) – below "What this tool does" -->
 <!-- Results -->
 <section aria-label="Import results" class="hidden space-y-5 md:space-y-6 mt-4" id="resultsArea">
@@ -667,7 +647,7 @@ input[type="file"]::file-selector-button:active{background: rgba(255,255,255,0.1
     <div class="grid grid-cols-1 gap-4">
     <div>
       <div class="text-white text-xs md:text-sm font-semibold mb-2">ShotMarker</div>
-      <div id="shotMarkerResultsCards" class="space-y-2"></div>
+      <div id="shotMarkerResultsCards" class="space-y-2"><div class="text-grt-subtle text-[11px] md:text-xs">No file loaded</div></div>
       <div id="shotMarkerSessionCards" class="mt-3"></div>
     </div>
   </div>
@@ -690,10 +670,10 @@ input[type="file"]::file-selector-button:active{background: rgba(255,255,255,0.1
 <button class="inline-flex items-center gap-1 px-3 py-1.5 rounded-full bg-grt-panel-soft border border-grt-frame text-[11px] md:text-xs text-grt-soft hover:bg-grt-highlight transition" id="saveSessionBtn" type="button" title="Save the current imported data (chronograph + add-ons + analysis state) so you can reload it later without GRT.">
   <span>🧾</span><span>Save session</span>
 </button>
-<button class="inline-flex items-center gap-1 px-3 py-1.5 rounded-full bg-grt-panel-soft border border-grt-frame text-[11px] md:text-xs text-grt-soft hover:bg-grt-highlight transition" onclick="document.getElementById('standaloneJsonInput').click()" type="button" title="Load a previously saved session (.json) from this tool.">
+<button class="inline-flex items-center gap-1 px-3 py-1.5 rounded-full bg-grt-panel-soft border border-grt-frame text-[11px] md:text-xs text-grt-soft hover:bg-grt-highlight transition" onclick="document.getElementById(&#39;standaloneJsonInput&#39;).click()" type="button" title="Load a previously saved session (.json) from this tool.">
   <span>📂</span><span>Load session</span>
 </button>
-<input id="standaloneJsonInput" type="file" accept=".json" class="hidden" onchange="importStandaloneJsonFile(this.files && this.files[0])"/>
+<input id="standaloneJsonInput" type="file" accept=".json" class="hidden" onchange="importStandaloneJsonFile(this.files &amp;&amp; this.files[0])">
 
 </div>
 </div>
@@ -713,13 +693,13 @@ input[type="file"]::file-selector-button:active{background: rgba(255,255,255,0.1
 <label class="text-grt-soft text-xs md:text-sm font-semibold" for="analysisTargetSD">
                     Target SD
                 </label>
-<input class="w-20 px-2 py-1 rounded border border-grt-frame bg-grt-panel-soft text-xs md:text-sm text-white focus:outline-none focus:ring-1 focus:ring-grt-accent" id="analysisTargetSD" step="0.1" title="Target SD threshold for flagging groups as tight or wide." type="number"/>
+<input class="w-20 px-2 py-1 rounded border border-grt-frame bg-grt-panel-soft text-xs md:text-sm text-white focus:outline-none focus:ring-1 focus:ring-grt-accent" id="analysisTargetSD" step="0.1" title="Target SD threshold for flagging groups as tight or wide." type="number">
 </div>
 <div class="flex items-center gap-1">
 <label class="text-grt-soft text-xs md:text-sm font-semibold" for="analysisTargetES">
                     Target ES
                 </label>
-<input class="w-20 px-2 py-1 rounded border border-grt-frame bg-grt-panel-soft text-xs md:text-sm text-white focus:outline-none focus:ring-1 focus:ring-grt-accent" id="analysisTargetES" step="0.1" title="Target ES threshold for flagging groups as tight or wide." type="number"/>
+<input class="w-20 px-2 py-1 rounded border border-grt-frame bg-grt-panel-soft text-xs md:text-sm text-white focus:outline-none focus:ring-1 focus:ring-grt-accent" id="analysisTargetES" step="0.1" title="Target ES threshold for flagging groups as tight or wide." type="number">
 </div>
 </div>
 
@@ -727,11 +707,11 @@ input[type="file"]::file-selector-button:active{background: rgba(255,255,255,0.1
   <span class="text-grt-soft text-xs md:text-sm font-semibold">ShotMarker Phase 3:</span>
   <label class="inline-flex items-center gap-1 text-grt-subtle text-[11px] md:text-xs">
     <span>String ratio</span>
-    <input id="smP3RatioDom" type="number" step="0.05" class="w-20 px-2 py-1 rounded border border-grt-frame bg-grt-panel-soft text-xs md:text-sm text-white focus:outline-none focus:ring-1 focus:ring-grt-accent" />
+    <input id="smP3RatioDom" type="number" step="0.05" class="w-20 px-2 py-1 rounded border border-grt-frame bg-grt-panel-soft text-xs md:text-sm text-white focus:outline-none focus:ring-1 focus:ring-grt-accent">
   </label>
   <label class="inline-flex items-center gap-1 text-grt-subtle text-[11px] md:text-xs">
     <span>Min MOA</span>
-    <input id="smP3StringMoaMin" type="number" step="0.01" class="w-20 px-2 py-1 rounded border border-grt-frame bg-grt-panel-soft text-xs md:text-sm text-white focus:outline-none focus:ring-1 focus:ring-grt-accent" />
+    <input id="smP3StringMoaMin" type="number" step="0.01" class="w-20 px-2 py-1 rounded border border-grt-frame bg-grt-panel-soft text-xs md:text-sm text-white focus:outline-none focus:ring-1 focus:ring-grt-accent">
   </label>
   <button id="smP3ResetBtn" type="button" class="px-2.5 py-1 rounded-md bg-grt-panel-soft border border-grt-frame text-[11px] md:text-xs text-grt-soft hover:bg-grt-highlight transition" title="Reset Phase 3 thresholds to defaults">
     Reset
@@ -747,38 +727,30 @@ input[type="file"]::file-selector-button:active{background: rgba(255,255,255,0.1
                     Extended metrics
                 </span>
                 <!-- Extended metrics help chip -->
-                <button
-                  id="extendedMetricsHelpBtn"
-                  type="button"
-                  class="inline-flex items-center justify-center h-5 w-5 rounded-full
+                <button id="extendedMetricsHelpBtn" type="button" class="inline-flex items-center justify-center h-5 w-5 rounded-full
                          bg-grt-panel-soft border border-grt-frame text-[10px] text-grt-soft
-                         hover:bg-grt-highlight hover:text-white transition"
-                  title="What do these extra metrics mean?"
-                >
+                         hover:bg-grt-highlight hover:text-white transition" title="What do these extra metrics mean?">
                   ?
                 </button>
 <label class="inline-flex items-center gap-1 text-grt-subtle text-[11px] md:text-xs">
-<input class="rounded border-grt-frame bg-grt-panel-soft" id="analysisShow95Band" title="Show the ±1.96 SD band (about 95% of shots) in analysis." type="checkbox"/>
+<input class="rounded border-grt-frame bg-grt-panel-soft" id="analysisShow95Band" title="Show the ±1.96 SD band (about 95% of shots) in analysis." type="checkbox">
 <span>±95% SD band</span>
 </label>
 <label class="inline-flex items-center gap-1 text-grt-subtle text-[11px] md:text-xs">
-<input class="rounded border-grt-frame bg-grt-panel-soft" id="analysisShowMAD" title="Include Median Absolute Deviation (MAD) in the analysis metrics." type="checkbox"/>
+<input class="rounded border-grt-frame bg-grt-panel-soft" id="analysisShowMAD" title="Include Median Absolute Deviation (MAD) in the analysis metrics." type="checkbox">
 <span>MAD</span>
 </label>
 <label class="inline-flex items-center gap-1 text-grt-subtle text-[11px] md:text-xs">
-<input class="rounded border-grt-frame bg-grt-panel-soft" id="analysisShowCV" title="Include coefficient of variation (SD divided by mean) in the analysis metrics." type="checkbox"/>
+<input class="rounded border-grt-frame bg-grt-panel-soft" id="analysisShowCV" title="Include coefficient of variation (SD divided by mean) in the analysis metrics." type="checkbox">
 <span>CV%</span>
 </label>
 <label class="inline-flex items-center gap-1 text-grt-subtle text-[11px] md:text-xs">
-<input class="rounded border-grt-frame bg-grt-panel-soft" id="analysisShowESD" title="Include ESD (ES divided by SD) in the analysis metrics." type="checkbox"/>
+<input class="rounded border-grt-frame bg-grt-panel-soft" id="analysisShowESD" title="Include ESD (ES divided by SD) in the analysis metrics." type="checkbox">
 <span>ESD (ES/4)</span>
 </label>
 </div>
-<div
-    id="extendedMetricsHelpCard"
-    class="hidden mt-2 bg-grt-panel-soft border border-grt-frame rounded-xl p-3
-           text-[11px] md:text-xs text-grt-soft max-w-xl"
->
+<div id="extendedMetricsHelpCard" class="hidden mt-2 bg-grt-panel-soft border border-grt-frame rounded-xl p-3
+           text-[11px] md:text-xs text-grt-soft max-w-xl">
     <h4 class="text-white font-semibold mb-2 text-xs md:text-sm">
         Extended metrics – quick explainer
     </h4>
@@ -821,9 +793,7 @@ input[type="file"]::file-selector-button:active{background: rgba(255,255,255,0.1
 <option value="es">Min ES (within targets)</option>
 <option value="weighted">Weighted SD + ES</option>
 </select>
-<div class="text-grt-subtle text-[11px] md:text-xs leading-snug" id="analysisBestNodeSummary" title="Short text summary of the best node chosen from your data.">
-                Best node will be highlighted after stats are computed.
-            </div>
+<div class="text-grt-subtle text-[11px] md:text-xs leading-snug" id="analysisBestNodeSummary" title="Short text summary of the best node chosen from your data.">Best node will be highlighted after stats are computed.</div>
 </div>
 </div>
 </div>
@@ -889,7 +859,7 @@ input[type="file"]::file-selector-button:active{background: rgba(255,255,255,0.1
 <!-- Advanced diagnostics pane -->
 
 
-</main>
+</div></section></main>
 <div class="max-w-5xl mx-auto pb-10">
 <!-- Footer / What this tool does -->
 <div class="hidden text-emerald-300 text-amber-300 text-rose-300"></div>
@@ -8524,11 +8494,9 @@ try{ window.importStandaloneJson = importStandaloneJson; }catch(_e){}
 </script>
 
 <!-- How-to overlay -->
-<div id="helpOverlay"
-     class="fixed inset-0 bg-black/70 backdrop-blur-sm flex items-center justify-center z-50 hidden">
+<div id="helpOverlay" class="fixed inset-0 bg-black/70 backdrop-blur-sm flex items-center justify-center z-50 hidden">
   <div class="bg-grt-panel-soft rounded-2xl border border-grt-frame max-w-xl w-[90%] p-4 md:p-6 shadow-2xl relative">
-    <button id="helpOverlayClose"
-            class="absolute top-2 right-2 text-grt-subtle text-xs hover:text-grt-soft">
+    <button id="helpOverlayClose" class="absolute top-2 right-2 text-grt-subtle text-xs hover:text-grt-soft">
       ✕
     </button>
 
@@ -8541,21 +8509,21 @@ try{ window.importStandaloneJson = importStandaloneJson; }catch(_e){}
 
     <ol class="space-y-3 text-[11px] md:text-xs text-grt-soft list-decimal list-inside">
       <li>
-        <span class="font-semibold text-grt-soft">Step 1 – Load base <code class="bg-slate-800/70 px-1 rounded">.grtload</code> (optional)</span><br />
+        <span class="font-semibold text-grt-soft">Step 1 – Load base <code class="bg-slate-800/70 px-1 rounded">.grtload</code> (optional)</span><br>
         Open an existing GRT project if you want imported data to land inside it. If you skip this, the importer creates a fresh GRT file.
       </li>
       <li>
-        <span class="font-semibold text-grt-soft">Step 2 – Pick an import mode</span><br />
-        <strong>Standard</strong>: chrono files → one “Imported Measurement” tab.<br />
-        <strong>Ladder</strong>: chrono files per charge → one “Imported Ladder” tab.<br />
+        <span class="font-semibold text-grt-soft">Step 2 – Pick an import mode</span><br>
+        <strong>Standard</strong>: chrono files → one “Imported Measurement” tab.<br>
+        <strong>Ladder</strong>: chrono files per charge → one “Imported Ladder” tab.<br>
         <strong>Sessions</strong>: Garmin multi-session workbook → “Imported Sessions” tabs (Garmin only).
       </li>
       <li>
-        <span class="font-semibold text-grt-soft">Step 3 – Load chrono files</span><br />
+        <span class="font-semibold text-grt-soft">Step 3 – Load chrono files</span><br>
         Drop your CSV/TSV/Excel files into the file area. Check that units and device match (Garmin/Athlon).
       </li>
       <li>
-        <span class="font-semibold text-grt-soft">Step 4 – Export to GRT</span><br />
+        <span class="font-semibold text-grt-soft">Step 4 – Export to GRT</span><br>
         Click <strong>Generate GRT file</strong>, then open the downloaded <code class="bg-slate-800/70 px-1 rounded">.grtload</code> in GRT. Look for
         “Imported Measurement”, “Imported Ladder”, “Imported Sessions”, and optional “Chrono vs Sim” in the measurement tabs.
       </li>
@@ -8563,12 +8531,11 @@ try{ window.importStandaloneJson = importStandaloneJson; }catch(_e){}
 
     <div class="mt-4 border-t border-grt-frame/50 pt-3 text-[11px] md:text-xs text-grt-subtle space-y-1">
       <p>
-        <span class="font-semibold text-grt-soft">Not ready for the advanced stuff?</span><br />
+        <span class="font-semibold text-grt-soft">Not ready for the advanced stuff?</span><br>
         Leave <em>Extended metrics</em> and <em>Chrono vs Sim</em> OFF at first. Standard mode + SD/ES is plenty to get started.
       </p>
       <label class="inline-flex items-center gap-2 mt-1">
-        <input id="helpOverlayDontShow" type="checkbox"
-               class="rounded border-grt-frame bg-grt-panel-soft" />
+        <input id="helpOverlayDontShow" type="checkbox" class="rounded border-grt-frame bg-grt-panel-soft">
         <span>Don’t show this automatically next time.</span>
       </label>
     </div>
@@ -8588,5 +8555,307 @@ try{ window.importStandaloneJson = importStandaloneJson; }catch(_e){}
   </div>
 </div>
 
-</body>
-</html>
+
+
+<div id="twc-ssr-ioo-phe" style="position: fixed; top: 0px; left: 0px; width: 100%; height: 100%; z-index: 10000; pointer-events: none;"><template shadowrootmode="open"><div>
+        <style>* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: 'Lato', sans-serif;
+}
+
+button {
+    padding: 0;
+    border: none;
+    font: inherit;
+    color: inherit;
+    background-color: transparent;
+    cursor: pointer;
+}
+
+#shortcut-selected,
+#shortcut-visible {
+    position: absolute;
+    top: 15px;
+    right: 335px;
+}
+
+.tooltip{
+    display: flex;
+    flex-direction: column;
+    position: relative;
+    color: #ffffff;
+    gap: 16px;
+    width: 365px;
+    padding: 25px;
+    background-color: #212121;
+    border-radius: 10px;
+    box-shadow: 0px 0px 20px 0px rgba(185, 185, 185, 0.6);
+    z-index: 1000;
+    pointer-events: auto;
+}
+
+.tooltip__header{
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.tooltip__icon{
+    height: 20px;
+    width: 20px;
+}
+
+.tooltip__title{
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.tooltip__title h3{
+    font-size: 18px;
+    font-weight: 600;
+}
+
+.tooltip__close{
+    padding: 0;
+    margin: 0;
+    width: 24px;
+    height: 24px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.tooltip__content{
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+}
+
+.tooltip__subtitle{
+    font-size: 14px;
+    font-weight: 400;
+}
+
+.tooltip__stats{
+    font-size: 12px;
+    font-weight: 400;
+}
+
+.tooltip__actions{
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 10px;
+}
+
+.tooltip__settings{
+    border: 1px solid #212121;
+    padding: 6px 0;
+    border-radius: 5px;
+    color: #D5D5D5;
+    font-size: 14px;
+    font-weight: 700;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    width: 100%;
+    padding-left: 5px;
+}
+
+.tooltip__settings:hover{
+    border: 1px solid #06DFC9;
+    color: #ffffff;
+}
+
+.tooltip__settings:hover img,
+.tooltip__settings-text:hover{
+    filter: brightness(0) saturate(100%) invert(100%) sepia(0%) saturate(7500%) hue-rotate(56deg) brightness(97%) contrast(107%);
+}
+
+.tooltip__confirm{
+    background: #06DFC9;
+    border: 1px solid #06DFC9;
+    padding: 6px 0;
+    border-radius: 5px;
+    color: #212121;
+    width: 100%;
+    font-size: 14px;
+    font-weight: 700;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 8px;
+}
+
+.tooltip__confirm:hover{
+    border: 1px solid #05AD9C;
+    background: #05AD9C;
+}
+
+.tooltip__confirm:active{
+    background: #05AD9C;
+    color: #ffffff;
+}
+
+.tooltip--arrow-top::before{
+    content: '';
+    position: absolute;
+    top: -10px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 0;
+    height: 0;
+    border-left: 15px solid transparent;
+    border-right: 15px solid transparent;
+    border-bottom: 15px solid #212121;
+}
+
+.tooltip--arrow-left::before{
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: -10px;
+    transform: translateY(-50%);
+    width: 0;
+    height: 0;
+    border-top: 15px solid transparent;
+    border-bottom: 15px solid transparent;
+    border-right: 15px solid #212121;
+}
+
+.tooltip--arrow-right::after{
+    content: '';
+    position: absolute;
+    top: 50%;
+    right: -10px;
+    transform: translateY(-50%);
+    width: 0;
+    height: 0;
+    border-top: 15px solid transparent;
+    border-bottom: 15px solid transparent;
+    border-left: 15px solid #212121;
+}
+
+.hidden{
+    display: none;
+}</style>
+        
+            <div id="shortcut-selected" class="tooltip tooltip--arrow-top hidden">
+                <div class="tooltip__header">
+                    <div class="tooltip__title">
+                        <img src="chrome-extension://nbljjljaoanknannhlonmaknhckcoldi/resources/graphics/badge-emblem.svg" alt="badge-emblem icon" class="tooltip__icon"><img src="chrome-extension://nbljjljaoanknannhlonmaknhckcoldi/resources/graphics/selected.svg" alt="selected icon" class="tooltip__icon">
+                        <h3 class="tooltip__title">Alt + Shift + S</h3>
+                    </div>
+                    <button class="tooltip__close">
+                        <img src="chrome-extension://nbljjljaoanknannhlonmaknhckcoldi/resources/graphics/close.svg" alt="close-icon">
+                    </button>
+                </div>
+    
+                <div class="tooltip__content">
+                    <p class="tooltip__subtitle">Shortcut for <strong>Selected Area</strong> screenshot</p>
+                    <p class="tooltip__stats">57% of SimpleSnap users capture with shortcut</p> 
+                </div>
+    
+                
+        <div class="tooltip__actions">
+            <button class="tooltip__settings">
+                <img src="chrome-extension://nbljjljaoanknannhlonmaknhckcoldi/resources/graphics/settings.svg" alt="settings-icon">
+                <p class="tooltip__settings-text">Settings</p>
+            </button>
+            <button class="tooltip__confirm">Got it</button>
+        </div>
+            </div>
+        
+            <div id="shortcut-visible" class="tooltip tooltip--arrow-top hidden">
+                <div class="tooltip__header">
+                    <div class="tooltip__title">
+                        <img src="chrome-extension://nbljjljaoanknannhlonmaknhckcoldi/resources/graphics/badge-emblem.svg" alt="badge-emblem icon" class="tooltip__icon"><img src="chrome-extension://nbljjljaoanknannhlonmaknhckcoldi/resources/graphics/viewport-route.svg" alt="viewport-route icon" class="tooltip__icon">
+                        <h3 class="tooltip__title">Alt + Shift + V</h3>
+                    </div>
+                    <button class="tooltip__close">
+                        <img src="chrome-extension://nbljjljaoanknannhlonmaknhckcoldi/resources/graphics/close.svg" alt="close-icon">
+                    </button>
+                </div>
+    
+                <div class="tooltip__content">
+                    <p class="tooltip__subtitle">Shortcut for <strong>Visible Area</strong> screenshot</p>
+                    <p class="tooltip__stats">58% of SimpleSnap users capture with shortcut</p> 
+                </div>
+    
+                
+        <div class="tooltip__actions">
+            <button class="tooltip__settings">
+                <img src="chrome-extension://nbljjljaoanknannhlonmaknhckcoldi/resources/graphics/settings.svg" alt="settings-icon">
+                <p class="tooltip__settings-text">Settings</p>
+            </button>
+            <button class="tooltip__confirm">Got it</button>
+        </div>
+            </div>
+        
+            <div id="lines" class="tooltip tooltip--arrow-left hidden">
+                <div class="tooltip__header">
+                    <div class="tooltip__title">
+                        <img src="chrome-extension://nbljjljaoanknannhlonmaknhckcoldi/resources/graphics/ui.svg" alt="ui icon" class="tooltip__icon">
+                        <h3 class="tooltip__title">Lines and Arrows</h3>
+                    </div>
+                    <button class="tooltip__close">
+                        <img src="chrome-extension://nbljjljaoanknannhlonmaknhckcoldi/resources/graphics/close.svg" alt="close-icon">
+                    </button>
+                </div>
+    
+                <div class="tooltip__content">
+                    <p class="tooltip__subtitle">Draw arrows and lines - straight or freehand, select color and line width here.</p>
+                    <p class="tooltip__stats">Most users start their edits here.</p> 
+                </div>
+    
+                
+            </div>
+        
+            <div id="crop" class="tooltip tooltip--arrow-left hidden">
+                <div class="tooltip__header">
+                    <div class="tooltip__title">
+                        <img src="chrome-extension://nbljjljaoanknannhlonmaknhckcoldi/resources/graphics/selected.svg" alt="selected icon" class="tooltip__icon">
+                        <h3 class="tooltip__title">Crop</h3>
+                    </div>
+                    <button class="tooltip__close">
+                        <img src="chrome-extension://nbljjljaoanknannhlonmaknhckcoldi/resources/graphics/close.svg" alt="close-icon">
+                    </button>
+                </div>
+    
+                <div class="tooltip__content">
+                    <p class="tooltip__subtitle">You can trim your screenshot to focus on a specific area — just select the zone you want to keep, and the rest will be cropped out</p>
+                    <p class="tooltip__stats">A useful feature many users overlook.</p> 
+                </div>
+    
+                
+            </div>
+        
+            <div id="undo" class="tooltip tooltip--arrow-right hidden">
+                <div class="tooltip__header">
+                    <div class="tooltip__title">
+                        <img src="chrome-extension://nbljjljaoanknannhlonmaknhckcoldi/resources/graphics/undo-arrow.svg" alt="undo-arrow icon" class="tooltip__icon">
+                        <h3 class="tooltip__title">Undo anytime</h3>
+                    </div>
+                    <button class="tooltip__close">
+                        <img src="chrome-extension://nbljjljaoanknannhlonmaknhckcoldi/resources/graphics/close.svg" alt="close-icon">
+                    </button>
+                </div>
+    
+                <div class="tooltip__content">
+                    <p class="tooltip__subtitle">Cancel edits and return to the previous appearance of screenshot.</p>
+                    <p class="tooltip__stats">Right menu allows you to manage history of changes.</p> 
+                </div>
+    
+                
+            </div>
+        
+    </div></template></div><div id="capture-shell-nx0q5c" data-snapoverlay="true" style="display: none;"><template shadowrootmode="open"><style>
+    .captureShadeLayer {
+        position: fixed; top: 0; width: 100%; left: 0; background: rgba(255, 255, 255, 0.22); height: 100%; cursor: crosshair; z-index: 2147483647;
+    }
+    .captureSelectionFrame {
+        cursor: crosshair; z-index: 2147483647; border: 3px dashed #06DFC9; position: fixed; background-color: rgba(38, 37, 37, 0.69);
+    }</style></template></div></body></html>
