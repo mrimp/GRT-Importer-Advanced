@@ -5,8 +5,10 @@
 
 <meta content="width=device-width, initial-scale=1.0" name="viewport">
 <title>GRT Importer Advanced v0.87.3</title>
-<script src="./GRT Importer Advanced v0.87.1_files/xlsx.full.min.js.download"></script>
-<script src="./GRT Importer Advanced v0.87.1_files/saved_resource"></script>
+<script src="./GRT Importer Advanced v0.87.1_files/xlsx.full.min.js.download"
+  onerror="this.onerror=null;this.src='https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js';"></script>
+<script src="./GRT Importer Advanced v0.87.1_files/saved_resource"
+  onerror="this.onerror=null;this.src='https://cdn.tailwindcss.com';"></script>
 <style>
         :root {
             --grt-bg: #10141c;
@@ -5831,9 +5833,7 @@ function generateMinimalGRT() {
                         </polyline>
                     </svg>
                 `;
-                const accent = (getComputedStyle(document.documentElement).getPropertyValue('--grt-accent') || '').trim() || '#3c86c7';
-                el.style.color = accent;
-                const poly = el.querySelector('polyline'); if (poly) poly.setAttribute('stroke', accent);
+                el.classList.add('text-[var(--grt-accent)]');
             });
         }
 
@@ -7959,27 +7959,4 @@ function closeSmDrilldown(){
   window.addEventListener('resize', hide, true);
 })();
 </script>
-
-<script>
-(function(){
-  try{
-    const qs = new URLSearchParams(location.search);
-    if(qs.get('debug')!=='1') return;
-    const root = document.documentElement;
-    const accent = (getComputedStyle(root).getPropertyValue('--grt-accent')||'').trim() || '#3c86c7';
-    const b = document.createElement('div');
-    b.style.cssText = [
-      'position:fixed','right:12px','bottom:12px','z-index:99999',
-      'padding:10px 12px','border-radius:12px',
-      'background:rgba(12,18,28,.78)','backdrop-filter:blur(10px)',
-      'border:1px solid '+accent,'color:rgba(255,255,255,.88)',
-      'font:12px/1.25 system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif',
-      'box-shadow:0 10px 30px rgba(0,0,0,.35)'
-    ].join(';');
-    b.textContent = 'GRT Importer Advanced • pages-check • origin '+location.protocol+'//'+(location.host||'local')+' • accent '+accent;
-    document.body.appendChild(b);
-  }catch(e){}
-})();
-</script>
-
 </body></html>
