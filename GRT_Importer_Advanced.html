@@ -1,26 +1,12 @@
 
 <!DOCTYPE html>
-<!-- saved from url=(0046)https://mrimp.github.io/GRT-Importer-Advanced/ -->
+<!-- saved from url=(0068)file:///C:/Users/bill/Downloads/GRT_Importer_Advanced_v080_beta.html -->
 <html lang="en"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
 
 <meta content="width=device-width, initial-scale=1.0" name="viewport">
-<title>GRT Importer Advanced v0.89</title>
-<script src="./GRT Importer Advanced v0.89_files/xlsx.full.min.js.download"></script>
-<script>
-/* Silence Tailwind CDN production warning in this single-file tool */
-(function(){
-  try{
-    const _w = console.warn;
-    console.warn = function(){
-      try{
-        if(arguments && typeof arguments[0]==='string' && arguments[0].indexOf('cdn.tailwindcss.com should not be used in production')>=0) return;
-      }catch(_e){}
-      return _w.apply(console, arguments);
-    };
-  }catch(_e){}
-})();
-</script>
-<script src="./GRT Importer Advanced v0.89_files/saved_resource"></script>
+<title>GRT Importer Advanced v0.87.3</title>
+<script src="./GRT Importer Advanced v0.87.1_files/xlsx.full.min.js.download"></script>
+<script src="./GRT Importer Advanced v0.87.1_files/saved_resource"></script>
 <style>
         :root {
             --grt-bg: #10141c;
@@ -192,14 +178,48 @@ input[type="file"]::file-selector-button:active{background: rgba(255,255,255,0.1
   pointer-events:none;
   opacity:.8;
 }
+
+
+        /* ============================
+           Blue custom tooltips (replaces native title tooltips)
+           ============================ */
+        :root{
+            --xqa-tip-bg:#2563eb;        /* nice blue */
+            --xqa-tip-text:#ffffff;
+            --xqa-tip-border:rgba(255,255,255,.18);
+            --xqa-tip-shadow:0 12px 28px rgba(0,0,0,.45);
+        }
+        #xqaBlueTip{
+            position:fixed;
+            z-index:99999;
+            display:none;
+            max-width:340px;
+            padding:10px 12px;
+            border-radius:12px;
+            background:var(--xqa-tip-bg);
+            color:var(--xqa-tip-text);
+            border:1px solid var(--xqa-tip-border);
+            box-shadow:var(--xqa-tip-shadow);
+            font-size:12px;
+            line-height:1.35;
+            pointer-events:none;
+            white-space:normal;
+        }
+        #xqaBlueTip .xqaBlueTipArrow{
+            position:absolute;
+            width:10px;height:10px;
+            background:var(--xqa-tip-bg);
+            transform:rotate(45deg);
+            top:-5px;left:14px;
+            border-left:1px solid var(--xqa-tip-border);
+            border-top:1px solid var(--xqa-tip-border);
+        }
+        #xqaBlueTip .xqaBlueTipBody{
+            position:relative;
+            z-index:1;
+        }
 </style>
-<style>*, ::before, ::after{--tw-border-spacing-x:0;--tw-border-spacing-y:0;--tw-translate-x:0;--tw-translate-y:0;--tw-rotate:0;--tw-skew-x:0;--tw-skew-y:0;--tw-scale-x:1;--tw-scale-y:1;--tw-pan-x: ;--tw-pan-y: ;--tw-pinch-zoom: ;--tw-scroll-snap-strictness:proximity;--tw-gradient-from-position: ;--tw-gradient-via-position: ;--tw-gradient-to-position: ;--tw-ordinal: ;--tw-slashed-zero: ;--tw-numeric-figure: ;--tw-numeric-spacing: ;--tw-numeric-fraction: ;--tw-ring-inset: ;--tw-ring-offset-width:0px;--tw-ring-offset-color:#fff;--tw-ring-color:rgb(59 130 246 / 0.5);--tw-ring-offset-shadow:0 0 #0000;--tw-ring-shadow:0 0 #0000;--tw-shadow:0 0 #0000;--tw-shadow-colored:0 0 #0000;--tw-blur: ;--tw-brightness: ;--tw-contrast: ;--tw-grayscale: ;--tw-hue-rotate: ;--tw-invert: ;--tw-saturate: ;--tw-sepia: ;--tw-drop-shadow: ;--tw-backdrop-blur: ;--tw-backdrop-brightness: ;--tw-backdrop-contrast: ;--tw-backdrop-grayscale: ;--tw-backdrop-hue-rotate: ;--tw-backdrop-invert: ;--tw-backdrop-opacity: ;--tw-backdrop-saturate: ;--tw-backdrop-sepia: ;--tw-contain-size: ;--tw-contain-layout: ;--tw-contain-paint: ;--tw-contain-style: }::backdrop{--tw-border-spacing-x:0;--tw-border-spacing-y:0;--tw-translate-x:0;--tw-translate-y:0;--tw-rotate:0;--tw-skew-x:0;--tw-skew-y:0;--tw-scale-x:1;--tw-scale-y:1;--tw-pan-x: ;--tw-pan-y: ;--tw-pinch-zoom: ;--tw-scroll-snap-strictness:proximity;--tw-gradient-from-position: ;--tw-gradient-via-position: ;--tw-gradient-to-position: ;--tw-ordinal: ;--tw-slashed-zero: ;--tw-numeric-figure: ;--tw-numeric-spacing: ;--tw-numeric-fraction: ;--tw-ring-inset: ;--tw-ring-offset-width:0px;--tw-ring-offset-color:#fff;--tw-ring-color:rgb(59 130 246 / 0.5);--tw-ring-offset-shadow:0 0 #0000;--tw-ring-shadow:0 0 #0000;--tw-shadow:0 0 #0000;--tw-shadow-colored:0 0 #0000;--tw-blur: ;--tw-brightness: ;--tw-contrast: ;--tw-grayscale: ;--tw-hue-rotate: ;--tw-invert: ;--tw-saturate: ;--tw-sepia: ;--tw-drop-shadow: ;--tw-backdrop-blur: ;--tw-backdrop-brightness: ;--tw-backdrop-contrast: ;--tw-backdrop-grayscale: ;--tw-backdrop-hue-rotate: ;--tw-backdrop-invert: ;--tw-backdrop-opacity: ;--tw-backdrop-saturate: ;--tw-backdrop-sepia: ;--tw-contain-size: ;--tw-contain-layout: ;--tw-contain-paint: ;--tw-contain-style: }/* ! tailwindcss v3.4.17 | MIT License | https://tailwindcss.com */*,::after,::before{box-sizing:border-box;border-width:0;border-style:solid;border-color:#e5e7eb}::after,::before{--tw-content:''}:host,html{line-height:1.5;-webkit-text-size-adjust:100%;-moz-tab-size:4;tab-size:4;font-family:ui-sans-serif, system-ui, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji";font-feature-settings:normal;font-variation-settings:normal;-webkit-tap-highlight-color:transparent}body{margin:0;line-height:inherit}hr{height:0;color:inherit;border-top-width:1px}abbr:where([title]){-webkit-text-decoration:underline dotted;text-decoration:underline dotted}h1,h2,h3,h4,h5,h6{font-size:inherit;font-weight:inherit}a{color:inherit;text-decoration:inherit}b,strong{font-weight:bolder}code,kbd,pre,samp{font-family:ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;font-feature-settings:normal;font-variation-settings:normal;font-size:1em}small{font-size:80%}sub,sup{font-size:75%;line-height:0;position:relative;vertical-align:baseline}sub{bottom:-.25em}sup{top:-.5em}table{text-indent:0;border-color:inherit;border-collapse:collapse}button,input,optgroup,select,textarea{font-family:inherit;font-feature-settings:inherit;font-variation-settings:inherit;font-size:100%;font-weight:inherit;line-height:inherit;letter-spacing:inherit;color:inherit;margin:0;padding:0}button,select{text-transform:none}button,input:where([type=button]),input:where([type=reset]),input:where([type=submit]){-webkit-appearance:button;background-color:transparent;background-image:none}:-moz-focusring{outline:auto}:-moz-ui-invalid{box-shadow:none}progress{vertical-align:baseline}::-webkit-inner-spin-button,::-webkit-outer-spin-button{height:auto}[type=search]{-webkit-appearance:textfield;outline-offset:-2px}::-webkit-search-decoration{-webkit-appearance:none}::-webkit-file-upload-button{-webkit-appearance:button;font:inherit}summary{display:list-item}blockquote,dd,dl,figure,h1,h2,h3,h4,h5,h6,hr,p,pre{margin:0}fieldset{margin:0;padding:0}legend{padding:0}menu,ol,ul{list-style:none;margin:0;padding:0}dialog{padding:0}textarea{resize:vertical}input::placeholder,textarea::placeholder{opacity:1;color:#9ca3af}[role=button],button{cursor:pointer}:disabled{cursor:default}audio,canvas,embed,iframe,img,object,svg,video{display:block;vertical-align:middle}img,video{max-width:100%;height:auto}[hidden]:where(:not([hidden=until-found])){display:none}.fixed{position:fixed}.absolute{position:absolute}.relative{position:relative}.inset-0{inset:0px}.right-0{right:0px}.right-2{right:0.5rem}.top-0{top:0px}.top-2{top:0.5rem}.z-50{z-index:50}.z-\[80\]{z-index:80}.mx-1{margin-left:0.25rem;margin-right:0.25rem}.mx-auto{margin-left:auto;margin-right:auto}.mb-1{margin-bottom:0.25rem}.mb-1\.5{margin-bottom:0.375rem}.mb-2{margin-bottom:0.5rem}.mb-3{margin-bottom:0.75rem}.mb-4{margin-bottom:1rem}.mb-5{margin-bottom:1.25rem}.ml-2{margin-left:0.5rem}.mt-1{margin-top:0.25rem}.mt-2{margin-top:0.5rem}.mt-3{margin-top:0.75rem}.mt-4{margin-top:1rem}.mt-6{margin-top:1.5rem}.block{display:block}.inline-block{display:inline-block}.flex{display:flex}.inline-flex{display:inline-flex}.grid{display:grid}.hidden{display:none}.h-1\.5{height:0.375rem}.h-10{height:2.5rem}.h-4{height:1rem}.h-5{height:1.25rem}.h-px{height:1px}.h-full{height:100%}.min-h-screen{min-height:100vh}.w-1\.5{width:0.375rem}.w-10{width:2.5rem}.w-20{width:5rem}.w-36{width:9rem}.w-4{width:1rem}.w-5{width:1.25rem}.w-full{width:100%}.w-\[90\%\]{width:90%}.max-w-5xl{max-width:64rem}.max-w-xl{max-width:36rem}.max-w-\[120px\]{max-width:120px}.flex-1{flex:1 1 0%}.flex-shrink-0{flex-shrink:0}.transform{transform:translate(var(--tw-translate-x), var(--tw-translate-y)) rotate(var(--tw-rotate)) skewX(var(--tw-skew-x)) skewY(var(--tw-skew-y)) scaleX(var(--tw-scale-x)) scaleY(var(--tw-scale-y))}@keyframes pulse{50%{opacity:.5}}.animate-pulse{animation:pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite}.cursor-help{cursor:help}.cursor-not-allowed{cursor:not-allowed}.cursor-pointer{cursor:pointer}.list-inside{list-style-position:inside}.list-decimal{list-style-type:decimal}.list-disc{list-style-type:disc}.grid-cols-1{grid-template-columns:repeat(1, minmax(0, 1fr))}.flex-col{flex-direction:column}.flex-wrap{flex-wrap:wrap}.items-start{align-items:flex-start}.items-end{align-items:flex-end}.items-center{align-items:center}.justify-end{justify-content:flex-end}.justify-center{justify-content:center}.justify-between{justify-content:space-between}.gap-1{gap:0.25rem}.gap-2{gap:0.5rem}.gap-3{gap:0.75rem}.gap-4{gap:1rem}.gap-x-4{column-gap:1rem}.gap-y-1{row-gap:0.25rem}.space-y-1 > :not([hidden]) ~ :not([hidden]){--tw-space-y-reverse:0;margin-top:calc(0.25rem * calc(1 - var(--tw-space-y-reverse)));margin-bottom:calc(0.25rem * var(--tw-space-y-reverse))}.space-y-1\.5 > :not([hidden]) ~ :not([hidden]){--tw-space-y-reverse:0;margin-top:calc(0.375rem * calc(1 - var(--tw-space-y-reverse)));margin-bottom:calc(0.375rem * var(--tw-space-y-reverse))}.space-y-2 > :not([hidden]) ~ :not([hidden]){--tw-space-y-reverse:0;margin-top:calc(0.5rem * calc(1 - var(--tw-space-y-reverse)));margin-bottom:calc(0.5rem * var(--tw-space-y-reverse))}.space-y-4 > :not([hidden]) ~ :not([hidden]){--tw-space-y-reverse:0;margin-top:calc(1rem * calc(1 - var(--tw-space-y-reverse)));margin-bottom:calc(1rem * var(--tw-space-y-reverse))}.space-y-5 > :not([hidden]) ~ :not([hidden]){--tw-space-y-reverse:0;margin-top:calc(1.25rem * calc(1 - var(--tw-space-y-reverse)));margin-bottom:calc(1.25rem * var(--tw-space-y-reverse))}.space-y-3 > :not([hidden]) ~ :not([hidden]){--tw-space-y-reverse:0;margin-top:calc(0.75rem * calc(1 - var(--tw-space-y-reverse)));margin-bottom:calc(0.75rem * var(--tw-space-y-reverse))}.overflow-y-auto{overflow-y:auto}.truncate{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.rounded{border-radius:0.25rem}.rounded-2xl{border-radius:1rem}.rounded-full{border-radius:9999px}.rounded-lg{border-radius:0.5rem}.rounded-md{border-radius:0.375rem}.rounded-xl{border-radius:0.75rem}.border{border-width:1px}.border-l{border-left-width:1px}.border-t{border-top-width:1px}.border-dashed{border-style:dashed}.border-emerald-500\/40{border-color:rgb(16 185 129 / 0.4)}.border-emerald-500\/80{border-color:rgb(16 185 129 / 0.8)}.border-emerald-600\/70{border-color:rgb(5 150 105 / 0.7)}.border-emerald-700\/70{border-color:rgb(4 120 87 / 0.7)}.bg-\[var\(--grt-accent\)\]{background-color:var(--grt-accent)}.bg-emerald-400{--tw-bg-opacity:1;background-color:rgb(52 211 153 / var(--tw-bg-opacity, 1))}.bg-emerald-500\/20{background-color:rgb(16 185 129 / 0.2)}.bg-emerald-600{--tw-bg-opacity:1;background-color:rgb(5 150 105 / var(--tw-bg-opacity, 1))}.bg-emerald-900\/70{background-color:rgb(6 78 59 / 0.7)}.bg-emerald-950\/70{background-color:rgb(2 44 34 / 0.7)}.bg-rose-400{--tw-bg-opacity:1;background-color:rgb(251 113 133 / var(--tw-bg-opacity, 1))}.bg-sky-400{--tw-bg-opacity:1;background-color:rgb(56 189 248 / var(--tw-bg-opacity, 1))}.bg-slate-500{--tw-bg-opacity:1;background-color:rgb(100 116 139 / var(--tw-bg-opacity, 1))}.bg-slate-800\/70{background-color:rgb(30 41 59 / 0.7)}.bg-slate-800\/80{background-color:rgb(30 41 59 / 0.8)}.bg-black\/70{background-color:rgb(0 0 0 / 0.7)}.p-2\.5{padding:0.625rem}.p-3{padding:0.75rem}.p-4{padding:1rem}.p-5{padding:1.25rem}.p-6{padding:1.5rem}.px-1{padding-left:0.25rem;padding-right:0.25rem}.px-2{padding-left:0.5rem;padding-right:0.5rem}.px-2\.5{padding-left:0.625rem;padding-right:0.625rem}.px-3{padding-left:0.75rem;padding-right:0.75rem}.px-4{padding-left:1rem;padding-right:1rem}.px-5{padding-left:1.25rem;padding-right:1.25rem}.py-0\.5{padding-top:0.125rem;padding-bottom:0.125rem}.py-1{padding-top:0.25rem;padding-bottom:0.25rem}.py-1\.5{padding-top:0.375rem;padding-bottom:0.375rem}.py-2{padding-top:0.5rem;padding-bottom:0.5rem}.py-2\.5{padding-top:0.625rem;padding-bottom:0.625rem}.pb-10{padding-bottom:2.5rem}.pt-3{padding-top:0.75rem}.font-mono{font-family:ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace}.text-3xl{font-size:1.875rem;line-height:2.25rem}.text-\[10px\]{font-size:10px}.text-\[11px\]{font-size:11px}.text-\[9px\]{font-size:9px}.text-lg{font-size:1.125rem;line-height:1.75rem}.text-sm{font-size:0.875rem;line-height:1.25rem}.text-xl{font-size:1.25rem;line-height:1.75rem}.text-xs{font-size:0.75rem;line-height:1rem}.font-bold{font-weight:700}.font-extrabold{font-weight:800}.font-medium{font-weight:500}.font-semibold{font-weight:600}.uppercase{text-transform:uppercase}.leading-relaxed{line-height:1.625}.leading-snug{line-height:1.375}.tracking-wide{letter-spacing:0.025em}.text-amber-300{--tw-text-opacity:1;color:rgb(252 211 77 / var(--tw-text-opacity, 1))}.text-emerald-200{--tw-text-opacity:1;color:rgb(167 243 208 / var(--tw-text-opacity, 1))}.text-emerald-300{--tw-text-opacity:1;color:rgb(110 231 183 / var(--tw-text-opacity, 1))}.text-rose-300{--tw-text-opacity:1;color:rgb(253 164 175 / var(--tw-text-opacity, 1))}.text-slate-100{--tw-text-opacity:1;color:rgb(241 245 249 / var(--tw-text-opacity, 1))}.text-slate-200{--tw-text-opacity:1;color:rgb(226 232 240 / var(--tw-text-opacity, 1))}.text-white{--tw-text-opacity:1;color:rgb(255 255 255 / var(--tw-text-opacity, 1))}.opacity-60{opacity:0.6}.opacity-90{opacity:0.9}.shadow-2xl{--tw-shadow:0 25px 50px -12px rgb(0 0 0 / 0.25);--tw-shadow-colored:0 25px 50px -12px var(--tw-shadow-color);box-shadow:var(--tw-ring-offset-shadow, 0 0 #0000), var(--tw-ring-shadow, 0 0 #0000), var(--tw-shadow)}.shadow-inner{--tw-shadow:inset 0 2px 4px 0 rgb(0 0 0 / 0.05);--tw-shadow-colored:inset 0 2px 4px 0 var(--tw-shadow-color);box-shadow:var(--tw-ring-offset-shadow, 0 0 #0000), var(--tw-ring-shadow, 0 0 #0000), var(--tw-shadow)}.shadow-lg{--tw-shadow:0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);--tw-shadow-colored:0 10px 15px -3px var(--tw-shadow-color), 0 4px 6px -4px var(--tw-shadow-color);box-shadow:var(--tw-ring-offset-shadow, 0 0 #0000), var(--tw-ring-shadow, 0 0 #0000), var(--tw-shadow)}.shadow-md{--tw-shadow:0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);--tw-shadow-colored:0 4px 6px -1px var(--tw-shadow-color), 0 2px 4px -2px var(--tw-shadow-color);box-shadow:var(--tw-ring-offset-shadow, 0 0 #0000), var(--tw-ring-shadow, 0 0 #0000), var(--tw-shadow)}.shadow-sm{--tw-shadow:0 1px 2px 0 rgb(0 0 0 / 0.05);--tw-shadow-colored:0 1px 2px 0 var(--tw-shadow-color);box-shadow:var(--tw-ring-offset-shadow, 0 0 #0000), var(--tw-ring-shadow, 0 0 #0000), var(--tw-shadow)}.shadow-xl{--tw-shadow:0 20px 25px -5px rgb(0 0 0 / 0.1), 0 8px 10px -6px rgb(0 0 0 / 0.1);--tw-shadow-colored:0 20px 25px -5px var(--tw-shadow-color), 0 8px 10px -6px var(--tw-shadow-color);box-shadow:var(--tw-ring-offset-shadow, 0 0 #0000), var(--tw-ring-shadow, 0 0 #0000), var(--tw-shadow)}.backdrop-blur-sm{--tw-backdrop-blur:blur(4px);-webkit-backdrop-filter:var(--tw-backdrop-blur) var(--tw-backdrop-brightness) var(--tw-backdrop-contrast) var(--tw-backdrop-grayscale) var(--tw-backdrop-hue-rotate) var(--tw-backdrop-invert) var(--tw-backdrop-opacity) var(--tw-backdrop-saturate) var(--tw-backdrop-sepia);backdrop-filter:var(--tw-backdrop-blur) var(--tw-backdrop-brightness) var(--tw-backdrop-contrast) var(--tw-backdrop-grayscale) var(--tw-backdrop-hue-rotate) var(--tw-backdrop-invert) var(--tw-backdrop-opacity) var(--tw-backdrop-saturate) var(--tw-backdrop-sepia)}.transition{transition-property:color, background-color, border-color, fill, stroke, opacity, box-shadow, transform, filter, -webkit-text-decoration-color, -webkit-backdrop-filter;transition-property:color, background-color, border-color, text-decoration-color, fill, stroke, opacity, box-shadow, transform, filter, backdrop-filter;transition-property:color, background-color, border-color, text-decoration-color, fill, stroke, opacity, box-shadow, transform, filter, backdrop-filter, -webkit-text-decoration-color, -webkit-backdrop-filter;transition-timing-function:cubic-bezier(0.4, 0, 0.2, 1);transition-duration:150ms}.transition-colors{transition-property:color, background-color, border-color, fill, stroke, -webkit-text-decoration-color;transition-property:color, background-color, border-color, text-decoration-color, fill, stroke;transition-property:color, background-color, border-color, text-decoration-color, fill, stroke, -webkit-text-decoration-color;transition-timing-function:cubic-bezier(0.4, 0, 0.2, 1);transition-duration:150ms}.transition-transform{transition-property:transform;transition-timing-function:cubic-bezier(0.4, 0, 0.2, 1);transition-duration:150ms}.file\:mr-2::file-selector-button{margin-right:0.5rem}.file\:rounded-md::file-selector-button{border-radius:0.375rem}.file\:border-0::file-selector-button{border-width:0px}.file\:px-3::file-selector-button{padding-left:0.75rem;padding-right:0.75rem}.file\:py-1::file-selector-button{padding-top:0.25rem;padding-bottom:0.25rem}.file\:text-white::file-selector-button{--tw-text-opacity:1;color:rgb(255 255 255 / var(--tw-text-opacity, 1))}.hover\:-translate-y-0\.5:hover{--tw-translate-y:-0.125rem;transform:translate(var(--tw-translate-x), var(--tw-translate-y)) rotate(var(--tw-rotate)) skewX(var(--tw-skew-x)) skewY(var(--tw-skew-y)) scaleX(var(--tw-scale-x)) scaleY(var(--tw-scale-y))}.hover\:bg-\[var\(--grt-accent-soft\)\]:hover{background-color:var(--grt-accent-soft)}.hover\:bg-emerald-500:hover{--tw-bg-opacity:1;background-color:rgb(16 185 129 / var(--tw-bg-opacity, 1))}.hover\:bg-emerald-700\/40:hover{background-color:rgb(4 120 87 / 0.4)}.hover\:text-white:hover{--tw-text-opacity:1;color:rgb(255 255 255 / var(--tw-text-opacity, 1))}.hover\:shadow-lg:hover{--tw-shadow:0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);--tw-shadow-colored:0 10px 15px -3px var(--tw-shadow-color), 0 4px 6px -4px var(--tw-shadow-color);box-shadow:var(--tw-ring-offset-shadow, 0 0 #0000), var(--tw-ring-shadow, 0 0 #0000), var(--tw-shadow)}.focus\:border-\[var\(--grt-accent\)\]:focus{border-color:var(--grt-accent)}.focus\:outline-none:focus{outline:2px solid transparent;outline-offset:2px}.focus\:ring-1:focus{--tw-ring-offset-shadow:var(--tw-ring-inset) 0 0 0 var(--tw-ring-offset-width) var(--tw-ring-offset-color);--tw-ring-shadow:var(--tw-ring-inset) 0 0 0 calc(1px + var(--tw-ring-offset-width)) var(--tw-ring-color);box-shadow:var(--tw-ring-offset-shadow), var(--tw-ring-shadow), var(--tw-shadow, 0 0 #0000)}.focus\:ring-2:focus{--tw-ring-offset-shadow:var(--tw-ring-inset) 0 0 0 var(--tw-ring-offset-width) var(--tw-ring-offset-color);--tw-ring-shadow:var(--tw-ring-inset) 0 0 0 calc(2px + var(--tw-ring-offset-width)) var(--tw-ring-color);box-shadow:var(--tw-ring-offset-shadow), var(--tw-ring-shadow), var(--tw-shadow, 0 0 #0000)}.focus\:ring-\[var\(--grt-accent\)\]:focus{--tw-ring-color:var(--grt-accent)}@media (min-width: 640px){.sm\:w-\[520px\]{width:520px}.sm\:flex-row{flex-direction:row}.sm\:flex-wrap{flex-wrap:wrap}}@media (min-width: 768px){.md\:mb-5{margin-bottom:1.25rem}.md\:flex{display:flex}.md\:h-12{height:3rem}.md\:w-12{width:3rem}.md\:max-w-\[40\%\]{max-width:40%}.md\:max-w-\[60\%\]{max-width:60%}.md\:max-w-\[160px\]{max-width:160px}.md\:grid-cols-1{grid-template-columns:repeat(1, minmax(0, 1fr))}.md\:grid-cols-3{grid-template-columns:repeat(3, minmax(0, 1fr))}.md\:flex-row{flex-direction:row}.md\:items-start{align-items:flex-start}.md\:items-center{align-items:center}.md\:items-baseline{align-items:baseline}.md\:justify-between{justify-content:space-between}.md\:gap-3{gap:0.75rem}.md\:space-y-5 > :not([hidden]) ~ :not([hidden]){--tw-space-y-reverse:0;margin-top:calc(1.25rem * calc(1 - var(--tw-space-y-reverse)));margin-bottom:calc(1.25rem * var(--tw-space-y-reverse))}.md\:space-y-6 > :not([hidden]) ~ :not([hidden]){--tw-space-y-reverse:0;margin-top:calc(1.5rem * calc(1 - var(--tw-space-y-reverse)));margin-bottom:calc(1.5rem * var(--tw-space-y-reverse))}.md\:p-4{padding:1rem}.md\:p-6{padding:1.5rem}.md\:text-4xl{font-size:2.25rem;line-height:2.5rem}.md\:text-\[11px\]{font-size:11px}.md\:text-base{font-size:1rem;line-height:1.5rem}.md\:text-sm{font-size:0.875rem;line-height:1.25rem}.md\:text-xl{font-size:1.25rem;line-height:1.75rem}.md\:text-xs{font-size:0.75rem;line-height:1rem}}@media (min-width: 1024px){.lg\:w-64{width:16rem}.lg\:grid-cols-3{grid-template-columns:repeat(3, minmax(0, 1fr))}.lg\:flex-row{flex-direction:row}}</style><style>
-            .captureFixedShim { position: absolute !important; }
-            .captureStickyShim { position: static !important; }
-            .captureHeaderShim { position: relative !important; }
-        </style><link href="./GRT Importer Advanced v0.89_files/css2" rel="stylesheet"><style id="ar2b2a445c13style">
-				.ar2b2a445c13hidden{ position:absolute !important; opacity:0 !important; pointer-events:none !important}
-			</style></head>
+<style>*, ::before, ::after{--tw-border-spacing-x:0;--tw-border-spacing-y:0;--tw-translate-x:0;--tw-translate-y:0;--tw-rotate:0;--tw-skew-x:0;--tw-skew-y:0;--tw-scale-x:1;--tw-scale-y:1;--tw-pan-x: ;--tw-pan-y: ;--tw-pinch-zoom: ;--tw-scroll-snap-strictness:proximity;--tw-gradient-from-position: ;--tw-gradient-via-position: ;--tw-gradient-to-position: ;--tw-ordinal: ;--tw-slashed-zero: ;--tw-numeric-figure: ;--tw-numeric-spacing: ;--tw-numeric-fraction: ;--tw-ring-inset: ;--tw-ring-offset-width:0px;--tw-ring-offset-color:#fff;--tw-ring-color:rgb(59 130 246 / 0.5);--tw-ring-offset-shadow:0 0 #0000;--tw-ring-shadow:0 0 #0000;--tw-shadow:0 0 #0000;--tw-shadow-colored:0 0 #0000;--tw-blur: ;--tw-brightness: ;--tw-contrast: ;--tw-grayscale: ;--tw-hue-rotate: ;--tw-invert: ;--tw-saturate: ;--tw-sepia: ;--tw-drop-shadow: ;--tw-backdrop-blur: ;--tw-backdrop-brightness: ;--tw-backdrop-contrast: ;--tw-backdrop-grayscale: ;--tw-backdrop-hue-rotate: ;--tw-backdrop-invert: ;--tw-backdrop-opacity: ;--tw-backdrop-saturate: ;--tw-backdrop-sepia: ;--tw-contain-size: ;--tw-contain-layout: ;--tw-contain-paint: ;--tw-contain-style: }::backdrop{--tw-border-spacing-x:0;--tw-border-spacing-y:0;--tw-translate-x:0;--tw-translate-y:0;--tw-rotate:0;--tw-skew-x:0;--tw-skew-y:0;--tw-scale-x:1;--tw-scale-y:1;--tw-pan-x: ;--tw-pan-y: ;--tw-pinch-zoom: ;--tw-scroll-snap-strictness:proximity;--tw-gradient-from-position: ;--tw-gradient-via-position: ;--tw-gradient-to-position: ;--tw-ordinal: ;--tw-slashed-zero: ;--tw-numeric-figure: ;--tw-numeric-spacing: ;--tw-numeric-fraction: ;--tw-ring-inset: ;--tw-ring-offset-width:0px;--tw-ring-offset-color:#fff;--tw-ring-color:rgb(59 130 246 / 0.5);--tw-ring-offset-shadow:0 0 #0000;--tw-ring-shadow:0 0 #0000;--tw-shadow:0 0 #0000;--tw-shadow-colored:0 0 #0000;--tw-blur: ;--tw-brightness: ;--tw-contrast: ;--tw-grayscale: ;--tw-hue-rotate: ;--tw-invert: ;--tw-saturate: ;--tw-sepia: ;--tw-drop-shadow: ;--tw-backdrop-blur: ;--tw-backdrop-brightness: ;--tw-backdrop-contrast: ;--tw-backdrop-grayscale: ;--tw-backdrop-hue-rotate: ;--tw-backdrop-invert: ;--tw-backdrop-opacity: ;--tw-backdrop-saturate: ;--tw-backdrop-sepia: ;--tw-contain-size: ;--tw-contain-layout: ;--tw-contain-paint: ;--tw-contain-style: }/* ! tailwindcss v3.4.17 | MIT License | https://tailwindcss.com */*,::after,::before{box-sizing:border-box;border-width:0;border-style:solid;border-color:#e5e7eb}::after,::before{--tw-content:''}:host,html{line-height:1.5;-webkit-text-size-adjust:100%;-moz-tab-size:4;tab-size:4;font-family:ui-sans-serif, system-ui, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji";font-feature-settings:normal;font-variation-settings:normal;-webkit-tap-highlight-color:transparent}body{margin:0;line-height:inherit}hr{height:0;color:inherit;border-top-width:1px}abbr:where([title]){-webkit-text-decoration:underline dotted;text-decoration:underline dotted}h1,h2,h3,h4,h5,h6{font-size:inherit;font-weight:inherit}a{color:inherit;text-decoration:inherit}b,strong{font-weight:bolder}code,kbd,pre,samp{font-family:ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;font-feature-settings:normal;font-variation-settings:normal;font-size:1em}small{font-size:80%}sub,sup{font-size:75%;line-height:0;position:relative;vertical-align:baseline}sub{bottom:-.25em}sup{top:-.5em}table{text-indent:0;border-color:inherit;border-collapse:collapse}button,input,optgroup,select,textarea{font-family:inherit;font-feature-settings:inherit;font-variation-settings:inherit;font-size:100%;font-weight:inherit;line-height:inherit;letter-spacing:inherit;color:inherit;margin:0;padding:0}button,select{text-transform:none}button,input:where([type=button]),input:where([type=reset]),input:where([type=submit]){-webkit-appearance:button;background-color:transparent;background-image:none}:-moz-focusring{outline:auto}:-moz-ui-invalid{box-shadow:none}progress{vertical-align:baseline}::-webkit-inner-spin-button,::-webkit-outer-spin-button{height:auto}[type=search]{-webkit-appearance:textfield;outline-offset:-2px}::-webkit-search-decoration{-webkit-appearance:none}::-webkit-file-upload-button{-webkit-appearance:button;font:inherit}summary{display:list-item}blockquote,dd,dl,figure,h1,h2,h3,h4,h5,h6,hr,p,pre{margin:0}fieldset{margin:0;padding:0}legend{padding:0}menu,ol,ul{list-style:none;margin:0;padding:0}dialog{padding:0}textarea{resize:vertical}input::placeholder,textarea::placeholder{opacity:1;color:#9ca3af}[role=button],button{cursor:pointer}:disabled{cursor:default}audio,canvas,embed,iframe,img,object,svg,video{display:block;vertical-align:middle}img,video{max-width:100%;height:auto}[hidden]:where(:not([hidden=until-found])){display:none}.fixed{position:fixed}.absolute{position:absolute}.relative{position:relative}.inset-0{inset:0px}.right-0{right:0px}.right-2{right:0.5rem}.top-0{top:0px}.top-2{top:0.5rem}.z-50{z-index:50}.z-\[80\]{z-index:80}.mx-1{margin-left:0.25rem;margin-right:0.25rem}.mx-auto{margin-left:auto;margin-right:auto}.mb-1{margin-bottom:0.25rem}.mb-1\.5{margin-bottom:0.375rem}.mb-2{margin-bottom:0.5rem}.mb-3{margin-bottom:0.75rem}.mb-4{margin-bottom:1rem}.mb-5{margin-bottom:1.25rem}.ml-2{margin-left:0.5rem}.mt-1{margin-top:0.25rem}.mt-2{margin-top:0.5rem}.mt-3{margin-top:0.75rem}.mt-4{margin-top:1rem}.mt-6{margin-top:1.5rem}.block{display:block}.inline-block{display:inline-block}.flex{display:flex}.inline-flex{display:inline-flex}.grid{display:grid}.hidden{display:none}.h-1\.5{height:0.375rem}.h-10{height:2.5rem}.h-4{height:1rem}.h-5{height:1.25rem}.h-px{height:1px}.h-full{height:100%}.min-h-screen{min-height:100vh}.w-1\.5{width:0.375rem}.w-10{width:2.5rem}.w-20{width:5rem}.w-36{width:9rem}.w-4{width:1rem}.w-5{width:1.25rem}.w-full{width:100%}.w-\[90\%\]{width:90%}.max-w-5xl{max-width:64rem}.max-w-xl{max-width:36rem}.max-w-\[120px\]{max-width:120px}.flex-1{flex:1 1 0%}.flex-shrink-0{flex-shrink:0}.transform{transform:translate(var(--tw-translate-x), var(--tw-translate-y)) rotate(var(--tw-rotate)) skewX(var(--tw-skew-x)) skewY(var(--tw-skew-y)) scaleX(var(--tw-scale-x)) scaleY(var(--tw-scale-y))}@keyframes pulse{50%{opacity:.5}}.animate-pulse{animation:pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite}.cursor-help{cursor:help}.cursor-not-allowed{cursor:not-allowed}.cursor-pointer{cursor:pointer}.list-inside{list-style-position:inside}.list-decimal{list-style-type:decimal}.list-disc{list-style-type:disc}.grid-cols-1{grid-template-columns:repeat(1, minmax(0, 1fr))}.flex-col{flex-direction:column}.flex-wrap{flex-wrap:wrap}.items-start{align-items:flex-start}.items-end{align-items:flex-end}.items-center{align-items:center}.justify-end{justify-content:flex-end}.justify-center{justify-content:center}.justify-between{justify-content:space-between}.gap-1{gap:0.25rem}.gap-2{gap:0.5rem}.gap-3{gap:0.75rem}.gap-4{gap:1rem}.gap-x-4{column-gap:1rem}.gap-y-1{row-gap:0.25rem}.space-y-1 > :not([hidden]) ~ :not([hidden]){--tw-space-y-reverse:0;margin-top:calc(0.25rem * calc(1 - var(--tw-space-y-reverse)));margin-bottom:calc(0.25rem * var(--tw-space-y-reverse))}.space-y-1\.5 > :not([hidden]) ~ :not([hidden]){--tw-space-y-reverse:0;margin-top:calc(0.375rem * calc(1 - var(--tw-space-y-reverse)));margin-bottom:calc(0.375rem * var(--tw-space-y-reverse))}.space-y-2 > :not([hidden]) ~ :not([hidden]){--tw-space-y-reverse:0;margin-top:calc(0.5rem * calc(1 - var(--tw-space-y-reverse)));margin-bottom:calc(0.5rem * var(--tw-space-y-reverse))}.space-y-4 > :not([hidden]) ~ :not([hidden]){--tw-space-y-reverse:0;margin-top:calc(1rem * calc(1 - var(--tw-space-y-reverse)));margin-bottom:calc(1rem * var(--tw-space-y-reverse))}.space-y-5 > :not([hidden]) ~ :not([hidden]){--tw-space-y-reverse:0;margin-top:calc(1.25rem * calc(1 - var(--tw-space-y-reverse)));margin-bottom:calc(1.25rem * var(--tw-space-y-reverse))}.space-y-3 > :not([hidden]) ~ :not([hidden]){--tw-space-y-reverse:0;margin-top:calc(0.75rem * calc(1 - var(--tw-space-y-reverse)));margin-bottom:calc(0.75rem * var(--tw-space-y-reverse))}.overflow-y-auto{overflow-y:auto}.truncate{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.rounded{border-radius:0.25rem}.rounded-2xl{border-radius:1rem}.rounded-full{border-radius:9999px}.rounded-lg{border-radius:0.5rem}.rounded-md{border-radius:0.375rem}.rounded-xl{border-radius:0.75rem}.border{border-width:1px}.border-l{border-left-width:1px}.border-t{border-top-width:1px}.border-dashed{border-style:dashed}.border-emerald-500\/40{border-color:rgb(16 185 129 / 0.4)}.border-emerald-500\/80{border-color:rgb(16 185 129 / 0.8)}.border-emerald-600\/70{border-color:rgb(5 150 105 / 0.7)}.border-emerald-700\/70{border-color:rgb(4 120 87 / 0.7)}.bg-\[var\(--grt-accent\)\]{background-color:var(--grt-accent)}.bg-emerald-400{--tw-bg-opacity:1;background-color:rgb(52 211 153 / var(--tw-bg-opacity, 1))}.bg-emerald-500\/20{background-color:rgb(16 185 129 / 0.2)}.bg-emerald-600{--tw-bg-opacity:1;background-color:rgb(5 150 105 / var(--tw-bg-opacity, 1))}.bg-emerald-900\/70{background-color:rgb(6 78 59 / 0.7)}.bg-emerald-950\/70{background-color:rgb(2 44 34 / 0.7)}.bg-rose-400{--tw-bg-opacity:1;background-color:rgb(251 113 133 / var(--tw-bg-opacity, 1))}.bg-sky-400{--tw-bg-opacity:1;background-color:rgb(56 189 248 / var(--tw-bg-opacity, 1))}.bg-slate-500{--tw-bg-opacity:1;background-color:rgb(100 116 139 / var(--tw-bg-opacity, 1))}.bg-slate-800\/70{background-color:rgb(30 41 59 / 0.7)}.bg-slate-800\/80{background-color:rgb(30 41 59 / 0.8)}.bg-black\/70{background-color:rgb(0 0 0 / 0.7)}.p-2\.5{padding:0.625rem}.p-3{padding:0.75rem}.p-4{padding:1rem}.p-5{padding:1.25rem}.p-6{padding:1.5rem}.px-1{padding-left:0.25rem;padding-right:0.25rem}.px-2{padding-left:0.5rem;padding-right:0.5rem}.px-2\.5{padding-left:0.625rem;padding-right:0.625rem}.px-3{padding-left:0.75rem;padding-right:0.75rem}.px-4{padding-left:1rem;padding-right:1rem}.px-5{padding-left:1.25rem;padding-right:1.25rem}.py-0\.5{padding-top:0.125rem;padding-bottom:0.125rem}.py-1{padding-top:0.25rem;padding-bottom:0.25rem}.py-1\.5{padding-top:0.375rem;padding-bottom:0.375rem}.py-2{padding-top:0.5rem;padding-bottom:0.5rem}.py-2\.5{padding-top:0.625rem;padding-bottom:0.625rem}.pb-10{padding-bottom:2.5rem}.pt-3{padding-top:0.75rem}.font-mono{font-family:ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace}.text-3xl{font-size:1.875rem;line-height:2.25rem}.text-\[10px\]{font-size:10px}.text-\[11px\]{font-size:11px}.text-\[9px\]{font-size:9px}.text-lg{font-size:1.125rem;line-height:1.75rem}.text-sm{font-size:0.875rem;line-height:1.25rem}.text-xl{font-size:1.25rem;line-height:1.75rem}.text-xs{font-size:0.75rem;line-height:1rem}.font-bold{font-weight:700}.font-extrabold{font-weight:800}.font-medium{font-weight:500}.font-semibold{font-weight:600}.uppercase{text-transform:uppercase}.leading-relaxed{line-height:1.625}.leading-snug{line-height:1.375}.tracking-wide{letter-spacing:0.025em}.text-amber-300{--tw-text-opacity:1;color:rgb(252 211 77 / var(--tw-text-opacity, 1))}.text-emerald-200{--tw-text-opacity:1;color:rgb(167 243 208 / var(--tw-text-opacity, 1))}.text-emerald-300{--tw-text-opacity:1;color:rgb(110 231 183 / var(--tw-text-opacity, 1))}.text-rose-300{--tw-text-opacity:1;color:rgb(253 164 175 / var(--tw-text-opacity, 1))}.text-slate-100{--tw-text-opacity:1;color:rgb(241 245 249 / var(--tw-text-opacity, 1))}.text-slate-200{--tw-text-opacity:1;color:rgb(226 232 240 / var(--tw-text-opacity, 1))}.text-white{--tw-text-opacity:1;color:rgb(255 255 255 / var(--tw-text-opacity, 1))}.opacity-60{opacity:0.6}.opacity-90{opacity:0.9}.shadow-2xl{--tw-shadow:0 25px 50px -12px rgb(0 0 0 / 0.25);--tw-shadow-colored:0 25px 50px -12px var(--tw-shadow-color);box-shadow:var(--tw-ring-offset-shadow, 0 0 #0000), var(--tw-ring-shadow, 0 0 #0000), var(--tw-shadow)}.shadow-inner{--tw-shadow:inset 0 2px 4px 0 rgb(0 0 0 / 0.05);--tw-shadow-colored:inset 0 2px 4px 0 var(--tw-shadow-color);box-shadow:var(--tw-ring-offset-shadow, 0 0 #0000), var(--tw-ring-shadow, 0 0 #0000), var(--tw-shadow)}.shadow-lg{--tw-shadow:0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);--tw-shadow-colored:0 10px 15px -3px var(--tw-shadow-color), 0 4px 6px -4px var(--tw-shadow-color);box-shadow:var(--tw-ring-offset-shadow, 0 0 #0000), var(--tw-ring-shadow, 0 0 #0000), var(--tw-shadow)}.shadow-md{--tw-shadow:0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);--tw-shadow-colored:0 4px 6px -1px var(--tw-shadow-color), 0 2px 4px -2px var(--tw-shadow-color);box-shadow:var(--tw-ring-offset-shadow, 0 0 #0000), var(--tw-ring-shadow, 0 0 #0000), var(--tw-shadow)}.shadow-sm{--tw-shadow:0 1px 2px 0 rgb(0 0 0 / 0.05);--tw-shadow-colored:0 1px 2px 0 var(--tw-shadow-color);box-shadow:var(--tw-ring-offset-shadow, 0 0 #0000), var(--tw-ring-shadow, 0 0 #0000), var(--tw-shadow)}.shadow-xl{--tw-shadow:0 20px 25px -5px rgb(0 0 0 / 0.1), 0 8px 10px -6px rgb(0 0 0 / 0.1);--tw-shadow-colored:0 20px 25px -5px var(--tw-shadow-color), 0 8px 10px -6px var(--tw-shadow-color);box-shadow:var(--tw-ring-offset-shadow, 0 0 #0000), var(--tw-ring-shadow, 0 0 #0000), var(--tw-shadow)}.backdrop-blur-sm{--tw-backdrop-blur:blur(4px);-webkit-backdrop-filter:var(--tw-backdrop-blur) var(--tw-backdrop-brightness) var(--tw-backdrop-contrast) var(--tw-backdrop-grayscale) var(--tw-backdrop-hue-rotate) var(--tw-backdrop-invert) var(--tw-backdrop-opacity) var(--tw-backdrop-saturate) var(--tw-backdrop-sepia);backdrop-filter:var(--tw-backdrop-blur) var(--tw-backdrop-brightness) var(--tw-backdrop-contrast) var(--tw-backdrop-grayscale) var(--tw-backdrop-hue-rotate) var(--tw-backdrop-invert) var(--tw-backdrop-opacity) var(--tw-backdrop-saturate) var(--tw-backdrop-sepia)}.transition{transition-property:color, background-color, border-color, fill, stroke, opacity, box-shadow, transform, filter, -webkit-text-decoration-color, -webkit-backdrop-filter;transition-property:color, background-color, border-color, text-decoration-color, fill, stroke, opacity, box-shadow, transform, filter, backdrop-filter;transition-property:color, background-color, border-color, text-decoration-color, fill, stroke, opacity, box-shadow, transform, filter, backdrop-filter, -webkit-text-decoration-color, -webkit-backdrop-filter;transition-timing-function:cubic-bezier(0.4, 0, 0.2, 1);transition-duration:150ms}.transition-colors{transition-property:color, background-color, border-color, fill, stroke, -webkit-text-decoration-color;transition-property:color, background-color, border-color, text-decoration-color, fill, stroke;transition-property:color, background-color, border-color, text-decoration-color, fill, stroke, -webkit-text-decoration-color;transition-timing-function:cubic-bezier(0.4, 0, 0.2, 1);transition-duration:150ms}.transition-transform{transition-property:transform;transition-timing-function:cubic-bezier(0.4, 0, 0.2, 1);transition-duration:150ms}.file\:mr-2::file-selector-button{margin-right:0.5rem}.file\:rounded-md::file-selector-button{border-radius:0.375rem}.file\:border-0::file-selector-button{border-width:0px}.file\:px-3::file-selector-button{padding-left:0.75rem;padding-right:0.75rem}.file\:py-1::file-selector-button{padding-top:0.25rem;padding-bottom:0.25rem}.file\:text-white::file-selector-button{--tw-text-opacity:1;color:rgb(255 255 255 / var(--tw-text-opacity, 1))}.hover\:-translate-y-0\.5:hover{--tw-translate-y:-0.125rem;transform:translate(var(--tw-translate-x), var(--tw-translate-y)) rotate(var(--tw-rotate)) skewX(var(--tw-skew-x)) skewY(var(--tw-skew-y)) scaleX(var(--tw-scale-x)) scaleY(var(--tw-scale-y))}.hover\:bg-\[var\(--grt-accent-soft\)\]:hover{background-color:var(--grt-accent-soft)}.hover\:bg-emerald-500:hover{--tw-bg-opacity:1;background-color:rgb(16 185 129 / var(--tw-bg-opacity, 1))}.hover\:bg-emerald-700\/40:hover{background-color:rgb(4 120 87 / 0.4)}.hover\:text-white:hover{--tw-text-opacity:1;color:rgb(255 255 255 / var(--tw-text-opacity, 1))}.hover\:shadow-lg:hover{--tw-shadow:0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);--tw-shadow-colored:0 10px 15px -3px var(--tw-shadow-color), 0 4px 6px -4px var(--tw-shadow-color);box-shadow:var(--tw-ring-offset-shadow, 0 0 #0000), var(--tw-ring-shadow, 0 0 #0000), var(--tw-shadow)}.focus\:border-\[var\(--grt-accent\)\]:focus{border-color:var(--grt-accent)}.focus\:outline-none:focus{outline:2px solid transparent;outline-offset:2px}.focus\:ring-1:focus{--tw-ring-offset-shadow:var(--tw-ring-inset) 0 0 0 var(--tw-ring-offset-width) var(--tw-ring-offset-color);--tw-ring-shadow:var(--tw-ring-inset) 0 0 0 calc(1px + var(--tw-ring-offset-width)) var(--tw-ring-color);box-shadow:var(--tw-ring-offset-shadow), var(--tw-ring-shadow), var(--tw-shadow, 0 0 #0000)}.focus\:ring-2:focus{--tw-ring-offset-shadow:var(--tw-ring-inset) 0 0 0 var(--tw-ring-offset-width) var(--tw-ring-offset-color);--tw-ring-shadow:var(--tw-ring-inset) 0 0 0 calc(2px + var(--tw-ring-offset-width)) var(--tw-ring-color);box-shadow:var(--tw-ring-offset-shadow), var(--tw-ring-shadow), var(--tw-shadow, 0 0 #0000)}.focus\:ring-\[var\(--grt-accent\)\]:focus{--tw-ring-color:var(--grt-accent)}@media (min-width: 640px){.sm\:w-\[520px\]{width:520px}.sm\:flex-row{flex-direction:row}.sm\:flex-wrap{flex-wrap:wrap}}@media (min-width: 768px){.md\:mb-5{margin-bottom:1.25rem}.md\:flex{display:flex}.md\:h-12{height:3rem}.md\:w-12{width:3rem}.md\:max-w-\[40\%\]{max-width:40%}.md\:max-w-\[60\%\]{max-width:60%}.md\:max-w-\[160px\]{max-width:160px}.md\:grid-cols-1{grid-template-columns:repeat(1, minmax(0, 1fr))}.md\:grid-cols-3{grid-template-columns:repeat(3, minmax(0, 1fr))}.md\:flex-row{flex-direction:row}.md\:items-start{align-items:flex-start}.md\:items-center{align-items:center}.md\:items-baseline{align-items:baseline}.md\:justify-between{justify-content:space-between}.md\:gap-3{gap:0.75rem}.md\:space-y-5 > :not([hidden]) ~ :not([hidden]){--tw-space-y-reverse:0;margin-top:calc(1.25rem * calc(1 - var(--tw-space-y-reverse)));margin-bottom:calc(1.25rem * var(--tw-space-y-reverse))}.md\:space-y-6 > :not([hidden]) ~ :not([hidden]){--tw-space-y-reverse:0;margin-top:calc(1.5rem * calc(1 - var(--tw-space-y-reverse)));margin-bottom:calc(1.5rem * var(--tw-space-y-reverse))}.md\:p-4{padding:1rem}.md\:p-6{padding:1.5rem}.md\:text-4xl{font-size:2.25rem;line-height:2.5rem}.md\:text-\[11px\]{font-size:11px}.md\:text-base{font-size:1rem;line-height:1.5rem}.md\:text-sm{font-size:0.875rem;line-height:1.25rem}.md\:text-xl{font-size:1.25rem;line-height:1.75rem}.md\:text-xs{font-size:0.75rem;line-height:1rem}}@media (min-width: 1024px){.lg\:w-64{width:16rem}.lg\:grid-cols-3{grid-template-columns:repeat(3, minmax(0, 1fr))}.lg\:flex-row{flex-direction:row}}</style></head>
 <body class="min-h-screen p-4 md:p-6">
 <main class="max-w-5xl mx-auto">
 <!-- Header -->
@@ -225,7 +245,7 @@ input[type="file"]::file-selector-button:active{background: rgba(255,255,255,0.1
                     </p>
 <div class="flex flex-wrap items-center gap-2 mt-2 text-xs">
 <p class="text-grt-subtle">
-                            GRT Importer Advanced v0.89 • XquiziT Arms
+                            GRT Importer Advanced v0.87.3 • XquiziT Arms
                         </p>
 <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full border border-grt-soft bg-grt-panel-soft text-[10px] md:text-[11px] text-grt-soft" id="sessionPill" title="Summary of imported sessions and current velocity unit.">⚙️ Standard • 0 chrono files • ft/s</span>
 </div>
@@ -283,7 +303,7 @@ input[type="file"]::file-selector-button:active{background: rgba(255,255,255,0.1
 <!-- Floating status toasts --><!-- Floating status toasts -->
 <div aria-live="polite" id="statusArea" role="status"></div>
 <!-- Upload Area -->
-<section aria-label="Import configuration" class="space-y-4 md:space-y-5" id="uploadArea" title="Configure device, units, and import mode, then load your chrono files.">
+<section aria-label="Import configuration" class="space-y-4 md:space-y-6" data-no-tip="1">
 <!-- 3. Imported Pictures & Notes -->
 <div class="bg-grt-panel rounded-2xl shadow-xl p-5 md:p-6 border border-grt-frame hover:border-grt-accent transition-colors">
 <div class="flex items-start gap-4">
@@ -379,8 +399,8 @@ input[type="file"]::file-selector-button:active{background: rgba(255,255,255,0.1
       </div>
     </div>
 </div>
-</div>
 
+</div>
 <!-- 1. GRT Base File -->
 <div class="bg-grt-panel rounded-2xl shadow-xl p-5 md:p-6 border border-grt-frame hover:border-grt-accent transition-colors">
 <div class="flex items-start gap-4">
@@ -666,15 +686,6 @@ input[type="file"]::file-selector-button:active{background: rgba(255,255,255,0.1
 <span>💾</span>
 <span>Export .grtload</span>
 </button>
-
-<button class="inline-flex items-center gap-1 px-3 py-1.5 rounded-full bg-grt-panel-soft border border-grt-frame text-[11px] md:text-xs text-grt-soft hover:bg-grt-highlight transition" id="saveSessionBtn" type="button" title="Save the current imported data (chronograph + add-ons + analysis state) so you can reload it later without GRT.">
-  <span>🧾</span><span>Save session</span>
-</button>
-<button class="inline-flex items-center gap-1 px-3 py-1.5 rounded-full bg-grt-panel-soft border border-grt-frame text-[11px] md:text-xs text-grt-soft hover:bg-grt-highlight transition" onclick="document.getElementById(&#39;standaloneJsonInput&#39;).click()" type="button" title="Load a previously saved session (.json) from this tool.">
-  <span>📂</span><span>Load session</span>
-</button>
-<input id="standaloneJsonInput" type="file" accept=".json" class="hidden" onchange="importStandaloneJsonFile(this.files &amp;&amp; this.files[0])">
-
 </div>
 </div>
 <!-- Analysis Dashboard -->
@@ -1380,101 +1391,6 @@ let chronoSimPngData = '';
             };
         }
 
-        // =======================
-        // Velocity SD (explicit)
-        // =======================
-        function xqaFmtNum(x, digits = 1, fallback = '—') {
-            const n = Number(x);
-            return Number.isFinite(n) ? n.toFixed(digits) : fallback;
-        }
-        // Tooltip helper for score cards (safe default)
-        function _xqaScoreHintTitle(row){
-            try{
-                const parts = [];
-                if (row && typeof row.velocitySDSource === 'string' && row.velocitySDSource){
-                    parts.push(`SD src: ${row.velocitySDSource}`);
-                }
-                // Chrono SD / ES if present (most rows)
-                if (row && Number.isFinite(Number(row.sd))){
-                    parts.push(`SD: ${xqaFmtNum(row.sd, 1)} fps`);
-                } else if (row && Number.isFinite(Number(row.velocitySD))){
-                    parts.push(`SD: ${xqaFmtNum(row.velocitySD, 1)} fps`);
-                }
-                if (row && Number.isFinite(Number(row.es))){
-                    parts.push(`ES: ${xqaFmtNum(row.es, 1)} fps`);
-                }
-                if (row && Number.isFinite(Number(row.vertMOA))){
-                    parts.push(`Vert: ${xqaFmtNum(row.vertMOA, 3)} MOA`);
-                }
-                if (row && Number.isFinite(Number(row.mrMOA))){
-                    parts.push(`MR: ${xqaFmtNum(row.mrMOA, 3)} MOA`);
-                }
-                return parts.length ? parts.join(' • ') : 'Score details';
-            }catch(_e){
-                return 'Score details';
-            }
-        }
-
-
-        // Sample SD (n-1). Returns null if <3 values.
-        function xqaIsSighter(tags){ return String(tags||'').toLowerCase().includes('sighter'); }
-
-function xqaSampleSD(values) {
-            const arr = Array.isArray(values) ? values.map(Number).filter(Number.isFinite) : [];
-            const n = arr.length;
-            if (n < 3) return null;
-            const mean = arr.reduce((a,b)=>a+b,0) / n;
-            const ss = arr.reduce((a,b)=>a + (b-mean)*(b-mean), 0);
-            return Math.sqrt(ss / (n - 1));
-        }
-
-        // Attach explicit SD fields to a stats object derived from a velocity array.
-        // - Never silently invent SD: if <3 shots, SD becomes null and source=insufficient.
-        function xqaAugmentVelocityStats(stats, velocities) {
-            try {
-                const vAll = Array.isArray(velocities) ? velocities.map(Number).filter(Number.isFinite) : [];
-                const nAll = vAll.length;
-
-                let velocitySD = null;
-                let velocitySDSource = 'missing';
-
-                if (nAll === 0) {
-                    velocitySDSource = 'missing';
-                } else if (nAll < 3) {
-                    velocitySDSource = 'insufficient';
-                } else {
-                    velocitySD = xqaSampleSD(vAll);
-                    velocitySDSource = 'computed';
-                }
-
-                if (stats && typeof stats === 'object') {
-                    stats.velocitySD = velocitySD;
-                    stats.velocitySDSource = velocitySDSource;
-                    stats.velocityShotCount = nAll;
-                    stats.velocityExcludedCount = 0; // Chrono imports have no sighters/quality yet
-
-                    // Make "SD handling" explicit by preventing silent SD usage for n<3
-                    if (velocitySDSource !== 'computed' && velocitySDSource !== 'measured') {
-                        stats.sd = null;
-                    } else if (Number.isFinite(velocitySD)) {
-                        // Prefer sample SD for analysis/scoring going forward
-                        stats.sd = velocitySD;
-                    }
-                }
-            } catch (e) {
-                console.error('xqaAugmentVelocityStats failed', e);
-            }
-        }
-
-        function xqaGetVelocitySD(stats) {
-            const v = stats && Number.isFinite(stats.velocitySD) ? stats.velocitySD
-                      : (stats && Number.isFinite(stats.sd) ? stats.sd : null);
-            const src = stats && stats.velocitySDSource ? stats.velocitySDSource
-                      : (Number.isFinite(v) ? 'computed' : 'missing');
-            return { v, src };
-        }
-
-
 
 
         function computeAggregates(statsArray) {
@@ -2056,7 +1972,10 @@ if (smInput) smInput.value = '';            if (typeof renderAddonCards === 'fun
                 }
 
 
-            document.getElementById('uploadArea').classList.remove('hidden');
+            (() => {
+                const ua = document.getElementById('uploadArea');
+                if (ua) ua.classList.remove('hidden');
+            })();
             document.getElementById('resultsArea').classList.add('hidden');
             document.getElementById('statusArea').innerHTML = '';
             document.getElementById('fileCount').textContent = '0';
@@ -2942,6 +2861,9 @@ if (smInput) smInput.value = '';            if (typeof renderAddonCards === 'fun
         function renderPicsNotesSummaryCards() {
             const el = document.getElementById('picsNotesResultsCards');
             if (!el) return;
+    if (el && el.hasAttribute && el.hasAttribute('data-no-tip')) return;
+    const tn = (el.tagName||'').toUpperCase();
+    if (tn === 'SECTION' || tn === 'MAIN' || tn === 'BODY' || tn === 'HTML') return;
 
             const items = [];
             if (Array.isArray(importedPictures) && importedPictures.length) {
@@ -3401,15 +3323,6 @@ function lockShotMarkerAutoLinks(strings){
 // =======================
 // /ShotMarker Advanced scoring + chrono mapping
 // =======================
-
-// -----------------------
-// ShotMarker helpers
-// -----------------------
-function _xqaIsSighterTag(tags){
-  const t = String(tags || '').toLowerCase();
-  // treat 'sighter' as a standalone token or substring (ShotMarker exports vary)
-  return (t.split(/[^a-z0-9_]+/).includes('sighter')) || t.includes(' sighter') || t.startsWith('sighter') || t.endsWith('sighter');
-}
 function _computeGroupMetricsFromXY(xArr, yArr) {
             const n = Math.min(xArr.length, yArr.length);
             if (!n) return null;
@@ -3516,23 +3429,18 @@ function _computeGroupMetricsFromXY(xArr, yArr) {
           const uLabel = _smUnitLabel(unit);
           const dist = (m && isFinite(m.distanceYd)) ? m.distanceYd : 1000;
 
-          const ptsMm = [];
-          const ptsMmScoring = [];
+          const xsMm = [];
+          const ysMm = [];
           for (const sh of shots){
             if (!sh) continue;
             if (isFinite(sh.xMm) && isFinite(sh.yMm)){
-              const p = { xMm: sh.xMm, yMm: sh.yMm, isSighter: !!sh.isSighter };
-              ptsMm.push(p);
-              if (!p.isSighter) ptsMmScoring.push(p);
+              xsMm.push(sh.xMm);
+              ysMm.push(sh.yMm);
             }
           }
-          if (!ptsMm.length) return '';
+          if (!xsMm.length) return '';
 
-          // metrics are computed from scoring shots only (sighters excluded)
-          const xsMm = ptsMmScoring.map(p=>p.xMm);
-          const ysMm = ptsMmScoring.map(p=>p.yMm);
-          const gm = (xsMm.length ? _computeGroupMetricsFromXY(xsMm, ysMm) : null);
-
+          const gm = _computeGroupMetricsFromXY(xsMm, ysMm);
           const mr = gm ? _smConvertMm(gm.mr, unit, dist) : null;
           const es = gm ? _smConvertMm(gm.es, unit, dist) : null;
           const w = gm ? _smConvertMm(gm.horiz, unit, dist) : null;
@@ -3557,14 +3465,13 @@ function _computeGroupMetricsFromXY(xArr, yArr) {
           const ringR = [0.25,0.5,0.75,1.0].map(f => Math.abs(toPx(range*f)));
 
           const pts = [];
-          for (let i=0;i<ptsMm.length;i++){
-            const p0 = ptsMm[i];
-            const x = _smConvertMm(p0.xMm, unit, dist);
-            const y = _smConvertMm(p0.yMm, unit, dist);
+          for (let i=0;i<xsMm.length;i++){
+            const x = _smConvertMm(xsMm[i], unit, dist);
+            const y = _smConvertMm(ysMm[i], unit, dist);
             if (!isFinite(x) || !isFinite(y)) continue;
             const px = cx + toPx(x);
             const py = cy - toPx(y);
-            pts.push({i:i+1, px, py, isSighter: !!p0.isSighter});
+            pts.push({i:i+1, px, py});
           }
 
           const svg = `
@@ -3581,7 +3488,7 @@ function _computeGroupMetricsFromXY(xArr, yArr) {
               ${ringR.map(r => `<circle cx="${cx}" cy="${cy}" r="${r}" fill="none" stroke="rgba(255,255,255,0.12)" stroke-width="1"/>`).join('')}
               ${pts.map(p => `
                 <g>
-                  <circle cx="${p.px}" cy="${p.py}" r="6.3" fill="${p.isSighter ? 'rgba(0,0,0,0)' : 'rgba(0,0,0,0.55)'}" stroke="rgba(255,255,255,0.55)" stroke-width="1" opacity="${p.isSighter ? 0.42 : 1}"/>
+                  <circle cx="${p.px}" cy="${p.py}" r="6.3" fill="rgba(0,0,0,0.55)" stroke="rgba(255,255,255,0.55)" stroke-width="1"/>
                   <text x="${p.px}" y="${p.py+3.2}" text-anchor="middle" font-size="9" fill="rgba(255,255,255,0.92)" font-weight="700">${p.i}</text>
                 </g>`).join('')}
             </svg>
@@ -3644,7 +3551,7 @@ function _computeGroupMetricsFromXY(xArr, yArr) {
 
         function parseShotMarkerShotslog(rawText) {
             const lines = String(rawText || '').replace(/\r\n/g,'\n').replace(/\r/g,'\n').split('\n');
-            const sessionRe = /^(?:(Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec)\s+\d{1,2}(?:,)?\s+\d{4},|\d{4}-\d{2}-\d{2}\s*,)/;
+            const sessionRe = /^(?:(Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec)\s+\d{1,2}(?:,)?\s+\d{4},|\d{4}-\d{2}-\d{2}\s*,|\d{1,2}\/\d{1,2}\/\d{4}\s*,)/;
             const strings = [];
 
             for (let i=0;i<lines.length;i++){
@@ -3682,8 +3589,7 @@ function _computeGroupMetricsFromXY(xArr, yArr) {
                 const iqual = idx('quality');
                 const ixyerr = idx('xy_err');
 
-                                const itags = idx('tags');
-const shots = [];
+                const shots = [];
                 const xs = [], ys = [], vs = [];
 
                 j++;
@@ -3711,7 +3617,6 @@ const shots = [];
                         id: getNum(iid),
                         score: getStr(iscore),
                         tempC: getNum(itemp),
-                        tags: getStr(itags),
                         xMm: x,
                         yMm: y,
                         vFps: v,
@@ -3719,13 +3624,8 @@ const shots = [];
                         xyErr: getNum(ixyerr)
                     };
                     shots.push(shot);
-                                        // intent: sighters never count toward scoring
-                    const __tagStr = String(shot.tags||'').toLowerCase();
-                    shot.isSighter = _xqaIsSighterTag(shot.tags);
-if (!shot.isSighter) {
-                        if (x !== null && y !== null) { xs.push(x); ys.push(y); }
-                        if (v !== null) vs.push(v);
-                    }
+                    if (x !== null && y !== null) { xs.push(x); ys.push(y); }
+                    if (v !== null) vs.push(v);
 
                     j++;
                 }
@@ -3735,39 +3635,7 @@ if (!shot.isSighter) {
 
                 const vel = _computeVelocityStats(vs);
                 const vertMoa = (distanceYd && isFinite(gm.vert)) ? _mmToMoa(gm.vert, distanceYd) : null;
-                const horizMoa = (distanceYd && isFinite(gm.horiz)) ? _mmToMoa(gm.horiz, distanceYd) : null;
                 const mrMoa = (distanceYd && isFinite(gm.mr)) ? _mmToMoa(gm.mr, distanceYd) : null;
-
-                // shot intent counts (sighters excluded from scoring)
-                const totalShots = shots.length;
-                const sighterShots = shots.reduce((a,sh)=>a + (sh && sh.isSighter ? 1 : 0), 0);
-                const scoringShots = totalShots - sighterShots;
-
-                // simple, explainable diagnostics + confidence
-                const __n = scoringShots;
-                const __v = Number.isFinite(gm.vert) ? gm.vert : null;
-                const __h = Number.isFinite(gm.horiz) ? gm.horiz : null;
-                const __tot = (Number.isFinite(__v) && Number.isFinite(__h)) ? (__v + __h) : null;
-                const __vDom = (__tot && __tot>0 && Number.isFinite(__v)) ? (__v/__tot) : null;
-                const __hDom = (__tot && __tot>0 && Number.isFinite(__h)) ? (__h/__tot) : null;
-                function __confFrom(n, domStrong, domModerate, coherent){
-                  let pts = 0;
-                  if(n>=8) pts += 2; else if(n>=5) pts += 1;
-                  if(domStrong) pts += 2; else if(domModerate) pts += 1;
-                  if(!coherent) pts -= 2;
-                  if(pts>=4) return {label:'High', pts};
-                  if(pts>=2) return {label:'Medium', pts};
-                  return {label:'Low', pts};
-                }
-                const __coherent = Number.isFinite(distanceYd) && __n>=3 && Number.isFinite(gm.es);
-                let dominantDiag = null;
-                if(Number.isFinite(__vDom) && Number.isFinite(__hDom)){
-                  if(__vDom>0.70){ dominantDiag = {type:'vertical', dominance:__vDom, conf:__confFrom(__n,true,true,__coherent)}; }
-                  else if(__hDom>0.70){ dominantDiag = {type:'horizontal', dominance:__hDom, conf:__confFrom(__n,true,true,__coherent)}; }
-                  else if(__vDom>=0.55){ dominantDiag = {type:'vertical', dominance:__vDom, conf:__confFrom(__n,false,true,__coherent)}; }
-                  else if(__hDom>=0.55){ dominantDiag = {type:'horizontal', dominance:__hDom, conf:__confFrom(__n,false,true,__coherent)}; }
-                  else { dominantDiag = {type:'scatter', dominance:Math.max(__vDom,__hDom), conf:__confFrom(__n,false,false,__coherent)}; }
-                }
 
                 const advScore = _computeShotMarkerScoreAdvanced(mrMoa, vertMoa, vel, distanceYd);
                 const verticalScore = (advScore && isFinite(advScore.vPenalty)) ? (advScore.vPenalty * 100) : null;
@@ -3775,7 +3643,7 @@ if (!shot.isSighter) {
                 const confidenceScore = (advScore && isFinite(advScore.finalScore)) ? advScore.finalScore : null;
                 const finalScore = (advScore && isFinite(advScore.finalScore)) ? advScore.finalScore : null;
 
-                const vVsY = (vel && (vs && vs.length >= 3) && (ys && ys.length >= 3)) ? _corr(vs, ys) : null;
+                const vVsY = (vel && shots.length) ? _corr(vs, ys) : null;
 
                 const sessionKey = [dateText, relay || '', label || '', img || '', targetName || '']
                     .map(x => String(x || '').trim()).join('|');
@@ -3797,12 +3665,7 @@ if (!shot.isSighter) {
                         esMm: gm.es,
                         vertMm: gm.vert,
                         horizMm: gm.horiz,
-                        mrMoa, vertMoa, horizMoa,
-                        totalShots: totalShots,
-                        scoringShots: scoringShots,
-                        sighterShots: sighterShots,
-                        dominantDiag: dominantDiag,
-
+                        mrMoa, vertMoa,
                         velocity: vel,
                         verticalScore, precisionScore, confidenceScore,
                         finalScore,
@@ -4118,6 +3981,7 @@ function _shotMarkerNodeSectionHtml(strings) {
   const es = isFinite(vel.es) ? vel.es : null;
 
   const tipLines = [];
+  tipLines.push('NC = Node Confidence (0–100). Higher = more repeatable node across sessions.');
   tipLines.push(`Node: ${best.label}`);
   tipLines.push(`Sessions: ${best.sessionCount} • Shots: ${best.shots}`);
   if (isFinite(best.mrMoa)) tipLines.push(`MR: ${best.mrMoa.toFixed(3)} MOA (σ ${best.mrStd.toFixed(3)})`);
@@ -4311,7 +4175,7 @@ function renderShotMarkerSessionCards() {
                 <div class="bg-grt-panel rounded-2xl shadow-xl p-4 border ${borderClass} ${relBorder}">
                   <div class="flex items-start justify-between gap-3">
                     <div class="min-w-0">
-                      <div class="text-white text-base font-semibold" title="${_xqaScoreHintTitle(d.scoreBreakdown || d || {})}">${title}</div>
+                      <div class="text-white text-base font-semibold">${title}</div>
                       <div class="text-grt-subtle text-xs mt-0.5">
                         ${m.date || ''}${m.relay ? ` • ${m.relay}` : ''}${m.label ? ` • ${m.label}` : ''}
                       </div>
@@ -4508,6 +4372,13 @@ function addonCardHtml(addon) {
             else card.classList.add('hidden');
 
             renderPicsNotesSummaryCards();
+
+            // ShotMarker panel top-right status (avoid "No file loaded" when we actually loaded it)
+            const smStatus = document.getElementById('shotMarkerStatus');
+            if (smStatus) {
+                const hasSM = Array.isArray(shotMarkerAddons) && shotMarkerAddons.length;
+                smStatus.textContent = hasSM ? 'Loaded' : 'No file loaded';
+            }
         }
 
 
@@ -4515,8 +4386,11 @@ function addonCardHtml(addon) {
             shotMarkerAddons = [];
             renderAddonCards();
             if (typeof renderShotMarkerSessionCards === 'function') renderShotMarkerSessionCards();
-}
-        function handleAddonFile(kind, file) {
+            refreshAddonsStatus();
+            showStatus('info', 'Cleared ShotMarker add-on.');
+        }
+
+function handleAddonFile(kind, file) {
             if (!file) return;
             if (kind !== 'shotmarker') return; // Ballistic-X removed
 
@@ -4670,20 +4544,7 @@ function refreshPicturesStatus() {
             const picInput = document.getElementById('pictureInput');
             const notesInput = document.getElementById('notesInput');
             const smInput = document.getElementById('shotMarkerInput');
-
-            // ShotMarker CSV (add-on)
-            if (smInput) {
-                smInput.addEventListener('change', (e) => {
-                    try {
-                        const file = (e && e.target && e.target.files) ? e.target.files[0] : null;
-                        if (!file) return;
-                        handleAddonFile('shotmarker', file);
-                    } finally {
-                        // allow selecting the same file again
-                        try { smInput.value = ''; } catch(_e) {}
-                    }
-                });
-            }
+            //  removed
 if (picInput) {
                 picInput.addEventListener('change', (e) => {
                     const files = Array.from(e.target.files || []);
@@ -4971,9 +4832,7 @@ if (picInput) {
 
             const stats = computeStats(velocities);
 
-            
-            xqaAugmentVelocityStats(stats, velocities);
-if (!isValidNumber(garminStats.avg)) garminStats.avg = stats.mean;
+            if (!isValidNumber(garminStats.avg)) garminStats.avg = stats.mean;
             if (!isValidNumber(garminStats.sd))  garminStats.sd  = stats.sd;
             if (!isValidNumber(garminStats.es))  garminStats.es  = stats.es;
             if (!isValidNumber(garminStats.min)) garminStats.min = stats.min;
@@ -5195,9 +5054,7 @@ function processExcel(arrayBuffer) {
 
             const stats = computeStats(velocities);
 
-            
-            xqaAugmentVelocityStats(stats, velocities);
-if (!isValidNumber(garminStats.avg)) garminStats.avg = stats.mean;
+            if (!isValidNumber(garminStats.avg)) garminStats.avg = stats.mean;
             if (!isValidNumber(garminStats.sd))  garminStats.sd  = stats.sd;
             if (!isValidNumber(garminStats.es))  garminStats.es  = stats.es;
             if (!isValidNumber(garminStats.min)) garminStats.min = stats.min;
@@ -5323,9 +5180,7 @@ if (!isValidNumber(garminStats.avg)) garminStats.avg = stats.mean;
 
             const stats = computeStats(velocities);
 
-            
-            xqaAugmentVelocityStats(stats, velocities);
-if (!isValidNumber(garminStats.avg)) garminStats.avg = stats.mean;
+            if (!isValidNumber(garminStats.avg)) garminStats.avg = stats.mean;
             if (!isValidNumber(garminStats.sd))  garminStats.sd  = stats.sd;
             if (!isValidNumber(garminStats.es))  garminStats.es  = stats.es;
             if (!isValidNumber(garminStats.min)) garminStats.min = stats.min;
@@ -5439,9 +5294,7 @@ if (!isValidNumber(garminStats.avg)) garminStats.avg = stats.mean;
 
             const stats = computeStats(velocities);
 
-            
-            xqaAugmentVelocityStats(stats, velocities);
-if (!isValidNumber(garminStats.avg)) garminStats.avg = stats.mean;
+            if (!isValidNumber(garminStats.avg)) garminStats.avg = stats.mean;
             if (!isValidNumber(garminStats.sd))  garminStats.sd  = stats.sd;
             if (!isValidNumber(garminStats.es))  garminStats.es  = stats.es;
             if (!isValidNumber(garminStats.min)) garminStats.min = stats.min;
@@ -5648,8 +5501,7 @@ function stripExistingImportedGallery(inner) {
             const avgLabel = 'AVG-E=';
             if (isFinite(avgFileUnit)) notes.push(avgLabel + fmt(avgFileUnit));
             if (isFinite(sdFileUnit))  notes.push('SD=' + fmt(sdFileUnit));
-                        try{ const _sd = xqaGetVelocitySD(s); notes.push('SD_SRC=' + String(_sd.src||'').replace(/\s+/g,'_')); }catch(_e){}
-if (isFinite(esFileUnit))  notes.push('ES=' + fmt(esFileUnit));
+            if (isFinite(esFileUnit))  notes.push('ES=' + fmt(esFileUnit));
             if (isFinite(minFileUnit)) notes.push('MIN=' + fmt(minFileUnit));
             if (isFinite(maxFileUnit)) notes.push('MAX=' + fmt(maxFileUnit));
 
@@ -6375,7 +6227,10 @@ if (Array.isArray(grtSimSeriesForChart) && grtSimSeriesForChart.length >= points
 
 
 function showResults() {
-            document.getElementById('uploadArea').classList.add('hidden');
+            (() => {
+                const ua = document.getElementById('uploadArea');
+                if (ua) ua.classList.add('hidden');
+            })();
             document.getElementById('resultsArea').classList.remove('hidden');
             document.getElementById('fileCount').textContent = allStats.length;
 
@@ -6423,31 +6278,18 @@ function showResults() {
                 // Multiplier for "near target" band (blue). Tweak here if you want looser/tighter.
                 const NEAR_RATIO = 1.2;
 
-                                const _vSD = xqaGetVelocitySD(s);
-                const vSD = _vSD.v;
-                const vSDsrc = _vSD.src;
-
-                const hasSDTarget = tSD > 0 && typeof vSD === "number" && !isNaN(vSD);
+                const hasSDTarget = tSD > 0 && typeof s.sd === 'number' && !isNaN(s.sd);
                 const hasESTarget = tES > 0 && typeof s.es === 'number' && !isNaN(s.es);
-                const sdRatio = hasSDTarget ? (vSD / tSD) : null;
-                const esRatio = hasESTarget ? (s.es / tES) : null;
 
-                
-                const _xqaScoreHints = (function(){
-                  const bits=[];
-                  if(_vSD && _vSD.src) bits.push(`SD src: ${_vSD.src}`);
-                  if(typeof vSD==='number' && hasSDTarget) bits.push(`SD ${vSD.toFixed(1)} / target ${tSD}`);
-                  if(typeof s.es==='number' && hasESTarget) bits.push(`ES ${s.es.toFixed(1)} / target ${tES}`);
-                  if(bits.length===0) bits.push('No velocity SD/ES available for scoring.');
-                  return bits.join(' • ');
-                })();                const _xqaScoreHintTitle = String(_xqaScoreHints||'').replace(/\"/g,'&quot;');
+                const sdRatio = hasSDTarget ? (s.sd / tSD) : null;
+                const esRatio = hasESTarget ? (s.es / tES) : null;
 
                 const withinSD = hasSDTarget && sdRatio <= 1;
                 const withinES = hasESTarget && esRatio <= 1;
 
                 // Target-aware SD color (green / blue / rose), with sdBands fallback when no SD target is set
                 let sdColorClass = 'text-grt-soft';
-                if (typeof vSD === "number" && !isNaN(vSD)) {
+                if (typeof s.sd === 'number' && !isNaN(s.sd)) {
                     if (hasSDTarget) {
                         if (sdRatio <= 1) {
                             sdColorClass = 'text-emerald-300'; // within target
@@ -6457,7 +6299,7 @@ function showResults() {
                             sdColorClass = 'text-rose-300';    // outside / wide
                         }
                     } else {
-                        const band = pickSdBand(vSD);
+                        const band = pickSdBand(s.sd);
                         if (band) {
                             if (band.key === 'tight') {
                                 sdColorClass = 'text-emerald-300';
@@ -6488,7 +6330,7 @@ function showResults() {
                     esColorClass = sdColorClass;
                 }
 
-                const healthBadge = renderSdBadge(vSD);
+                const healthBadge = renderSdBadge(s.sd);
 
                 // Threshold-based status badge leveraging ratios (blue = "near node / partial hit")
                 let statusLabel = '';
@@ -6564,8 +6406,8 @@ function showResults() {
                             <div class="flex justify-between">
                                 <span class="text-grt-subtle" title="SD: standard deviation of velocity; lower means more consistent.">SD:</span>
                                 <span class="flex items-center gap-1">
-                                    <span class="${sdColorClass} font-semibold">${(vSDsrc==="insufficient") ? "⚠ <3" : ((typeof vSD==="number" && !isNaN(vSD)) ? xqaFmtNum(vSD,1) : "—")} ${uLabel}</span>
-                                    ${renderSdBadge(vSD)}
+                                    <span class="${sdColorClass} font-semibold">${s.sd.toFixed(1)} ${uLabel}</span>
+                                    ${renderSdBadge(s.sd)}
                                 </span>
                             </div>
                             <div class="flex justify-between">
@@ -6753,190 +6595,25 @@ function showResults() {
             }
         }
 
-        
-function copySessionSummary() {
-  try{
-    if (!allStats || !allStats.length) {
-      showStatus('error', 'No session stats yet. Load chronograph files first.');
-      return;
-    }
-    const text = (typeof buildSessionSummaryText === 'function')
-      ? buildSessionSummaryText()
-      : JSON.stringify(allStats, null, 2);
-
-    // Clipboard (modern) + fallback
-    if (navigator.clipboard && navigator.clipboard.writeText) {
-      navigator.clipboard.writeText(text).then(()=>{
-        showStatus('success', 'Session summary copied to clipboard.');
-      }).catch((_e)=>{
-        try{ fallbackCopyToClipboard(text); }catch(e){ showStatus('error','Unable to copy summary.'); }
-      });
-    } else {
-      try{ fallbackCopyToClipboard(text); }catch(e){ showStatus('error','Unable to copy summary.'); }
-    }
-  }catch(e){
-    console.error(e);
-    try{ showStatus('error','Copy summary failed: ' + (e?.message || e)); }catch(_e){}
-  }
-}
-
-// =======================
-// Standalone session save/load (neutral JSON)
-// =======================
-function _xqaBuildStandalonePayload(){
-  return {
-    tool: 'GRT Importer Advanced',
-    schemaVersion: 1,
-    version: (document.title || '').replace(/\s+/g,' ').trim(),
-    savedAtIso: new Date().toISOString(),
-    state: {
-      chronographType,
-      unit,
-      mode,
-      sessionsLayout,
-      ladderNameMode,
-      ladderSteps,
-      analysisConfig,
-      smPhase3Config,
-      shotMarkerManualMap,
-      shotMarkerScoreSettings,
-      shotMarkerAddons,
-      allStats,
-      importedPictures,
-      importedNotesText
-    }
-  };
-}
-
-function exportStandaloneJson(){
-  try{
-    const nCharges = Array.isArray(allStats) ? allStats.length : 0;
-    const nSM = Array.isArray(shotMarkerAddons) ? shotMarkerAddons.length : 0;
-
-    // Never silently do nothing
-    try{ showStatus('info', `Preparing session save… (${nCharges} charge(s), ${nSM} ShotMarker file(s))`); }catch(_e){}
-
-    if (!nCharges){
-      try{ showStatus('error','Nothing to save yet — import chronograph files first.'); }catch(_e){}
-      return;
-    }
-
-    const payload = _xqaBuildStandalonePayload();
-    const jsonText = JSON.stringify(payload, null, 2);
-    const blob = new Blob([jsonText], {type:'application/json;charset=utf-8'});
-
-    const ts = new Date();
-    const y = ts.getFullYear();
-    const mo = String(ts.getMonth()+1).padStart(2,'0');
-    const d = String(ts.getDate()).padStart(2,'0');
-    const hh = String(ts.getHours()).padStart(2,'0');
-    const mm = String(ts.getMinutes()).padStart(2,'0');
-    const ss = String(ts.getSeconds()).padStart(2,'0');
-    const fname = `xqa_session_${y}${mo}${d}_${hh}${mm}${ss}.json`;
-
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = fname;
-    a.style.display = 'none';
-    document.body.appendChild(a);
-
-    // Attempt download
-    a.click();
-
-    // Download-only: no new tab preview
-
-    setTimeout(()=>{
-      try{ a.remove(); }catch(_e){}
-      try{ URL.revokeObjectURL(url); }catch(_e){}
-    }, 4000);
-
-    try{ showStatus('success', `Saved session JSON: ${fname}`); }catch(_e){}
-  }catch(e){
-    console.error(e);
-    try{ showStatus('error','Save session failed: ' + (e?.message || e)); }catch(_e){}
-  }
-}
-
-// Ensure global access for inline handlers / cross-scope callbacks
-try{ window.exportStandaloneJson = exportStandaloneJson; }catch(_e){}
-
-
-function importStandaloneJsonFile(file){
-  try{
-    if(!file) return;
-    const r = new FileReader();
-    r.onload = ()=>{
-      try{
-        const obj = JSON.parse(String(r.result||'{}'));
-        const schemaV = (obj && typeof obj.schemaVersion === 'number') ? obj.schemaVersion : 0;
-        const st = obj && obj.state ? obj.state : null;
-        if(!st || !Array.isArray(st.allStats)){
-          showStatus('error','That JSON does not look like a saved session from this tool.');
-          return;
-        }
-        if (schemaV > 1) {
-          try{ showToast('Note: session schema v'+schemaV+' is newer; attempting best-effort load.','warn'); }catch(_e){}
+        function copySessionSummary() {
+            if (!allStats.length) {
+                showStatus('error', 'No session stats yet. Load chronograph files first.');
+                return;
+            }
+            const text = buildSessionSummaryText();
+            if (navigator.clipboard && navigator.clipboard.writeText) {
+                navigator.clipboard.writeText(text)
+                    .then(() => {
+                        showStatus('success', 'Session summary copied to clipboard.');
+                    })
+                    .catch(() => {
+                        fallbackCopyToClipboard(text);
+                    });
+            } else {
+                fallbackCopyToClipboard(text);
+            }
         }
 
-        // Restore state (best-effort)
-        chronographType = st.chronographType || chronographType;
-        unit = st.unit || unit;
-        mode = st.mode || mode;
-        sessionsLayout = st.sessionsLayout || sessionsLayout;
-        ladderNameMode = st.ladderNameMode || ladderNameMode;
-        ladderSteps = (typeof st.ladderSteps === 'number') ? st.ladderSteps : ladderSteps;
-
-        analysisConfig = st.analysisConfig || analysisConfig;
-        smPhase3Config = st.smPhase3Config || smPhase3Config;
-        shotMarkerManualMap = st.shotMarkerManualMap || shotMarkerManualMap;
-        shotMarkerScoreSettings = (st.shotMarkerScoreSettings !== undefined) ? st.shotMarkerScoreSettings : shotMarkerScoreSettings;
-
-        shotMarkerAddons = st.shotMarkerAddons || shotMarkerAddons;
-        allStats = st.allStats || allStats;
-
-        importedPictures = st.importedPictures || importedPictures;
-        importedNotesText = (st.importedNotesText !== undefined) ? st.importedNotesText : importedNotesText;
-
-        // Sync UI controls
-        try{ document.getElementById('deviceSelect').value = chronographType; }catch(_e){}
-        try{ document.getElementById('unitSelect').value = unit; }catch(_e){}
-        try{ document.getElementById('modeSelect').value = mode; }catch(_e){}
-        try{
-          const r1=document.querySelector('input[name="sessionsLayout"][value="sessions"]');
-          const r2=document.querySelector('input[name="sessionsLayout"][value="files"]');
-          if (sessionsLayout==='sessions' && r1) r1.checked=true;
-          if (sessionsLayout==='files' && r2) r2.checked=true;
-        }catch(_e){}
-        try{ updateModeUI(); }catch(_e){}
-
-        try{
-          const c = document.getElementById('analysisTargetSD'); if(c) c.value = analysisConfig.targetSD;
-          const e = document.getElementById('analysisTargetES'); if(e) e.value = analysisConfig.targetES;
-        }catch(_e){}
-        try{ updateSessionPill(); }catch(_e){}
-        try{ setCurrentStep(4); }catch(_e){}
-
-        // Re-render
-        showResults();
-        try{ renderShotMarkerInlineCards(); }catch(_e){}
-        try{ renderShotMarkerSessionCards(); }catch(_e){}
-        try{ updateRunSummary(); }catch(_e){}
-
-        showStatus('success','Loaded saved session JSON.');
-      }catch(e){
-        console.error(e);
-        showStatus('error','Load session failed: ' + (e?.message || e));
-      }
-    };
-    r.readAsText(file);
-  }catch(e){
-    console.error(e);
-    showStatus('error','Load session failed: ' + (e?.message || e));
-  }
-}
-
-try{ window.importStandaloneJsonFile = importStandaloneJsonFile; }catch(_e){}
 
 function downloadGRT() {
             setCurrentStep(4);
@@ -7160,270 +6837,13 @@ function _smConfFromN(n){ n = Number(n||0); if (!isFinite(n)||n<=0) return 0; co
 
 
 
-// score scaling: raw composite -> 0–100 rating (higher is better)
-function _smClamp(v, lo, hi){ v=Number(v); if(!isFinite(v)) return lo; return Math.max(lo, Math.min(hi, v)); }
-function _smGetScoreK(){
-  try{
-    const k = Number(localStorage.getItem('grt_sm_score_k'));
-    return (isFinite(k) && k>0) ? k : 0.447;
-  }catch(_e){ return 0.447; }
-}
-function _smSetScoreK(k){
-  k = Number(k);
-  if(!isFinite(k) || k<=0) return false;
-  try{ localStorage.setItem('grt_sm_score_k', String(k)); }catch(_e){}
-  return true;
-}
-// Suggest k from currently loaded data so that P75 raw score maps to ~80.
-// Uses your real imported sessions (scoring shots only).
-function _smSuggestScoreKFromData(targetRating){
-  targetRating = Number.isFinite(targetRating) ? targetRating : 80;
-  try{
-    const rows = (window.__xqaSmPhase2Rows||[]);
-    const raws = rows.map(r => Number(r?.s?.derived?.rank2?.rawScore)).filter(x=>isFinite(x) && x>=0).sort((a,b)=>a-b);
-    if(raws.length < 5) return null;
-    const p75 = raws[Math.floor(0.75*(raws.length-1))];
-    if(!isFinite(p75) || p75<=0) return null;
-    const y = _smClamp(targetRating/100, 0.01, 0.99); // avoid inf
-    // rating = 100*(1-exp(-k*raw))  =>  k = -ln(1-y)/raw
-    const k = -Math.log(1 - y) / p75;
-    return (isFinite(k) && k>0) ? k : null;
-  }catch(_e){ return null; }
-}
-
-function _smOnCalibrateClick(ev){
-  try{
-    const k = _smSuggestScoreKFromData(80);
-    if(k == null){
-      try{ if(typeof showToast==='function') showToast('Not enough sessions to calibrate (need ~5+ rows).','warn'); }catch(_e){}
-      try{ if(typeof showToast!=='function') alert('Not enough sessions to calibrate. Load more sessions.'); }catch(_e){}
-      return;
-    }
-    _smSetScoreK(k);
-    const msg = `Calibrated score scale (k=${k.toFixed(3)}; P75 raw ≈ 80).`;
-    try{ if(typeof showToast==='function') showToast(msg,'ok'); else alert(msg); }catch(_e){ try{ alert(msg);}catch(__){} }
-    try{ renderShotMarkerSessionCards(); }catch(_e){}
-    try{
-      const p = document.getElementById('smSanityPanel');
-      if(p && !p.classList.contains('hidden')) _smToggleSanityPanel(true);
-    }catch(_e){}
-  }catch(e){
-    console.error(e);
-    try{ if(typeof showToast==='function') showToast('Calibrate failed: '+(e?.message||e),'error'); else alert('Calibrate failed.'); }catch(_e){}
-  }
-}
-
-function _smScoreTo100(raw){
-  raw = Number(raw);
-  if(!isFinite(raw)) return null;
-  // Map raw>=0 to 0..100 using a smooth saturating curve.
-  // k is user-tuneable (stored in localStorage as 'grt_sm_score_k').
-  const k = _smGetScoreK();
-  const rating = 100 * (1 - Math.exp(-k * Math.max(0, raw)));
-  return _smClamp(rating, 0, 100);
-}
-
-
-function _smLogPhase2SanityTable(force){
-  try{
-    const rows = (window.__xqaSmPhase2Rows||[]);
-    if(!rows.length){ console.warn('No ShotMarker Phase 2 rows available.'); return; }
-    if(!force && window.__SM_SANITY_PRINTED__){ return (window.__SM_SANITY_ROWS__||null); }
-    window.__SM_SANITY_PRINTED__ = true;
-
-    function _smChronoStatsForCharge(ci){
-      try{
-        if(!Number.isFinite(ci)) return null;
-        const idx = Number(ci) - 1; // charges are 1-based in UI
-        const a = (window.allStats || allStats || []);
-        const item = (Array.isArray(a) && a[idx]) ? a[idx] : null;
-        const st = item && item.stats ? item.stats : null;
-        return st && typeof st === 'object' ? st : null;
-      }catch(_e){ return null; }
-    }
-
-    const out = rows.map((x,i)=>{
-      const s=x.s||{};
-      const d=s.derived||{};
-      const r=d.rank2||{};
-      const meta=s.meta||{};
-
-      // ShotMarker model-fit velocity (target-derived)
-      const modelVsd = (d.velocityDiag && Number.isFinite(d.velocityDiag.vSD)) ? d.velocityDiag.vSD : null;
-      const modelVes = (d.velocityDiag && Number.isFinite(d.velocityDiag.vES)) ? d.velocityDiag.vES : null;
-
-      // Chrono-linked velocity SD (if linked to a charge)
-      const ci = (Number.isFinite(r.chargeIndex) ? r.chargeIndex : (Number.isFinite(x.ci) ? x.ci : null));
-      const chronoStats = _smChronoStatsForCharge(ci);
-      const chronoV = (typeof xqaGetVelocitySD === 'function') ? xqaGetVelocitySD(chronoStats) : {v:null, src:'missing'};
-      const chronoVsd = Number.isFinite(chronoV.v) ? chronoV.v : null;
-      const chronoSrc = chronoV && chronoV.src ? chronoV.src : (chronoVsd!=null ? 'computed' : 'missing');
-
-      // prefer a single "SD for sanity" display:
-      // - if model-fit exists, call it model-fit
-      // - else if chrono SD exists, show that with its src
-      // - else missing/insufficient per chronoSrc
-      let sdDisplay = null;
-      let sdSource = 'missing';
-      if (Number.isFinite(modelVsd)) {
-        sdDisplay = modelVsd;
-        sdSource = 'model-fit';
-      } else if (Number.isFinite(chronoVsd)) {
-        sdDisplay = chronoVsd;
-        sdSource = chronoSrc;
-      } else {
-        sdDisplay = null;
-        sdSource = chronoSrc || 'missing';
-      }
-
-      const raw =
-        (Number.isFinite(r.rawScore) ? r.rawScore :
-         (Number.isFinite(r.raw) ? r.raw : null));
-
-      const score100 =
-        (Number.isFinite(r.score100) ? r.score100 :
-         (Number.isFinite(r.score) ? r.score : null));
-
-      const flags = (d.velocityDiag && d.velocityDiag.flags) ? d.velocityDiag.flags : {};
-      const hasAnyVelocity = Number.isFinite(modelVsd) || Number.isFinite(chronoVsd);
-      const why = (r.reasons && r.reasons.length) ? r.reasons.join(' • ') : (hasAnyVelocity ? '' : 'target-only (no velocity)');
-
-      return {
-        idx:i,
-        charge: (Number.isFinite(ci)?('Charge '+ci):'Unlinked'),
-        session: (meta.sessionKey||x.key||'').split('|')[1]|| (meta.sessionKey||x.key||''),
-        totalShots: (Number.isFinite(d.totalShots)?d.totalShots:null),
-        sighterShots: (Number.isFinite(d.sighterShots)?d.sighterShots:null),
-        scoringShots: (Number.isFinite(d.scoringShots)?d.scoringShots:null),
-        nShots: (Number.isFinite(d.scoringShots)?d.scoringShots:(Number.isFinite(r.nShots)?r.nShots:null)),
-        mrMOA: (Number.isFinite(d.mrMoa)? +d.mrMoa.toFixed(3): null),
-        vertMOA: (Number.isFinite(d.vertMoa)? +d.vertMoa.toFixed(3): null),
-
-        // new fields
-        modelVsdFPS: (modelVsd==null ? null : +modelVsd.toFixed(1)),
-        modelVesFPS: (modelVes==null ? null : +modelVes.toFixed(1)),
-        chronoVsdFPS: (chronoVsd==null ? null : +chronoVsd.toFixed(1)),
-        chronoVsdSource: chronoSrc,
-        sdFPS: (sdDisplay==null ? null : +sdDisplay.toFixed(1)),
-        sdSource: sdSource,
-        why: why,
-        flags: flags,
-
-        raw: (raw==null ? null : +raw.toFixed(3)),
-        score100: (score100==null ? null : +score100.toFixed(1))
-      };
-    });
-
-    console.table(out);
-    window.__SM_SANITY_ROWS__ = out;
-    return out;
-  }catch(e){ console.error(e); return null; }
-}
-
-
-
-function _smEscHtml(s){
-  return String(s==null?'':s)
-    .replace(/&/g,'&amp;').replace(/</g,'&lt;')
-    .replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;');
-}
-
-function _smRenderSanityPanelRows(rows){
-  if(!Array.isArray(rows) || !rows.length){
-    return '<div class="text-[11px] text-grt-subtle">No rows available yet. Load ShotMarker data, then open this panel again.</div>';
-  }
-  const head = ['Charge','Session','Shots (SC)','MR (MOA)','Vert (MOA)','SD (fps)','SD source','Model SD','Chrono SD','Chrono src','Why','Score'];
-  const ths = head.map(h=>`<th class="py-1 px-2 text-[10px] uppercase tracking-wide text-grt-subtle whitespace-nowrap">${_smEscHtml(h)}</th>`).join('');
-  const pill = (txt, cls)=>`<span class="inline-flex items-center px-2 py-0.5 rounded-full border ${cls} text-[10px] whitespace-nowrap">${_smEscHtml(txt)}</span>`;
-  const srcPill = (src)=>{
-    const s = String(src||'missing').toLowerCase();
-    if(s==='model-fit') return pill('model-fit','border-sky-400/40 bg-sky-500/10 text-sky-200');
-    if(s==='computed' || s==='measured') return pill(s,'border-emerald-400/40 bg-emerald-500/10 text-emerald-200');
-    if(s==='insufficient') return pill('insufficient','border-amber-400/40 bg-amber-500/10 text-amber-200');
-    if(s==='missing') return pill('missing','border-slate-400/30 bg-slate-500/10 text-slate-200');
-    return pill(s,'border-slate-400/30 bg-slate-500/10 text-slate-200');
-  };
-
-  const trs = rows.map(r=>{
-    const sd = (r.sdFPS==null) ? '—' : r.sdFPS;
-    const modelSd = (r.modelVsdFPS==null) ? '—' : r.modelVsdFPS;
-    const chronoSd = (r.chronoVsdFPS==null) ? '—' : r.chronoVsdFPS;
-    const why = r.why || '';
-    return `<tr class="border-t border-grt-frame/40 align-top">
-      <td class="py-1 px-2 text-[11px] text-white/90 whitespace-nowrap">${_smEscHtml(r.charge)}</td>
-      <td class="py-1 px-2 text-[11px] text-white/80 whitespace-nowrap">${_smEscHtml(r.session)}</td>
-      <td class="py-1 px-2 text-[11px] text-white/80 text-right" title="${Number.isFinite(r.totalShots)?(`Total: ${r.totalShots} • Sighters: ${r.sighterShots||0}`):``}">${_smEscHtml(r.nShots)}</td>
-      <td class="py-1 px-2 text-[11px] text-white/80 text-right">${_smEscHtml(r.mrMOA)}</td>
-      <td class="py-1 px-2 text-[11px] text-white/80 text-right">${_smEscHtml(r.vertMOA)}</td>
-      <td class="py-1 px-2 text-[11px] text-white/90 text-right font-semibold">${_smEscHtml(sd)}</td>
-      <td class="py-1 px-2 text-[11px] text-white/80">${srcPill(r.sdSource)}</td>
-      <td class="py-1 px-2 text-[11px] text-white/80 text-right">${_smEscHtml(modelSd)}</td>
-      <td class="py-1 px-2 text-[11px] text-white/80 text-right">${_smEscHtml(chronoSd)}</td>
-      <td class="py-1 px-2 text-[11px] text-white/80">${srcPill(r.chronoVsdSource)}</td>
-      <td class="py-1 px-2 text-[11px] text-white/70 max-w-[260px]">${_smEscHtml(why)}</td>
-      <td class="py-1 px-2 text-[11px] text-white/90 text-right font-semibold">${_smEscHtml(r.score100)}</td>
-    </tr>`;
-  }).join('');
-  return `<div class="text-[10px] text-grt-subtle mb-2">
-    SD (fps) prefers <span class="text-white/80">model-fit</span> when available; otherwise uses linked chrono SD (computed/insufficient/missing).
-  </div>
-  <table class="min-w-full text-left">
-    <thead><tr class="border-b border-grt-frame/60">${ths}</tr></thead>
-    <tbody>${trs}</tbody>
-  </table>`;
-}
-
-function _smToggleSanityPanel(force, hide){
-  try{
-    const panel = document.getElementById('smSanityPanel');
-    const body = document.getElementById('smSanityPanelBody');
-    if(!panel || !body){
-      console.warn('Sanity panel DOM not found (render ShotMarker Ranking first).');
-      // still allow console logging
-      return _smLogPhase2SanityTable(!!force);
-    }
-    if(hide){
-      panel.classList.add('hidden');
-      return;
-    }
-    // toggle visibility
-    const willShow = panel.classList.contains('hidden');
-    if(willShow){
-      panel.classList.remove('hidden');
-    }
-    const rows = _smLogPhase2SanityTable(true);
-    body.innerHTML = _smRenderSanityPanelRows(rows||[]);
-    return rows;
-  }catch(e){ console.error(e); return null; }
-}
-
-
-// --- Current Tune + Improvement helpers (v0.89) ---
+// --- Current Tune + Improvement helpers (v0.87.1) ---
 function _smParseDateISOFromMeta(meta){
   try{
     const dt = (meta && meta.dateText) ? String(meta.dateText) : '';
     if(!dt) return null;
     const first = dt.split('|')[0].trim(); // e.g. "Sep 25 2025"
-    if(!first) return null;
-
-    // Prefer Date.parse for portability; fall back to manual month parse.
-    let t = Date.parse(first);
-    if(!isFinite(t)){
-      const m = /^([A-Za-z]{3,})\s+(\d{1,2})\s+(\d{4})$/.exec(first);
-      if(m){
-        const mon = m[1].slice(0,3).toLowerCase();
-        const map = {jan:0,feb:1,mar:2,apr:3,may:4,jun:5,jul:6,aug:7,sep:8,oct:9,nov:10,dec:11};
-        const mm = map[mon];
-        if(mm!=null){
-          const dd = Number(m[2]), yy = Number(m[3]);
-          const d = new Date(yy, mm, dd);
-          t = d.getTime();
-        }
-      }
-    }
-    if(!isFinite(t)) return null;
-
-    const d = new Date(t);
+    const d = new Date(first);
     if(!isFinite(d.getTime())) return null;
     const yyyy = d.getFullYear();
     const mm = String(d.getMonth()+1).padStart(2,'0');
@@ -7431,7 +6851,6 @@ function _smParseDateISOFromMeta(meta){
     return yyyy + '-' + mm + '-' + dd;
   }catch(e){ return null; }
 }
-
 function _smDecayWeight(ageDays, halfLifeDays=14, floor=0.15){
   ageDays = Number(ageDays||0);
   if(!isFinite(ageDays) || ageDays<0) ageDays = 0;
@@ -7456,17 +6875,15 @@ function _smCurrentTuneVertical(sessions, nowDate){
   const elig = (Array.isArray(sessions)?sessions:[]).filter(s=>{
     const m=s?.meta||{}; const d=s?.derived||{};
     const dist = (m.distanceYd && isFinite(m.distanceYd)) ? Number(m.distanceYd) : 1000;
-    const shots = Number.isFinite(d.scoringShots) ? Number(d.scoringShots)
-                 : (Number.isFinite(d.shots) ? Number(d.shots) : Number(m.shots||0));
+    const shots = Number.isFinite(d.shots)?Number(d.shots):Number(m.shots||0);
     const v = Number.isFinite(d.vertMoa)?Number(d.vertMoa):null;
-    return (Math.abs(dist-1000) <= 2) && shots>=10 && isFinite(v);
+    return dist===1000 && shots>=10 && isFinite(v);
   });
   if(!elig.length) return null;
   let num=0, den=0;
   for(const s of elig){
     const m=s?.meta||{}; const d=s?.derived||{};
-    const shots = Number.isFinite(d.scoringShots) ? Number(d.scoringShots)
-                 : (Number.isFinite(d.shots) ? Number(d.shots) : Number(m.shots||0));
+    const shots = Number.isFinite(d.shots)?Number(d.shots):Number(m.shots||0);
     const v = Number(d.vertMoa);
     const iso=_smParseDateISOFromMeta(m);
     const dt = iso ? new Date(iso) : null;
@@ -7476,17 +6893,15 @@ function _smCurrentTuneVertical(sessions, nowDate){
   }
   return den>0 ? (num/den) : null;
 }
-
 function _smSupportScore(sessions, nowDate){
   const now = nowDate || new Date();
   let support = 0;
   for(const s of (Array.isArray(sessions)?sessions:[])){
     const m=s?.meta||{}; const d=s?.derived||{};
     const dist = (m.distanceYd && isFinite(m.distanceYd)) ? Number(m.distanceYd) : 1000;
-    const shots = Number.isFinite(d.scoringShots) ? Number(d.scoringShots)
-                 : (Number.isFinite(d.shots) ? Number(d.shots) : Number(m.shots||0));
+    const shots = Number.isFinite(d.shots)?Number(d.shots):Number(m.shots||0);
     const v = Number.isFinite(d.vertMoa)?Number(d.vertMoa):null;
-    if(Math.abs(dist-1000) > 2 || shots<10 || !isFinite(v)) continue;
+    if(dist!==1000 || shots<10 || !isFinite(v)) continue;
     const iso=_smParseDateISOFromMeta(m);
     const dt = iso ? new Date(iso) : null;
     const ageDays = dt ? ((now - dt)/(1000*60*60*24)) : 0;
@@ -7494,7 +6909,6 @@ function _smSupportScore(sessions, nowDate){
   }
   return support;
 }
-
 function _smImprovementForCharge(chargeSessions, nowDate){
   const now = nowDate || new Date();
   const recentWindowDays = 14;
@@ -7675,7 +7089,6 @@ function _smEnsureVelocityDerived(session){
   const vertMm = Number.isFinite(session.derived.vertMm) ? session.derived.vertMm : null;
   const flags=_smDiagFlagsFromModel(model, vertMm);
   session.derived.velocityDiag = {
-    source: "model-fit",
     n: model.n,
     corr: Number.isFinite(model.corr)?model.corr:null,
     r2: Number.isFinite(model.r2)?model.r2:null,
@@ -7720,15 +7133,7 @@ function _smRank2ForSession(session){
   const residVertMoa = (residVertMm!=null) ? _mmToMoa(residVertMm, distanceYd) : null;
 
   const r2 = (d.velocityDiag && Number.isFinite(d.velocityDiag.r2)) ? d.velocityDiag.r2 : null;
-  const vSD_src = (d.velocityDiag && typeof d.velocityDiag.source==='string') ? d.velocityDiag.source : ((d.velocityDiag && typeof d.velocityDiag.vSDSource==='string') ? d.velocityDiag.vSDSource : null);
-  let vSD = (d.velocityDiag && Number.isFinite(d.velocityDiag.vSD)) ? d.velocityDiag.vSD : null;
-  // Score gating: only allow velocity SD to influence score when it has an explicit, trustworthy source.
-  // (model-fit from ShotMarker OR chrono-computed/measured if you ever feed it in)
-  if(vSD != null){
-    const okSrc = (vSD_src === 'model-fit' || vSD_src === 'computed' || vSD_src === 'measured');
-    if(!okSrc) vSD = null;
-  }
-
+  const vSD = (d.velocityDiag && Number.isFinite(d.velocityDiag.vSD)) ? d.velocityDiag.vSD : null;
 
   // weights (simple + tunable later)
   const wResid=1.6, wVert=1.0, wMR=0.6, wVel=0.35;
@@ -7749,11 +7154,7 @@ function _smRank2ForSession(session){
   if(flags.windDominated) score *= 0.85;
   if(flags.weirdSign) score *= 0.10;
 
-    const rawScore = score;
-  const score100 = _smScoreTo100(rawScore);
-  score = (score100==null? null : score100);
-
-const reasons=[];
+  const reasons=[];
   if(Number.isFinite(residVertMoa)) reasons.push(`residualV ${residVertMoa.toFixed(2)} MOA`);
   else if(Number.isFinite(vertMoa)) reasons.push(`vert ${vertMoa.toFixed(2)} MOA`);
   if(Number.isFinite(vSD)) reasons.push(`SD ${vSD.toFixed(1)}`);
@@ -7764,7 +7165,7 @@ const reasons=[];
   else if(flags.velocityDominated) label='velocity';
   else if(flags.windDominated) label='wind';
 
-  return { score, rawScore, label, reasons, confidence: conf, nShots };
+  return { score, label, reasons, confidence: conf, nShots };
 }
 
 function computeShotMarkerPhase2(strings){
@@ -7970,7 +7371,7 @@ function computeShotMarkerChargeRollups(sessions){
     const velocityCoverage = arr.length ? (withVel / arr.length) : 0;
 
     const nShotsTotal = arr.reduce((a,s)=> a + Number(s?.meta?.shotCount || s?.meta?.shots || s?.shots?.length || 0), 0);
-    const bestScore = _smMax(scores);
+    const bestScore = _smMin(scores);
     const medianScore = _smMedian(scores);
 
     // best session = lowest score
@@ -7999,11 +7400,11 @@ function computeShotMarkerChargeRollups(sessions){
     });
   }
 
-  // sort: best medianScore descending (fallback to bestScore)
+  // sort: best medianScore ascending (fallback to bestScore)
   rollups.sort((a,b)=>{
     const am = Number.isFinite(a.medianScore) ? a.medianScore : a.bestScore;
     const bm = Number.isFinite(b.medianScore) ? b.medianScore : b.bestScore;
-    if(Number.isFinite(am) && Number.isFinite(bm)) return bm - am;
+    if(Number.isFinite(am) && Number.isFinite(bm)) return am - bm;
     if(Number.isFinite(am)) return -1;
     if(Number.isFinite(bm)) return 1;
     return a.chargeIndex - b.chargeIndex;
@@ -8040,46 +7441,6 @@ function _smRankIcon(label){
   return '🎯';
 }
 
-
-// v0.89: session verification baseline + tightened Phase 3 confidence
-function _smConfBars(label){
-  const l = String(label||'').toLowerCase();
-  const n = (l==='high')?3:((l==='medium')?2:((l==='low')?1:0));
-  const on = '▮', off='◻';
-  return (n>=1?on:off) + (n>=2?on:off) + (n>=3?on:off);
-}
-function _smDiagIconChar(type){
-  if(type==='vertical') return '⬍';
-  if(type==='horizontal') return '⇄';
-  if(type==='scatter') return '✖';
-  return '—';
-}
-function _smDiagOpacity(label){
-  const l = String(label||'').toLowerCase();
-  if(l==='high') return 1.0;
-  if(l==='medium') return 0.7;
-  if(l==='low') return 0.4;
-  return 0.45;
-}
-function _smDominantDiagHtml(dd){
-  if(!dd || !dd.type) return '';
-  const confLabel = dd?.conf?.label || 'Low';
-  const domPct = Number.isFinite(dd.dominance) ? Math.round(dd.dominance*100) : null;
-  const icon = _smDiagIconChar(dd.type);
-  const op = _smDiagOpacity(confLabel);
-  const name = (dd.type==='vertical')?'Vertical dispersion':(dd.type==='horizontal')?'Horizontal dispersion':'Scatter / instability';
-  const tip = `${name} — ${confLabel} confidence${domPct!=null?` (${domPct}% axis dominance)`:''}`;
-  return `<span class="inline-flex items-center justify-center w-5" style="opacity:${op}" title="${tip}">${icon}</span>`;
-}
-function _smDominantDiagSummaryHtml(dd){
-  if(!dd || !dd.type) return '';
-  const confLabel = dd?.conf?.label || 'Low';
-  const domPct = Number.isFinite(dd.dominance) ? Math.round(dd.dominance*100) : null;
-  const name = (dd.type==='vertical')?'Vertical dispersion':(dd.type==='horizontal')?'Horizontal dispersion':'Scatter / instability';
-  return `<div class="mt-2 text-[11px] text-grt-subtle">Dominant: <span class="text-white/90">${name}</span> <span class="ml-1 font-mono">${_smConfBars(confLabel)}</span> <span class="ml-1">${confLabel}</span>${domPct!=null?` <span class="ml-1">(${domPct}% axis)</span>`:''}</div>`;
-}
-
-
 function _shotMarkerPhase2RankingTableHtml(strings){
   const sessions = Array.isArray(strings)?strings:[];
   const improvements = _smImprovementsByCharge(sessions);
@@ -8099,10 +7460,10 @@ function _shotMarkerPhase2RankingTableHtml(strings){
 
   const body = rows.map((x,i)=>`
     <tr class="border-t border-grt-frame/60 hover:bg-white/5 cursor-pointer" onclick="openSmDrilldown(${i})">
-      <td class=\"py-2 px-2 text-[12px]\">${(((x.s?.derived?.velocityDiag && (Number.isFinite(x.s.derived.velocityDiag.vSD)||Number.isFinite(x.s.derived.velocityDiag.vES)||Number.isFinite(x.s.derived.velocityDiag.r2)||Number.isFinite(x.s.derived.velocityDiag.corr))) ? _smRankIcon(x.r.label) : '📄') + _smDominantDiagHtml(x.s?.derived?.dominantDiag))}</td>
+      <td class=\"py-2 px-2 text-[12px]\">${(x.s?.derived?.velocityDiag && (Number.isFinite(x.s.derived.velocityDiag.vSD)||Number.isFinite(x.s.derived.velocityDiag.vES)||Number.isFinite(x.s.derived.velocityDiag.r2)||Number.isFinite(x.s.derived.velocityDiag.corr))) ? _smRankIcon(x.r.label) : '📄'}</td>
       <td class="py-2 px-3 text-[11px] text-white/90">${((x.ci!=null && Number.isFinite(x.ci)) ? ("Charge "+x.ci) : "Unlinked") + _smImprovementIconHtml(x.ci)}</td>
       <td class=\"py-2 px-3 text-[11px] text-grt-subtle\">${_smPhase3BadgePills(x.s?.derived?.phase3?.badges)}<div class="mt-1">${(x.r.reasons && x.r.reasons.length)? x.r.reasons.join(' • ') : (((x.s?.derived?.velocityDiag && (Number.isFinite(x.s.derived.velocityDiag.vSD)||Number.isFinite(x.s.derived.velocityDiag.vES)||Number.isFinite(x.s.derived.velocityDiag.r2)||Number.isFinite(x.s.derived.velocityDiag.corr))) ? '' : 'target-only (no velocity)'))}</div></td>
-      <td class="py-2 px-3 text-[11px] text-white/90">${x.score.toFixed(1)}</td>
+      <td class="py-2 px-3 text-[11px] text-white/90">${x.score.toFixed(3)}</td>
     </tr>`).join('');
 
   // stash table rows for drilldown
@@ -8112,30 +7473,7 @@ function _shotMarkerPhase2RankingTableHtml(strings){
     <div class="bg-grt-panel-soft/40 border border-grt-frame rounded-2xl p-3 mb-3">
       <div class="flex items-center justify-between gap-3 mb-2">
         <div class="text-white text-sm font-semibold">🏁 ShotMarker Ranking (Phase 2.1)</div>
-        <div class="flex items-center gap-3">
-          <button class="text-[10px] text-white/70 hover:text-white underline decoration-white/20 hover:decoration-white/40"
-            title="Show a side-by-side sanity table (MR, Vertical, SD, raw score, 0–100 score)."
-            onclick="event.stopPropagation(); try{ _smToggleSanityPanel(true); }catch(e){ console.error(e);}">
-            Sanity</button>
-          <button class="text-[10px] text-white/70 hover:text-white underline decoration-white/20 hover:decoration-white/40"
-            title="Auto-tunes the 0–100 score scale using your currently loaded data (sets k so P75 raw ≈ 80)."
-            onclick="event.stopPropagation(); try{ _smOnCalibrateClick(event); }catch(e){ console.error(e);} ">Calibrate</button>
-          <div class="text-grt-subtle text-[10px]">Click a row to expand details</div>
-        </div>
-      </div>
-      <div id="smSanityPanel" class="hidden mt-2 mb-2 bg-black/20 border border-grt-frame/60 rounded-xl p-2">
-        <div class="flex items-center justify-between gap-2 mb-2">
-          <div class="text-[11px] text-white/90 font-semibold">Sanity output</div>
-          <div class="flex items-center gap-3">
-            <button class="text-[10px] text-white/70 hover:text-white underline decoration-white/20 hover:decoration-white/40"
-              title="Refresh the sanity table from current Phase 2 rows."
-              onclick="event.stopPropagation(); try{ _smToggleSanityPanel(true); }catch(e){ console.error(e);}">Refresh</button>
-            <button class="text-[10px] text-white/70 hover:text-white underline decoration-white/20 hover:decoration-white/40"
-              title="Hide this panel."
-              onclick="event.stopPropagation(); try{ _smToggleSanityPanel(false,true); }catch(e){ console.error(e);}">Hide</button>
-          </div>
-        </div>
-        <div id="smSanityPanelBody" class="overflow-x-auto"></div>
+        <div class="text-grt-subtle text-[10px]">Click a row to expand details</div>
       </div>
       <div class="overflow-x-auto">
         <table class="w-full text-left">
@@ -8144,7 +7482,7 @@ function _shotMarkerPhase2RankingTableHtml(strings){
               <th class="py-2 px-2"> </th>
               <th class="py-2 px-3">Link</th>
               <th class="py-2 px-3">Why</th>
-              <th class="py-2 px-3" title="Composite 0–100 (higher is better). Mean-radius score × vertical & velocity penalties (sighters excluded).">Score</th>
+              <th class="py-2 px-3">Score</th>
             </tr>
           </thead>
           <tbody>${body}</tbody>
@@ -8172,8 +7510,8 @@ function _shotMarkerChargeLeaderboardHtml(){
 
   const rows = rollups.map((ru, idx)=>{
     const ci = ru.chargeIndex;
-    const best = Number.isFinite(ru.bestScore) ? ru.bestScore.toFixed(1) : '—';
-    const med  = Number.isFinite(ru.medianScore) ? ru.medianScore.toFixed(1) : '—';
+    const best = Number.isFinite(ru.bestScore) ? ru.bestScore.toFixed(3) : '—';
+    const med  = Number.isFinite(ru.medianScore) ? ru.medianScore.toFixed(3) : '—';
     const conf = Number.isFinite(ru.chargeConfidence) ? ru.chargeConfidence.toFixed(2) : '—';
     const nSess = ru.nSessions || 0;
     const cov = Number.isFinite(ru.velocityCoverage) ? Math.round(ru.velocityCoverage*100) : 0;
@@ -8273,7 +7611,7 @@ function openSmChargeDrilldown(chargeIndex){
     <div class="grid grid-cols-2 gap-3 mt-4">
       <div class="rounded-2xl border border-white/10 bg-white/5 p-3">
         <div class="text-grt-subtle text-[11px] uppercase tracking-wide">Median Rank2</div>
-        <div class="text-white text-2xl font-semibold mt-1">${Number.isFinite(ru.medianScore)?ru.medianScore.toFixed(1):'—'}</div>
+        <div class="text-white text-2xl font-semibold mt-1">${Number.isFinite(ru.medianScore)?ru.medianScore.toFixed(3):'—'}</div>
       </div>
       <div class="rounded-2xl border border-white/10 bg-white/5 p-3">
         <div class="text-grt-subtle text-[11px] uppercase tracking-wide">Confidence</div>
@@ -8349,14 +7687,6 @@ function openSmDrilldown(rowIndex){
   const hasAnyVel = Number.isFinite(vSD) || Number.isFinite(vES);
 
   const velLabel = hasModelVel ? (d?.rank2?.label || 'mixed') : (hasAnyVel ? 'linked-chrono' : 'target-only');
-
-// Chrono-linked SD details (from the matched charge stats, if available)
-const chronoChargeIndex = Number.isFinite(x?.ci) ? Number(x.ci) : null;
-const chronoRow = (chronoChargeIndex !== null && Array.isArray(allStats)) ? allStats[chronoChargeIndex] : null;
-const chronoSD = chronoRow && Number.isFinite(chronoRow.velocitySD) ? chronoRow.velocitySD : null;
-const chronoSDSource = chronoRow && chronoRow.velocitySDSource ? chronoRow.velocitySDSource : null;
-const chronoSDShots = chronoRow && Number.isFinite(chronoRow.velocityShotCount) ? chronoRow.velocityShotCount : null;
-const chronoSDExcluded = chronoRow && Number.isFinite(chronoRow.velocityExcludedCount) ? chronoRow.velocityExcludedCount : null;
   const velIcon  = hasModelVel ? _smRankIcon(velLabel) : (hasAnyVel ? '⛭' : '📄');
 
 
@@ -8365,9 +7695,7 @@ const chronoSDExcluded = chronoRow && Number.isFinite(chronoRow.velocityExcluded
       <div>
         <div class="text-white font-semibold text-base">${meta.targetName || 'ShotMarker Session'}</div>
         <div class="text-grt-subtle text-[11px] mt-1">${meta.sessionKey || ''}</div>
-                <div class="text-grt-subtle text-[11px] mt-1">Shots: <span class="text-white/90">${Number.isFinite(d.totalShots)?d.totalShots:'—'}</span> (<span class="text-white/90">${Number.isFinite(d.scoringShots)?d.scoringShots:'—'}</span> scoring, <span class="text-white/90">${Number.isFinite(d.sighterShots)?d.sighterShots:'—'}</span> sighters excluded)</div>
-        ${_smDominantDiagSummaryHtml(d.dominantDiag)}
-${_smImprovementPillHtml(x.ci)}
+        ${_smImprovementPillHtml(x.ci)}
       </div>
       <button class="px-2 py-1 rounded-lg border border-grt-frame bg-grt-panel-soft text-white/80 hover:bg-white/10" onclick="closeSmDrilldown()">✕</button>
     </div>
@@ -8416,16 +7744,6 @@ ${_smImprovementPillHtml(x.ci)}
         corr: <span class="text-white">${isFinite(corr)?__fmtNum(corr,2):'—'}</span>
       </div>
       <div class="mt-2 text-[12px] text-grt-subtle">
-  SD source: <span class="text-white/90">${
-    hasModelVel && Number.isFinite(vSD_model) ? 'model-fit'
-      : (chronoSDSource ? ('chrono-'+chronoSDSource) : (hasAnyVel ? 'linked-chrono' : 'missing'))
-  }</span>${
-    (chronoSDShots!==null) ? (' • shots used: <span class="text-white/90">'+chronoSDShots+'</span>') : ''
-  }${
-    (chronoSDExcluded!==null) ? (' • excluded: <span class="text-white/90">'+chronoSDExcluded+'</span>') : ''
-  }
-</div>
-<div class="mt-2 text-[12px] text-grt-subtle">
         Flags: ${hasModelVel ? (flags.weirdSign?'⚠ weirdSign ':'')+(flags.velocityDominated?'⛽ velocityDominated ':'')+(flags.windDominated?'🌬 windDominated ':'')+(flags.mixed?'🎯 mixed':'') : (hasAnyVel ? '⛭ linked chrono (no per-shot)' : '📄 target-only (no velocity)')}
       </div>
     </div>
@@ -8453,44 +7771,6 @@ function closeSmDrilldown(){
   if(overlay) overlay.classList.add('hidden');
 }
 
-
-// --- v0.89: ShotMarker sanity button (delegated binding, survives re-renders) ---
-(function(){
-  try{
-    if(window.__smSanityDelegated) return;
-    window.__smSanityDelegated = true;
-    document.addEventListener('click', function(e){
-      const btn = e.target && e.target.closest ? e.target.closest('[data-sm-sanity]') : null;
-      if(!btn) return;
-      e.preventDefault();
-      e.stopPropagation();
-      try{
-        if(typeof _smLogPhase2SanityTable === 'function'){
-          _smLogPhase2SanityTable(true);
-        }else{
-          console.warn('Sanity check function not available.');
-        }
-      }catch(err){
-        console.error(err);
-      }
-    }, true);
-  }catch(_e){}
-})();
-
-
-
-// --- Standalone Save/Load button wiring (no inline onclick dependency) ---
-try{
-  const _saveBtn = document.getElementById('saveSessionBtn');
-  if(_saveBtn) _saveBtn.addEventListener('click', (e)=>{ e.preventDefault(); try{ window.exportStandaloneJson && window.exportStandaloneJson(); }catch(err){ console.error(err); try{ showStatus('error','Save session failed: ' + (err?.message||err)); }catch(_e){} }});
-  const _loadBtn = document.getElementById('loadSessionBtn');
-  if(_loadBtn) _loadBtn.addEventListener('click', (e)=>{ e.preventDefault(); try{ window.importStandaloneJson && window.importStandaloneJson(); }catch(err){ console.error(err); try{ showStatus('error','Load session failed: ' + (err?.message||err)); }catch(_e){} }});
-}catch(_e){}
-
-
-// Ensure standalone save/load functions are globally accessible for inline onclick handlers
-try{ window.exportStandaloneJson = exportStandaloneJson; }catch(_e){}
-try{ window.importStandaloneJson = importStandaloneJson; }catch(_e){}
 </script>
 
 <!-- How-to overlay -->
@@ -8556,306 +7836,125 @@ try{ window.importStandaloneJson = importStandaloneJson; }catch(_e){}
 </div>
 
 
-
-<div id="twc-ssr-ioo-phe" style="position: fixed; top: 0px; left: 0px; width: 100%; height: 100%; z-index: 10000; pointer-events: none;"><template shadowrootmode="open"><div>
-        <style>* {
-    margin: 0;
-    padding: 0;
-    box-sizing: border-box;
-    font-family: 'Lato', sans-serif;
-}
-
-button {
-    padding: 0;
-    border: none;
-    font: inherit;
-    color: inherit;
-    background-color: transparent;
-    cursor: pointer;
-}
-
-#shortcut-selected,
-#shortcut-visible {
-    position: absolute;
-    top: 15px;
-    right: 335px;
-}
-
-.tooltip{
-    display: flex;
-    flex-direction: column;
-    position: relative;
-    color: #ffffff;
-    gap: 16px;
-    width: 365px;
-    padding: 25px;
-    background-color: #212121;
-    border-radius: 10px;
-    box-shadow: 0px 0px 20px 0px rgba(185, 185, 185, 0.6);
-    z-index: 1000;
-    pointer-events: auto;
-}
-
-.tooltip__header{
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-}
-
-.tooltip__icon{
-    height: 20px;
-    width: 20px;
-}
-
-.tooltip__title{
-    display: flex;
-    align-items: center;
-    gap: 8px;
-}
-
-.tooltip__title h3{
-    font-size: 18px;
-    font-weight: 600;
-}
-
-.tooltip__close{
-    padding: 0;
-    margin: 0;
-    width: 24px;
-    height: 24px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-}
-
-.tooltip__content{
-    display: flex;
-    flex-direction: column;
-    gap: 5px;
-}
-
-.tooltip__subtitle{
-    font-size: 14px;
-    font-weight: 400;
-}
-
-.tooltip__stats{
-    font-size: 12px;
-    font-weight: 400;
-}
-
-.tooltip__actions{
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    gap: 10px;
-}
-
-.tooltip__settings{
-    border: 1px solid #212121;
-    padding: 6px 0;
-    border-radius: 5px;
-    color: #D5D5D5;
-    font-size: 14px;
-    font-weight: 700;
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    width: 100%;
-    padding-left: 5px;
-}
-
-.tooltip__settings:hover{
-    border: 1px solid #06DFC9;
-    color: #ffffff;
-}
-
-.tooltip__settings:hover img,
-.tooltip__settings-text:hover{
-    filter: brightness(0) saturate(100%) invert(100%) sepia(0%) saturate(7500%) hue-rotate(56deg) brightness(97%) contrast(107%);
-}
-
-.tooltip__confirm{
-    background: #06DFC9;
-    border: 1px solid #06DFC9;
-    padding: 6px 0;
-    border-radius: 5px;
-    color: #212121;
-    width: 100%;
-    font-size: 14px;
-    font-weight: 700;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    gap: 8px;
-}
-
-.tooltip__confirm:hover{
-    border: 1px solid #05AD9C;
-    background: #05AD9C;
-}
-
-.tooltip__confirm:active{
-    background: #05AD9C;
-    color: #ffffff;
-}
-
-.tooltip--arrow-top::before{
-    content: '';
-    position: absolute;
-    top: -10px;
-    left: 50%;
-    transform: translateX(-50%);
-    width: 0;
-    height: 0;
-    border-left: 15px solid transparent;
-    border-right: 15px solid transparent;
-    border-bottom: 15px solid #212121;
-}
-
-.tooltip--arrow-left::before{
-    content: '';
-    position: absolute;
-    top: 50%;
-    left: -10px;
-    transform: translateY(-50%);
-    width: 0;
-    height: 0;
-    border-top: 15px solid transparent;
-    border-bottom: 15px solid transparent;
-    border-right: 15px solid #212121;
-}
-
-.tooltip--arrow-right::after{
-    content: '';
-    position: absolute;
-    top: 50%;
-    right: -10px;
-    transform: translateY(-50%);
-    width: 0;
-    height: 0;
-    border-top: 15px solid transparent;
-    border-bottom: 15px solid transparent;
-    border-left: 15px solid #212121;
-}
-
-.hidden{
-    display: none;
-}</style>
         
-            <div id="shortcut-selected" class="tooltip tooltip--arrow-top hidden">
-                <div class="tooltip__header">
-                    <div class="tooltip__title">
-                        <img src="chrome-extension://nbljjljaoanknannhlonmaknhckcoldi/resources/graphics/badge-emblem.svg" alt="badge-emblem icon" class="tooltip__icon"><img src="chrome-extension://nbljjljaoanknannhlonmaknhckcoldi/resources/graphics/selected.svg" alt="selected icon" class="tooltip__icon">
-                        <h3 class="tooltip__title">Alt + Shift + S</h3>
-                    </div>
-                    <button class="tooltip__close">
-                        <img src="chrome-extension://nbljjljaoanknannhlonmaknhckcoldi/resources/graphics/close.svg" alt="close-icon">
-                    </button>
-                </div>
-    
-                <div class="tooltip__content">
-                    <p class="tooltip__subtitle">Shortcut for <strong>Selected Area</strong> screenshot</p>
-                    <p class="tooltip__stats">57% of SimpleSnap users capture with shortcut</p> 
-                </div>
-    
-                
-        <div class="tooltip__actions">
-            <button class="tooltip__settings">
-                <img src="chrome-extension://nbljjljaoanknannhlonmaknhckcoldi/resources/graphics/settings.svg" alt="settings-icon">
-                <p class="tooltip__settings-text">Settings</p>
-            </button>
-            <button class="tooltip__confirm">Got it</button>
-        </div>
-            </div>
-        
-            <div id="shortcut-visible" class="tooltip tooltip--arrow-top hidden">
-                <div class="tooltip__header">
-                    <div class="tooltip__title">
-                        <img src="chrome-extension://nbljjljaoanknannhlonmaknhckcoldi/resources/graphics/badge-emblem.svg" alt="badge-emblem icon" class="tooltip__icon"><img src="chrome-extension://nbljjljaoanknannhlonmaknhckcoldi/resources/graphics/viewport-route.svg" alt="viewport-route icon" class="tooltip__icon">
-                        <h3 class="tooltip__title">Alt + Shift + V</h3>
-                    </div>
-                    <button class="tooltip__close">
-                        <img src="chrome-extension://nbljjljaoanknannhlonmaknhckcoldi/resources/graphics/close.svg" alt="close-icon">
-                    </button>
-                </div>
-    
-                <div class="tooltip__content">
-                    <p class="tooltip__subtitle">Shortcut for <strong>Visible Area</strong> screenshot</p>
-                    <p class="tooltip__stats">58% of SimpleSnap users capture with shortcut</p> 
-                </div>
-    
-                
-        <div class="tooltip__actions">
-            <button class="tooltip__settings">
-                <img src="chrome-extension://nbljjljaoanknannhlonmaknhckcoldi/resources/graphics/settings.svg" alt="settings-icon">
-                <p class="tooltip__settings-text">Settings</p>
-            </button>
-            <button class="tooltip__confirm">Got it</button>
-        </div>
-            </div>
-        
-            <div id="lines" class="tooltip tooltip--arrow-left hidden">
-                <div class="tooltip__header">
-                    <div class="tooltip__title">
-                        <img src="chrome-extension://nbljjljaoanknannhlonmaknhckcoldi/resources/graphics/ui.svg" alt="ui icon" class="tooltip__icon">
-                        <h3 class="tooltip__title">Lines and Arrows</h3>
-                    </div>
-                    <button class="tooltip__close">
-                        <img src="chrome-extension://nbljjljaoanknannhlonmaknhckcoldi/resources/graphics/close.svg" alt="close-icon">
-                    </button>
-                </div>
-    
-                <div class="tooltip__content">
-                    <p class="tooltip__subtitle">Draw arrows and lines - straight or freehand, select color and line width here.</p>
-                    <p class="tooltip__stats">Most users start their edits here.</p> 
-                </div>
-    
-                
-            </div>
-        
-            <div id="crop" class="tooltip tooltip--arrow-left hidden">
-                <div class="tooltip__header">
-                    <div class="tooltip__title">
-                        <img src="chrome-extension://nbljjljaoanknannhlonmaknhckcoldi/resources/graphics/selected.svg" alt="selected icon" class="tooltip__icon">
-                        <h3 class="tooltip__title">Crop</h3>
-                    </div>
-                    <button class="tooltip__close">
-                        <img src="chrome-extension://nbljjljaoanknannhlonmaknhckcoldi/resources/graphics/close.svg" alt="close-icon">
-                    </button>
-                </div>
-    
-                <div class="tooltip__content">
-                    <p class="tooltip__subtitle">You can trim your screenshot to focus on a specific area — just select the zone you want to keep, and the rest will be cropped out</p>
-                    <p class="tooltip__stats">A useful feature many users overlook.</p> 
-                </div>
-    
-                
-            </div>
-        
-            <div id="undo" class="tooltip tooltip--arrow-right hidden">
-                <div class="tooltip__header">
-                    <div class="tooltip__title">
-                        <img src="chrome-extension://nbljjljaoanknannhlonmaknhckcoldi/resources/graphics/undo-arrow.svg" alt="undo-arrow icon" class="tooltip__icon">
-                        <h3 class="tooltip__title">Undo anytime</h3>
-                    </div>
-                    <button class="tooltip__close">
-                        <img src="chrome-extension://nbljjljaoanknannhlonmaknhckcoldi/resources/graphics/close.svg" alt="close-icon">
-                    </button>
-                </div>
-    
-                <div class="tooltip__content">
-                    <p class="tooltip__subtitle">Cancel edits and return to the previous appearance of screenshot.</p>
-                    <p class="tooltip__stats">Right menu allows you to manage history of changes.</p> 
-                </div>
-    
-                
-            </div>
-        
-    </div></template></div><div id="capture-shell-nx0q5c" data-snapoverlay="true" style="display: none;"><template shadowrootmode="open"><style>
-    .captureShadeLayer {
-        position: fixed; top: 0; width: 100%; left: 0; background: rgba(255, 255, 255, 0.22); height: 100%; cursor: crosshair; z-index: 2147483647;
+
+<script>
+/* ============================
+   Blue custom tooltip system
+   - Converts native title tooltips into styled blue tooltips
+   - Works for dynamically-rendered content too
+   ============================ */
+(function initBlueTooltips(){
+  const tip = document.createElement('div');
+  tip.id = 'xqaBlueTip';
+  tip.innerHTML = '<div class="xqaBlueTipArrow"></div><div class="xqaBlueTipBody"></div>';
+  document.addEventListener('DOMContentLoaded', () => {
+    if (!document.body.contains(tip)) document.body.appendChild(tip);
+    migrateTitles(document);
+    observeNewTitles();
+  });
+
+  const body = () => tip.querySelector('.xqaBlueTipBody');
+
+  function esc(s){
+    return String(s ?? '').replace(/[&<>"']/g, ch => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[ch]));
+  }
+
+  function migrateTitles(root){
+    try{
+      const els = (root && root.querySelectorAll) ? root.querySelectorAll('[title]') : [];
+      els.forEach(el => {
+        const t = el.getAttribute('title');
+        if (t && !el.dataset.xqaTitle){
+          el.dataset.xqaTitle = t;
+          el.removeAttribute('title');
+        }
+      });
+    }catch(_){}
+  }
+
+  function observeNewTitles(){
+    if (!window.MutationObserver) return;
+    const mo = new MutationObserver((mutations)=>{
+      for (const m of mutations){
+        if (m.type !== 'childList') continue;
+        m.addedNodes && m.addedNodes.forEach(n=>{
+          if (n && n.nodeType === 1){
+            migrateTitles(n);
+          }
+        });
+      }
+    });
+    mo.observe(document.body, {childList:true, subtree:true});
+  }
+
+  let activeEl = null;
+
+  function getText(el){
+    if (!el) return '';
+    const t = el.dataset.xqaTitle || el.getAttribute('data-tip') || el.dataset.tip || '';
+    return String(t || '').trim();
+  }
+
+  function show(el, x, y){
+    const text = getText(el);
+    if (!text) return;
+    activeEl = el;
+    body().innerHTML = esc(text).replace(/\n/g,'<br>');
+    tip.style.display = 'block';
+    position(x,y);
+  }
+
+  function hide(){
+    activeEl = null;
+    tip.style.display = 'none';
+  }
+
+  function position(x,y){
+    const pad = 10;
+    // initial
+    let left = x + 14;
+    let top  = y + 14;
+
+    // measure after display
+    const rect = tip.getBoundingClientRect();
+    if (left + rect.width > window.innerWidth - pad) left = window.innerWidth - rect.width - pad;
+    if (top + rect.height > window.innerHeight - pad) top = window.innerHeight - rect.height - pad;
+    if (left < pad) left = pad;
+    if (top < pad) top = pad;
+
+    tip.style.left = left + 'px';
+    tip.style.top  = top + 'px';
+  }
+
+  // Pointer events (captures dynamic elements too)
+  document.addEventListener('pointerover', (e)=>{
+    const el = e.target && e.target.closest ? e.target.closest('[data-xqa-title],[data-tip],[title]') : null;
+    if (!el) return;
+    // If any new title slipped in, migrate it now
+    if (el.getAttribute && el.getAttribute('title') && !el.dataset.xqaTitle){
+      el.dataset.xqaTitle = el.getAttribute('title');
+      el.removeAttribute('title');
     }
-    .captureSelectionFrame {
-        cursor: crosshair; z-index: 2147483647; border: 3px dashed #06DFC9; position: fixed; background-color: rgba(38, 37, 37, 0.69);
-    }</style></template></div></body></html>
+    show(el, e.clientX, e.clientY);
+  }, true);
+
+  document.addEventListener('pointermove', (e)=>{
+    if (!activeEl) return;
+    position(e.clientX, e.clientY);
+  }, true);
+
+  document.addEventListener('pointerout', (e)=>{
+    if (!activeEl) return;
+    const rel = e.relatedTarget;
+    if (!rel || (activeEl !== rel && !(rel.closest && rel.closest('[data-xqa-title],[data-tip]') === activeEl))){
+      hide();
+    }
+  }, true);
+
+  // Hide on scroll/resize
+  window.addEventListener('scroll', hide, true);
+  window.addEventListener('resize', hide, true);
+})();
+</script>
+</body></html>
