@@ -5,10 +5,8 @@
 
 <meta content="width=device-width, initial-scale=1.0" name="viewport">
 <title>GRT Importer Advanced v0.87.3</title>
-<script src="./GRT Importer Advanced v0.87.1_files/xlsx.full.min.js.download"
-  onerror="this.onerror=null;this.src='https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js';"></script>
-<script src="./GRT Importer Advanced v0.87.1_files/saved_resource"
-  onerror="this.onerror=null;this.src='https://cdn.tailwindcss.com';"></script>
+<script src="./GRT Importer Advanced v0.87.1_files/xlsx.full.min.js.download" onerror="this.onerror=null;this.src='https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js';"></script>
+<script src="./GRT Importer Advanced v0.87.1_files/saved_resource" onerror="this.onerror=null;this.src='https://cdn.tailwindcss.com?plugins=forms';"></script>
 <style>
         :root {
             --grt-bg: #10141c;
@@ -5760,28 +5758,47 @@ function generateMinimalGRT() {
         function generateOutput() {
             analysisNoteText = buildSessionSummaryText();
             try { renderChronoSimChart(); } catch (e) {}
-            if (grtBaseContent) {
-                const base = grtBaseContent;
+
+            const base = grtBaseContent;
+            if (base) {
+                const buildNewInner = (existingInner) => {
+                    const inner = (existingInner == null) ? '' : String(existingInner);
+                    if (mode === 'ladder') return generateImportedLadderXML(inner);
+                    if (mode === 'sessions') return generateImportedSessionsXML(inner);
+                    return generateImportedMeasurementXML(inner);
+                };
+
+                // Normal <appendix>...</appendix>
                 const openIdx = base.indexOf('<appendix>');
                 const closeIdx = base.indexOf('</appendix>');
-                if (openIdx !== -1 && closeIdx !== -1) {
+                if (openIdx !== -1 && closeIdx !== -1 && closeIdx > openIdx) {
                     const before = base.substring(0, openIdx);
                     const after = base.substring(closeIdx + '</appendix>'.length);
                     const inner = base.substring(openIdx + '<appendix>'.length, closeIdx);
 
-                    let newInner;
-                    if (mode === 'ladder') {
-                        newInner = generateImportedLadderXML(inner);
-                    } else if (mode === 'sessions') {
-                        newInner = generateImportedSessionsXML(inner);
-                    } else {
-                        newInner = generateImportedMeasurementXML(inner);
-                    }
-
+                    const newInner = buildNewInner(inner);
                     outputXML = before + '<appendix>' + newInner + '</appendix>' + after;
                     return;
                 }
+
+                // Self-closing <appendix/> or <appendix />
+                const selfMatch = base.match(/<appendix\s*\/\s*>/i);
+                if (selfMatch) {
+                    const newInner = buildNewInner('');
+                    outputXML = base.replace(selfMatch[0], '<appendix>' + newInner + '</appendix>');
+                    return;
+                }
+
+                // No appendix tag: inject before closing InnerBallistikInput if present.
+                const endIdx = base.indexOf('</InnerBallistikInput>');
+                if (endIdx !== -1) {
+                    const newInner = buildNewInner('');
+                    outputXML = base.substring(0, endIdx) + '  <appendix>' + newInner + '</appendix>\n' + base.substring(endIdx);
+                    return;
+                }
             }
+
+            // Fallback: minimal template (no base file loaded or malformed XML)
             outputXML = generateMinimalGRT();
         }
 
