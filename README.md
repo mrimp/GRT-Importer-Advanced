@@ -1,13 +1,12 @@
 # GRT-Importer-Advanced
 
-Live app
-https://mrimp.github.io/GRT-Importer-Advanced/
+## Live app
+
+[Open the live app on GitHub Pages](https://mrimp.github.io/GRT-Importer-Advanced/)
 
 <img width="2415" height="4848" alt="_C__Users_bill_Downloads_GRT_Importer_Advanced_v0 87 1_LastImproved_TooltipsAndChargeLinkFix html (2)" src="https://github.com/user-attachments/assets/0cb365c5-7e73-4ec4-bbe2-28bfaeeaeaa6" />
 
-
 <img width="2415" height="9788" alt="_C__Users_bill_Downloads_GRT_Importer_Advanced_v0 87 1_LastImproved_TooltipsAndChargeLinkFix html (1)" src="https://github.com/user-attachments/assets/a45f99f7-b65e-47d4-af2e-d40884f8aeed" />
-
 
 🎯 GRT Importer Advanced — ShotMarker-First Load Analysis
 
@@ -46,4 +45,3 @@ This isn’t a spreadsheet replacement — it’s a decision tool.
 F-Class, Long Range, and precision shooters using ShotMarker
 Shooters tuning loads across multiple sessions
 Anyone who cares more about repeatable performance than cherry-picked groups
-
