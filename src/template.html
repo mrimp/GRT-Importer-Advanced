@@ -1,0 +1,1000 @@
+<!DOCTYPE html>
+<html lang="en"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+
+<meta content="width=device-width, initial-scale=1.0" name="viewport">
+<title>GRT Importer Advanced v0.87.13</title>
+<link rel="icon" type="image/x-icon" href="data:image/x-icon;base64,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">
+
+
+
+
+
+<style>
+/*__INJECT_CSS__*/
+</style>
+</head>
+<body class="min-h-screen p-4 md:p-6">
+<main class="max-w-5xl mx-auto">
+<!-- Header -->
+<div class="bg-grt-panel rounded-2xl shadow-2xl p-6 mb-4 border border-grt-frame header-neon">
+<div class="flex items-start justify-between gap-4">
+<div>
+<div class="inline-flex items-center gap-2 mb-2">
+<span class="inline-flex items-center px-2 py-0.5 rounded-full bg-grt-highlight border border-grt-accent text-[10px] font-semibold tracking-wide uppercase text-grt-soft">
+                            Chronograph → GRT
+                        </span>
+</div>
+<h1 class="text-3xl md:text-4xl font-extrabold text-white mb-1">
+                        GARMIN / ATHLON → GRT Importer
+                    </h1>
+<p class="text-grt-soft text-sm md:text-base">
+                        Import chronograph data (Garmin Xero C1 Pro or Athlon Rangecraft Velocity Pro)
+                        into Gordon's Reloading Tool projects.
+                    </p>
+<!-- Quick start line -->
+<p class="text-grt-subtle text-[11px] mt-1">
+                        Quick start: 1) Load base <code class="bg-slate-800/70 px-1 rounded">.grtload</code> (optional),
+                        2) pick chrono + files, 3) download <code class="bg-slate-800/70 px-1 rounded">.grtload</code> and open in GRT.
+                    </p>
+<div class="flex flex-wrap items-center gap-2 mt-2 text-xs">
+<p class="text-grt-subtle">
+                            GRT Importer Advanced v0.87.13 • XquiziT Arms
+                        </p>
+<span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full border border-grt-soft bg-grt-panel-soft text-[10px] md:text-[11px] text-grt-soft" id="sessionPill" data-xqa-title="Summary of imported sessions and current velocity unit.">⚙️ Standard • 0 chrono files • ft/s</span>
+</div>
+</div>
+<div class="flex flex-col items-end gap-3">
+<div class="flex items-center gap-2">
+<button aria-label="Start new session" class="p-2.5 rounded-full bg-grt-panel-soft hover:bg-grt-highlight text-slate-100 border border-grt-frame shadow-md transition-transform transform hover:-translate-y-0.5 hover:shadow-lg" id="newSessionBtn" data-xqa-title="Start new session">
+<svg class="h-5 w-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" xmlns="">
+<path d="M4.5 12a7.5 7.5 0 0112.62-5.303L19.5 9M7.5 9H4.5V6m15 6a7.5 7.5 0 01-12.62 5.303L4.5 15m12 0h3v3" stroke-linecap="round" stroke-linejoin="round"></path>
+</svg>
+</button>
+</div>
+</div>
+
+<div class="hidden md:flex items-start justify-end">
+    <button id="helpOverlayButton" class="inline-flex items-center gap-1 px-3 py-1.5 rounded-full border border-grt-frame text-grt-soft text-[11px] md:text-xs bg-grt-panel-soft hover:border-grt-accent hover:text-grt-accent transition">
+        <span>❓ How to use this</span>
+    </button>
+</div>
+</div>
+</div>
+
+<!-- Stepper -->
+<div class="mb-4 md:mb-5">
+<ol class="flex items-center gap-2 text-[11px] md:text-xs text-grt-subtle" id="topStepper">
+<li class="flex items-center gap-1" data-step="1">
+<div class="step-circle step-circle--active">
+                        1
+                    </div>
+<span>Pictures &amp; notes</span>
+</li>
+<li class="flex-1 h-px bg-grt-highlight/60 mx-1"></li>
+<li class="flex items-center gap-1" data-step="2">
+<div class="step-circle">
+                        2
+                    </div>
+<span>Add-ons</span>
+</li>
+<li class="flex-1 h-px bg-grt-highlight/30 mx-1"></li>
+<li class="flex items-center gap-1" data-step="3">
+<div class="step-circle">
+                        3
+                    </div>
+<span>Load base .grtload</span>
+</li>
+<li class="flex-1 h-px bg-grt-highlight/30 mx-1"></li>
+<li class="flex items-center gap-1" data-step="4">
+<div class="step-circle">
+                        4
+                    </div>
+<span>Chronograph files</span>
+</li>
+</ol>
+</div>
+<!-- Floating status toasts --><!-- Floating status toasts -->
+<div aria-live="polite" id="statusArea" role="status"></div>
+<!-- Upload Area -->
+<section aria-label="Import configuration" class="space-y-4 md:space-y-6" data-no-tip="1">
+<!-- 3. Imported Pictures & Notes -->
+<div class="bg-grt-panel rounded-2xl shadow-xl p-5 md:p-6 border border-grt-frame hover:border-grt-accent transition-colors">
+<div class="flex items-start gap-4">
+<div class="flex-shrink-0 w-10 h-10 md:w-12 md:h-12 bg-grt-highlight rounded-full flex items-center justify-center text-lg md:text-xl font-bold text-grt-soft border-grt-accent border shadow-inner">
+                        1
+                    </div>
+<div class="flex-1">
+<h3 class="text-lg font-bold text-white mb-1.5">
+                            🖼️ Optional: Imported Pictures &amp; Notes
+                        </h3>
+<p class="text-grt-soft text-xs md:text-sm mb-3">
+                            Add screenshots, target photos, and text notes directly into the GRT project.
+                            Pictures go to <strong>Imported Pictures</strong>; notes go to
+                            <strong>Imported Notes</strong>. Your existing tabs remain unchanged.
+                        </p>
+<div class="grid grid-cols-1 md:grid-cols-1 gap-3">
+<!-- Pictures -->
+<div class="bg-grt-panel-soft rounded-xl border border-grt-frame p-3">
+<h4 class="text-white text-xs md:text-sm font-semibold mb-2">Imported Pictures</h4>
+<p class="text-grt-subtle text-[11px] mb-2">
+                                    Select one or more images. They’re stored inside the
+                                    <code class="bg-slate-800/70 px-1 rounded text-[10px]">.grtload</code> as a gallery tab.
+                                </p>
+<div class="flex flex-wrap items-center gap-2">
+<input accept="image/*" class="hidden" id="pictureInput" multiple="" type="file">
+<button class="px-3 py-1.5 bg-grt-panel hover:bg-grt-highlight text-white rounded-md text-[11px] md:text-xs border border-grt-frame" id="pictureBtn" onclick="document.getElementById(&#39;pictureInput&#39;).click()" type="button">
+                                        Select Pictures
+                                    </button>
+<span class="text-grt-subtle text-[11px] md:text-xs" id="picturesStatus">No pictures selected</span>
+</div>
+</div>
+<!-- Notes -->
+<div class="bg-grt-panel-soft rounded-xl border border-grt-frame p-3">
+<h4 class="text-white text-xs md:text-sm font-semibold mb-2">Imported Notes</h4>
+<p class="text-grt-subtle text-[11px] mb-2">
+                                    Select text files (<code class="bg-slate-800/70 px-1 rounded text-[10px]">.txt</code>,
+                                    <code class="bg-slate-800/70 px-1 rounded text-[10px]">.md</code>, etc.). Files are merged into one notes tab.
+                                </p>
+<div class="flex flex-wrap items-center gap-2">
+<input accept=".txt,.md,.rtf,.log" class="hidden" id="notesInput" multiple="" type="file">
+<button class="px-3 py-1.5 bg-grt-panel hover:bg-grt-highlight text-white rounded-md text-[11px] md:text-xs border border-grt-frame" id="notesBtn" onclick="document.getElementById(&#39;notesInput&#39;).click()" type="button">
+                                        Select Notes Files
+                                    </button>
+<span class="text-grt-subtle text-[11px] md:text-xs" id="notesStatus">No notes added</span>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+
+<!-- 2. Optional Add-ons: ShotMarker -->
+<div class="bg-grt-panel rounded-2xl shadow-xl p-5 md:p-6 border border-grt-frame hover:border-grt-accent transition-colors">
+  <div class="flex items-start gap-4">
+    <div class="flex-shrink-0 w-10 h-10 md:w-12 md:h-12 bg-grt-highlight rounded-full flex items-center justify-center text-lg md:text-xl font-bold text-grt-soft border border-grt-accent shadow-inner">
+      2
+    </div>
+    <div class="flex-1">
+      <h3 class="text-lg font-bold text-white mb-1.5">🧩 Optional Add-ons: ShotMarker</h3>
+      <p class="text-grt-soft text-xs md:text-sm mb-3">
+        Load exported add-on files. These will be shown in the run summary and exported as appendix tabs in the generated
+        <code class="text-slate-200 bg-slate-800/80 px-1 py-0.5 rounded text-[11px]">.grtload</code>.
+      </p>
+
+      <div class="grid grid-cols-1 gap-3">
+        <!-- ShotMarker -->
+        <div class="bg-grt-panel-soft rounded-xl border border-grt-frame p-3">
+          <div class="flex items-start justify-between gap-2">
+            <div>
+              <h4 class="text-white text-xs md:text-sm font-semibold mb-1">ShotMarker</h4>
+              <p class="text-grt-subtle text-[11px] mb-2">
+                Import a ShotMarker export (CSV). We’ll summarize ES/MR when possible.
+              </p>
+            </div>
+            <span class="text-grt-subtle text-[10px] md:text-xs" id="shotMarkerStatus">No file loaded</span>
+          </div>
+
+          <div class="flex flex-wrap items-center gap-2 mb-2">
+            <input accept=".csv" class="hidden" id="shotMarkerInput" type="file">
+            <button class="px-3 py-1.5 bg-grt-panel hover:bg-grt-highlight text-white rounded-md text-[11px] md:text-xs border border-grt-frame" type="button" onclick="document.getElementById(&#39;shotMarkerInput&#39;).click()">
+              Select ShotMarker CSV
+            </button>
+            <button class="px-3 py-1.5 bg-grt-panel hover:bg-grt-highlight text-white rounded-md text-[11px] md:text-xs border border-grt-frame" type="button" onclick="clearShotMarkerAddons()">
+              Clear
+            </button>
+          </div>
+
+          <div id="shotMarkerInlineCards" class="space-y-2"><div class="text-grt-subtle text-[11px] md:text-xs">No file loaded</div></div>
+        </div>
+
+        
+        
+      </div>
+    </div>
+</div>
+
+</div>
+<!-- 1. GRT Base File -->
+<div class="bg-grt-panel rounded-2xl shadow-xl p-5 md:p-6 border border-grt-frame hover:border-grt-accent transition-colors">
+<div class="flex items-start gap-4">
+<div class="flex-shrink-0 w-10 h-10 md:w-12 md:h-12 bg-grt-highlight rounded-full flex items-center justify-center text-lg md:text-xl font-bold text-grt-soft border border-grt-accent shadow-inner">
+                        3
+                    </div>
+<div class="flex-1">
+<h3 class="text-lg font-bold text-white mb-1.5">
+                            📁 Load GRT Base File (Optional)
+                        </h3>
+<p class="text-grt-soft text-xs md:text-sm mb-4">
+                            Upload an existing <code class="text-slate-200 bg-slate-800/80 px-1 py-0.5 rounded text-[11px]">.grtload</code>
+                            with your rifle, ammo, and powder configuration. Your original tabs and ladder remain untouched.
+                            Standard mode creates an <strong>Imported Measurement</strong> tab; Ladder mode creates an
+                            <strong>Imported Ladder</strong> tab.
+                        </p>
+<div class="flex flex-wrap items-center gap-3">
+<input accept=".grtload,.grt" class="hidden" id="grtBaseInput" type="file" data-xqa-title="Optional: choose a base .grtload file to merge ladder data into.">
+<button class="px-4 py-2 bg-[var(--grt-accent)] hover:bg-[var(--grt-accent-soft)] text-white rounded-lg text-sm font-medium border border-grt-accent shadow-sm transition-colors" id="grtBaseBtn" onclick="document.getElementById(&#39;grtBaseInput&#39;).click()" data-xqa-title="Browse for the base .grtload file used for ladder imports.">
+                                Select .grtload
+                            </button>
+<span class="text-grt-subtle text-xs md:text-sm inline-flex items-center gap-2 hidden" id="grtBaseStatus"></span>
+</div>
+</div>
+</div>
+</div>
+
+<!-- 2. Chronograph Files -->
+<div class="bg-grt-panel rounded-2xl shadow-xl p-5 md:p-6 border border-grt-frame hover:border-grt-accent transition-colors">
+<div class="flex items-start gap-4">
+<div class="flex-shrink-0 w-10 h-10 md:w-12 md:h-12 bg-grt-highlight rounded-full flex items-center justify-center text-lg md:text-xl font-bold text-grt-soft border border-grt-accent shadow-inner">
+                        4
+                    </div>
+<div class="flex-1">
+<h3 class="text-lg font-bold text-white mb-1.5">🎯 Load Chronograph Files</h3>
+<p class="text-grt-soft text-xs md:text-sm mb-4">
+                            Load chronograph data as CSV or Excel files
+                            (<code class="text-slate-200 bg-slate-800/80 px-1 py-0.5 rounded text-[11px]">.csv</code>,
+                             <code class="text-slate-200 bg-slate-800/80 px-1 py-0.5 rounded text-[11px]">.xls</code>,
+                             <code class="text-slate-200 bg-slate-800/80 px-1 py-0.5 rounded text-[11px]">.xlsx</code>),
+                            then pick device, file unit, and import mode.
+                        </p>
+<!-- Device / unit / mode -->
+<div class="flex flex-col gap-2 mb-4">
+<div class="flex flex-wrap items-center gap-2">
+<label class="text-grt-soft text-xs md:text-sm font-semibold" for="deviceSelect">
+                                    Chronograph:
+                                </label>
+<select class="px-2.5 py-1.5 rounded-lg bg-grt-panel-soft text-white text-xs md:text-sm border border-grt-frame focus:outline-none focus:ring-2 focus:ring-[var(--grt-accent)] focus:border-[var(--grt-accent)]" id="deviceSelect" data-xqa-title="Choose the chronograph device that produced your files (Garmin or Athlon).">
+<option value="garmin">Garmin Xero C1 Pro</option>
+<option value="athlon">Athlon Rangecraft Velocity Pro</option>
+</select>
+</div>
+<div class="flex flex-wrap items-center gap-2">
+<label class="text-grt-soft text-xs md:text-sm font-semibold" for="unitSelect">
+                                    Velocity unit in file:
+                                </label>
+<select class="px-2.5 py-1.5 rounded-lg bg-grt-panel-soft text-white text-xs md:text-sm border border-grt-frame focus:outline-none focus:ring-2 focus:ring-[var(--grt-accent)] focus:border-[var(--grt-accent)]" id="unitSelect" data-xqa-title="Set the velocity unit that matches your chronograph exports.">
+<option value="imperial">Imperial (ft/s)</option>
+<option value="metric">Metric (m/s)</option>
+</select>
+<span class="text-grt-subtle text-[11px] md:text-xs">
+                                    GRT always receives m/s; we convert if needed.
+                                </span>
+</div>
+<div class="flex flex-wrap items-center gap-2">
+<label class="text-grt-soft text-xs md:text-sm font-semibold" for="modeSelect">
+                                    Import mode:
+                                </label>
+<select class="px-2.5 py-1.5 rounded-lg bg-grt-panel-soft text-white text-xs md:text-sm border border-grt-frame focus:outline-none focus:ring-2 focus:ring-[var(--grt-accent)] focus:border-[var(--grt-accent)]" id="modeSelect" data-xqa-title="Select Standard, Ladder, or Sessions import mode.">
+<option value="normal">Standard → Imported Measurement</option>
+<option value="ladder">Ladder → Imported Ladder</option>
+<option value="sessions">Sessions - Imported Sessions</option>
+
+</select>
+<div class="mt-3 p-3 md:p-4 rounded-xl bg-grt-panel-soft border border-grt-frame">
+  <div class="flex flex-col md:flex-row md:items-baseline md:justify-between gap-1 md:gap-3 mb-2">
+    <span class="text-grt-soft text-xs md:text-sm font-semibold">Export &amp; GRT options</span>
+    <span class="text-grt-subtle text-[10px] md:text-xs">
+      Affects what gets written into the next <span class="font-mono">.grtload</span> export.
+    </span>
+  </div>
+
+  <div class="flex flex-col sm:flex-row sm:flex-wrap gap-3">
+    <label class="inline-flex items-center gap-2 text-grt-subtle text-[11px] md:text-xs" data-xqa-title="If enabled, we’ll write extended metrics into the charge notes when exporting.">
+      <input id="analysisIncludeInNotes" type="checkbox" class="rounded border-grt-frame bg-grt-panel-soft">
+      <span>Write extended metrics into charge notes</span>
+    </label>
+
+    <label class="inline-flex items-center gap-2 text-grt-subtle text-[11px] md:text-xs" data-xqa-title="If enabled, we’ll add the Analysis summary note/tab to the .grtload appendix.">
+      <input id="exportAnalysisTab" type="checkbox" class="rounded border-grt-frame bg-grt-panel-soft">
+      <span>Export “Analysis” tab (summary note)</span>
+    </label>
+  </div>
+
+  <div class="mt-2 text-grt-subtle text-[10px] md:text-xs">Remembered on this browser.</div>
+</div>
+</div>
+</div>
+<!-- Standard multi-file panel inside drag-and-drop zone -->
+<div class="border border-dashed border-grt-frame rounded-xl p-3 hover:border-grt-accent hover:bg-grt-panel-soft/60 transition-colors" id="multiFileDropzone" data-xqa-title="Drop chronograph exports here or click to browse from disk.">
+<div class="flex flex-wrap items-center gap-3" id="multiFilePanel">
+<input accept=".csv,.xls,.xlsx" class="hidden" id="garminInput" multiple="" type="file" data-xqa-title="Load a Garmin session workbook (.xls/.xlsx) with one sheet per string.">
+<button class="px-5 py-2.5 bg-[var(--grt-accent)] hover:bg-[var(--grt-accent-soft)] text-white rounded-lg text-sm font-semibold shadow-md border border-grt-accent transition-transform transform hover:-translate-y-0.5 hover:shadow-lg" onclick="document.getElementById(&#39;garminInput&#39;).click()">
+                                    Select Chronograph Files
+                                </button>
+<span class="text-grt-subtle text-[11px] md:text-xs">
+                                    Standard mode: each file becomes a separate charge in “Imported Measurement”.
+                                </span>
+<div class="mt-1 text-grt-subtle text-[11px] md:text-xs">
+    <span class="font-semibold">Sessions layout (Sessions mode only):</span>
+    <label class="inline-flex items-center gap-1 ml-2">
+        <input type="radio" name="sessionsLayout" value="compact" id="sessionsLayoutCompact" checked="">
+        <span>Single tab – compact sessions</span>
+    </label>
+    <label class="inline-flex items-center gap-1 ml-2">
+        <input type="radio" name="sessionsLayout" value="legacy" id="sessionsLayoutLegacy">
+        <span>One tab per session (legacy)</span>
+    </label>
+</div>
+
+</div>
+<p class="mt-2 text-grt-subtle text-[10px] md:text-xs">
+                                Tip: You can also drag &amp; drop chronograph files anywhere on this box.
+                            </p>
+</div>
+<!-- Per-file processing status list -->
+<div class="mt-2 space-y-1 text-[11px] md:text-xs text-grt-subtle" id="fileStatusList"></div>
+<!-- Ladder panel -->
+<div class="mt-4 border border-grt-frame rounded-xl bg-grt-panel-soft p-3 md:p-4 hidden" id="ladderPanel">
+<p class="text-grt-soft text-xs md:text-sm mb-3">
+                                Ladder mode: select one file per charge step. A new <strong>Imported Ladder</strong> tab
+                                is created; the original ladder measurement in your base file stays intact.
+                            </p>
+<!-- Ladder state badge -->
+<div class="inline-flex items-center gap-2 px-2.5 py-1 rounded-full border border-grt-frame bg-grt-panel text-[11px] md:text-xs text-grt-subtle mb-3" id="ladderStateBadge">
+                <span class="h-1.5 w-1.5 rounded-full bg-slate-500"></span>
+                <span>Base .grtload not loaded — ladder state unknown</span>
+            </div>
+<!-- Hidden if ladder disabled in base -->
+<div id="ladderControls" class="hidden">
+<!-- Advanced ladder options toggle -->
+<button class="inline-flex items-center gap-1 px-2.5 py-1 rounded-md bg-grt-panel border border-grt-frame text-[11px] md:text-xs text-grt-soft hover:bg-grt-highlight transition-colors mb-2" id="ladderAdvancedToggle" type="button">
+<span>Advanced ladder options</span>
+<span class="inline-block transform transition-transform" id="ladderAdvancedChevron" style="transform: rotate(180deg);">▼</span>
+</button>
+<div class="mt-1" id="ladderAdvancedPanel">
+<div class="flex flex-col gap-2 mb-2">
+<div class="flex flex-wrap items-center gap-2">
+<label class="text-grt-soft text-xs md:text-sm font-semibold" for="ladderStepsSelect">
+                                                Loading Ladder Steps (display):
+                                            </label>
+<select class="px-2.5 py-1.5 rounded-lg bg-grt-panel text-white text-xs md:text-sm border border-grt-frame focus:outline-none focus:ring-2 focus:ring-[var(--grt-accent)] focus:border-[var(--grt-accent)]" id="ladderStepsSelect">
+<option value="2">2</option>
+<option value="3">3</option>
+<option value="4">4</option>
+<option value="5">5</option>
+<option value="6">6</option>
+<option value="7">7</option>
+<option value="8">8</option>
+<option value="9">9</option>
+<option selected="" value="10">10</option>
+</select>
+<span class="text-grt-subtle text-[11px] md:text-xs">
+                                                Actual step count is read from the base .grtload.
+                                            </span>
+</div>
+<div class="flex flex-wrap items-center gap-2">
+<span class="text-grt-soft text-xs md:text-sm font-semibold">
+                                                Ladder charge names:
+                                            </span>
+<select class="px-2.5 py-1.5 rounded-lg bg-grt-panel text-white text-xs md:text-sm border border-grt-frame focus:outline-none focus:ring-2 focus:ring-[var(--grt-accent)] focus:border-[var(--grt-accent)]" id="ladderNameModeSelect">
+<option value="filename">Use file name</option>
+<option value="charge">Use “Charge #”</option>
+</select>
+<span class="text-grt-subtle text-[11px] md:text-xs flex items-center gap-1">
+<span>Preference is remembered.</span>
+<span class="inline-flex items-center justify-center h-4 w-4 rounded-full bg-grt-panel-soft border border-grt-frame text-[9px] cursor-help" data-xqa-title="Controls how charges are named in Imported Ladder tab.">
+                                                    ?
+                                                </span>
+</span>
+</div>
+<div class="flex flex-wrap items-center gap-2 mt-1">
+    <span class="text-grt-soft text-xs md:text-sm font-semibold">
+        Chrono vs Sim export:
+    </span>
+    <label class="inline-flex items-center gap-1 text-grt-subtle text-[11px] md:text-xs">
+        <input id="ladderIncludeChronoSim" type="checkbox" class="rounded border-grt-frame bg-grt-panel-soft">
+        <span>Export “Chrono vs Sim” tab for ladder</span>
+    </label>
+    <span class="text-grt-subtle text-[10px] md:text-xs">
+        Remembered on this browser.
+    </span>
+</div>
+
+<div class="flex flex-wrap items-center gap-2 mt-1">
+  <span class="text-grt-soft text-xs md:text-sm font-semibold">GRT Simulation Export (JSON):</span>
+  <input id="grtSimJsonInput" type="file" accept=".json" class="block text-xs md:text-sm text-grt-soft file:mr-2 file:py-1 file:px-3 file:rounded-md file:border-0 file:bg-grt-highlight file:text-white hover:file:bg-grt-accent cursor-pointer">
+  <span id="grtSimJsonStatus" class="text-[10px] md:text-xs text-emerald-300">Loaded ladder: 5 steps (52.25–53.05 gr).</span>
+</div>
+<div class="flex flex-wrap items-center gap-3 mt-1">
+  <label class="inline-flex items-center gap-1 text-grt-subtle text-[11px] md:text-xs">
+    <input id="exportAdvancedDiagnostics" type="checkbox" class="rounded border-grt-frame bg-grt-panel-soft" checked="">
+    <span>Export “Advanced Diagnostics” dashboard (single tab)</span>
+  </label>
+  <label class="inline-flex items-center gap-1 text-grt-subtle text-[11px] md:text-xs">
+    <input id="exportSimOverlays" type="checkbox" class="rounded border-grt-frame bg-grt-panel-soft" checked="">
+    <span>Enable Sim overlays (Pressure / Barrel Time / Optimal BT)</span>
+  </label>
+  <label class="inline-flex items-center gap-1 text-grt-subtle text-[11px] md:text-xs">
+    <input id="alsoExportIndividualOverlays" type="checkbox" class="rounded border-grt-frame bg-grt-panel-soft">
+    <span>Also export individual overlay pictures</span>
+  </label>
+</div>
+<div class="flex flex-wrap items-center gap-2 mt-1">
+  <span class="text-grt-soft text-xs md:text-sm font-semibold">Peak pressure “soft limit”:</span>
+  <input id="softLimitPsi" type="number" inputmode="numeric" placeholder="e.g. 62000" class="px-2.5 py-1.5 rounded-lg bg-grt-panel text-white text-xs md:text-sm border border-grt-frame focus:outline-none focus:ring-2 focus:ring-[var(--grt-accent)] focus:border-[var(--grt-accent)] w-36">
+  <span class="text-grt-subtle text-[11px] md:text-xs">psi (optional)</span>
+</div>
+
+
+</div>
+</div>
+<!-- Ladder rows -->
+<div class="grid grid-cols-1 md:grid-cols-1 gap-2 mb-3" id="ladderRows"><div id="ladderRow1" data-charge-index="1" class="flex items-center justify-between gap-2 text-xs md:text-sm"><span class="text-grt-soft ladder-charge-label" data-role="ladderChargeLabel">Charge 1</span><div class="flex items-center gap-2"><input type="file" accept=".csv,.xls,.xlsx" class="hidden" id="ladderInput1"><button type="button" class="px-2.5 py-1 bg-grt-panel hover:bg-grt-highlight text-white rounded-md border border-grt-frame text-[11px] md:text-xs">Select File</button><span id="ladderLabel1" class="text-grt-subtle text-[10px] md:text-[11px] truncate max-w-[120px] md:max-w-[160px]"></span></div></div><div id="ladderRow2" data-charge-index="2" class="flex items-center justify-between gap-2 text-xs md:text-sm"><span class="text-grt-soft ladder-charge-label" data-role="ladderChargeLabel">Charge 2</span><div class="flex items-center gap-2"><input type="file" accept=".csv,.xls,.xlsx" class="hidden" id="ladderInput2"><button type="button" class="px-2.5 py-1 bg-grt-panel hover:bg-grt-highlight text-white rounded-md border border-grt-frame text-[11px] md:text-xs">Select File</button><span id="ladderLabel2" class="text-grt-subtle text-[10px] md:text-[11px] truncate max-w-[120px] md:max-w-[160px]"></span></div></div><div id="ladderRow3" data-charge-index="3" class="flex items-center justify-between gap-2 text-xs md:text-sm"><span class="text-grt-soft ladder-charge-label" data-role="ladderChargeLabel">Charge 3</span><div class="flex items-center gap-2"><input type="file" accept=".csv,.xls,.xlsx" class="hidden" id="ladderInput3"><button type="button" class="px-2.5 py-1 bg-grt-panel hover:bg-grt-highlight text-white rounded-md border border-grt-frame text-[11px] md:text-xs">Select File</button><span id="ladderLabel3" class="text-grt-subtle text-[10px] md:text-[11px] truncate max-w-[120px] md:max-w-[160px]"></span></div></div><div id="ladderRow4" data-charge-index="4" class="flex items-center justify-between gap-2 text-xs md:text-sm hidden"><span class="text-grt-soft ladder-charge-label" data-role="ladderChargeLabel">Charge 4</span><div class="flex items-center gap-2"><input type="file" accept=".csv,.xls,.xlsx" class="hidden" id="ladderInput4"><button type="button" class="px-2.5 py-1 bg-grt-panel hover:bg-grt-highlight text-white rounded-md border border-grt-frame text-[11px] md:text-xs">Select File</button><span id="ladderLabel4" class="text-grt-subtle text-[10px] md:text-[11px] truncate max-w-[120px] md:max-w-[160px]"></span></div></div><div id="ladderRow5" data-charge-index="5" class="flex items-center justify-between gap-2 text-xs md:text-sm hidden"><span class="text-grt-soft ladder-charge-label" data-role="ladderChargeLabel">Charge 5</span><div class="flex items-center gap-2"><input type="file" accept=".csv,.xls,.xlsx" class="hidden" id="ladderInput5"><button type="button" class="px-2.5 py-1 bg-grt-panel hover:bg-grt-highlight text-white rounded-md border border-grt-frame text-[11px] md:text-xs">Select File</button><span id="ladderLabel5" class="text-grt-subtle text-[10px] md:text-[11px] truncate max-w-[120px] md:max-w-[160px]"></span></div></div><div id="ladderRow6" data-charge-index="6" class="flex items-center justify-between gap-2 text-xs md:text-sm hidden"><span class="text-grt-soft ladder-charge-label" data-role="ladderChargeLabel">Charge 6</span><div class="flex items-center gap-2"><input type="file" accept=".csv,.xls,.xlsx" class="hidden" id="ladderInput6"><button type="button" class="px-2.5 py-1 bg-grt-panel hover:bg-grt-highlight text-white rounded-md border border-grt-frame text-[11px] md:text-xs">Select File</button><span id="ladderLabel6" class="text-grt-subtle text-[10px] md:text-[11px] truncate max-w-[120px] md:max-w-[160px]"></span></div></div><div id="ladderRow7" data-charge-index="7" class="flex items-center justify-between gap-2 text-xs md:text-sm hidden"><span class="text-grt-soft ladder-charge-label" data-role="ladderChargeLabel">Charge 7</span><div class="flex items-center gap-2"><input type="file" accept=".csv,.xls,.xlsx" class="hidden" id="ladderInput7"><button type="button" class="px-2.5 py-1 bg-grt-panel hover:bg-grt-highlight text-white rounded-md border border-grt-frame text-[11px] md:text-xs">Select File</button><span id="ladderLabel7" class="text-grt-subtle text-[10px] md:text-[11px] truncate max-w-[120px] md:max-w-[160px]"></span></div></div><div id="ladderRow8" data-charge-index="8" class="flex items-center justify-between gap-2 text-xs md:text-sm hidden"><span class="text-grt-soft ladder-charge-label" data-role="ladderChargeLabel">Charge 8</span><div class="flex items-center gap-2"><input type="file" accept=".csv,.xls,.xlsx" class="hidden" id="ladderInput8"><button type="button" class="px-2.5 py-1 bg-grt-panel hover:bg-grt-highlight text-white rounded-md border border-grt-frame text-[11px] md:text-xs">Select File</button><span id="ladderLabel8" class="text-grt-subtle text-[10px] md:text-[11px] truncate max-w-[120px] md:max-w-[160px]"></span></div></div><div id="ladderRow9" data-charge-index="9" class="flex items-center justify-between gap-2 text-xs md:text-sm hidden"><span class="text-grt-soft ladder-charge-label" data-role="ladderChargeLabel">Charge 9</span><div class="flex items-center gap-2"><input type="file" accept=".csv,.xls,.xlsx" class="hidden" id="ladderInput9"><button type="button" class="px-2.5 py-1 bg-grt-panel hover:bg-grt-highlight text-white rounded-md border border-grt-frame text-[11px] md:text-xs">Select File</button><span id="ladderLabel9" class="text-grt-subtle text-[10px] md:text-[11px] truncate max-w-[120px] md:max-w-[160px]"></span></div></div><div id="ladderRow10" data-charge-index="10" class="flex items-center justify-between gap-2 text-xs md:text-sm hidden"><span class="text-grt-soft ladder-charge-label" data-role="ladderChargeLabel">Charge 10</span><div class="flex items-center gap-2"><input type="file" accept=".csv,.xls,.xlsx" class="hidden" id="ladderInput10"><button type="button" class="px-2.5 py-1 bg-grt-panel hover:bg-grt-highlight text-white rounded-md border border-grt-frame text-[11px] md:text-xs">Select File</button><span id="ladderLabel10" class="text-grt-subtle text-[10px] md:text-[11px] truncate max-w-[120px] md:max-w-[160px]"></span></div></div></div>
+<div class="flex justify-end">
+<button class="px-4 py-2 bg-[var(--grt-accent)] hover:bg-[var(--grt-accent-soft)] text-white rounded-lg text-xs md:text-sm font-semibold shadow-md border border-grt-accent transition-transform transform hover:-translate-y-0.5 hover:shadow-lg opacity-60 cursor-not-allowed" id="processLadderBtn" type="button" disabled="">
+                                        Process Ladder
+                                    </button>
+</div>
+</div>
+</div>
+<!-- /Ladder panel -->
+</div>
+</div>
+</div>
+</section>
+<!-- Changelog panel (small text) – below "What this tool does" -->
+<!-- Results -->
+<section aria-label="Import results" class="space-y-5 md:space-y-6 mt-4 hidden" id="resultsArea">
+<!-- Run summary card -->
+<div class="bg-grt-panel-soft rounded-2xl border border-grt-frame p-4" id="runSummaryCard">
+<h3 class="text-white text-sm md:text-base font-semibold mb-2">
+                    📌 Run summary
+                </h3>
+<div class="grid grid-cols-1 md:grid-cols-3 gap-x-4 gap-y-1 text-[11px] md:text-xs text-grt-subtle">
+  <div>Files: <span class="text-grt-soft font-semibold" id="summaryFiles">0</span></div>
+  <div>Total shots: <span class="text-grt-soft font-semibold" id="summaryShots">0</span></div>
+  <div>Chronograph: <span class="text-grt-soft font-semibold" id="summaryDevice">—</span></div>
+  <div>Mode: <span class="text-grt-soft font-semibold" id="summaryMode">—</span></div>
+  <div>File unit: <span class="text-grt-soft font-semibold" id="summaryUnit">—</span></div>
+  <div>Base .grtload: <span class="text-grt-soft font-semibold" id="summaryBase">Not loaded</span></div>
+</div>
+<div class="mt-2 text-[11px] md:text-xs text-grt-soft" id="summaryBestNode">⭐ Best node: <span class="text-grt-soft font-semibold">—</span></div>
+
+<!-- close Run summary card before any other results panels -->
+</div>
+
+<!-- Add-ons loaded summary -->
+<div class="bg-grt-panel rounded-2xl shadow-xl p-5 md:p-6 border border-grt-frame mb-5 hidden" id="addonsLoadedCard">
+  <h3 class="text-white text-sm md:text-base font-semibold mb-2">🧩 Add-ons loaded</h3>
+  <p class="text-grt-subtle text-[11px] md:text-xs mb-4">These will be exported as appendix tabs in the generated <span class="font-mono">.grtload</span>.</p>
+
+    <div class="grid grid-cols-1 gap-4">
+    <div>
+      <div class="text-white text-xs md:text-sm font-semibold mb-2">ShotMarker</div>
+      <div id="shotMarkerResultsCards" class="space-y-2"><div class="text-grt-subtle text-[11px] md:text-xs">No file loaded</div></div>
+      <div id="shotMarkerSessionCards" class="mt-3"></div>
+    </div>
+  </div>
+
+  <!-- close Add-ons loaded card -->
+  </div>
+
+<!-- Quick actions: copy summary / export / advanced -->
+<div class="flex flex-wrap items-center justify-between gap-2 md:gap-3 mb-3" id="quickActionsRow">
+<div class="flex flex-wrap items-center gap-2 text-[11px] md:text-xs text-grt-subtle">
+<span>Quick actions</span>
+</div>
+<div class="flex flex-wrap items-center gap-2">
+<button class="inline-flex items-center gap-1 px-3 py-1.5 rounded-full bg-grt-panel-soft border border-grt-frame text-[11px] md:text-xs text-grt-soft hover:bg-grt-highlight transition" onclick="copySessionSummary()" type="button">
+<span>📋</span>
+<span>Copy summary</span>
+</button>
+<button class="inline-flex items-center gap-1 px-3 py-1.5 rounded-full bg-grt-panel-soft border border-emerald-600/70 text-[11px] md:text-xs text-emerald-200 hover:bg-emerald-700/40 transition" onclick="downloadGRT()" type="button">
+<span>💾</span>
+<span>Export .grtload</span>
+</button>
+<button class="inline-flex items-center gap-1 px-3 py-1.5 rounded-full bg-grt-panel-soft border border-sky-600/70 text-[11px] md:text-xs text-sky-200 hover:bg-sky-700/30 transition" onclick="exportDiagnosticsZip()" type="button" data-xqa-title="Export diagnostics.json plus per-file raw_rows and parsed_rows CSVs inside one ZIP."><span>🧰</span><span>Export Diagnostics ZIP</span></button>
+
+</div>
+</div>
+<!-- Analysis Dashboard -->
+<div class="bg-grt-panel rounded-2xl shadow-xl p-5 md:p-6 border border-grt-frame mb-5" id="analysisDashboard">
+<div class="flex flex-col md:flex-row md:items-center md:justify-between gap-3 mb-4">
+<div>
+<h2 class="text-xl font-bold text-white flex items-center gap-2">
+                🔧 Analysis Dashboard
+            </h2>
+<p class="text-grt-subtle text-xs md:text-sm">
+                Set your SD / ES targets and toggle extended metrics. These settings affect badges and best-node selection.
+            </p>
+</div>
+<div class="flex flex-wrap items-center gap-3">
+<div class="flex items-center gap-1">
+<label class="text-grt-soft text-xs md:text-sm font-semibold" for="analysisTargetSD">
+                    Target SD
+                </label>
+<input class="w-20 px-2 py-1 rounded border border-grt-frame bg-grt-panel-soft text-xs md:text-sm text-white focus:outline-none focus:ring-1 focus:ring-grt-accent" id="analysisTargetSD" step="0.1" type="number" data-xqa-title="Target SD threshold for flagging groups as tight or wide.">
+</div>
+<div class="flex items-center gap-1">
+<label class="text-grt-soft text-xs md:text-sm font-semibold" for="analysisTargetES">
+                    Target ES
+                </label>
+<input class="w-20 px-2 py-1 rounded border border-grt-frame bg-grt-panel-soft text-xs md:text-sm text-white focus:outline-none focus:ring-1 focus:ring-grt-accent" id="analysisTargetES" step="0.1" type="number" data-xqa-title="Target ES threshold for flagging groups as tight or wide.">
+</div>
+</div>
+
+<div class="flex items-center gap-2">
+  <span class="text-grt-soft text-xs md:text-sm font-semibold">ShotMarker Phase 3:</span>
+  <label class="inline-flex items-center gap-1 text-grt-subtle text-[11px] md:text-xs">
+    <span>String ratio</span>
+    <input id="smP3RatioDom" type="number" step="0.05" class="w-20 px-2 py-1 rounded border border-grt-frame bg-grt-panel-soft text-xs md:text-sm text-white focus:outline-none focus:ring-1 focus:ring-grt-accent">
+  </label>
+  <label class="inline-flex items-center gap-1 text-grt-subtle text-[11px] md:text-xs">
+    <span>Min MOA</span>
+    <input id="smP3StringMoaMin" type="number" step="0.01" class="w-20 px-2 py-1 rounded border border-grt-frame bg-grt-panel-soft text-xs md:text-sm text-white focus:outline-none focus:ring-1 focus:ring-grt-accent">
+  </label>
+  <button id="smP3ResetBtn" type="button" class="px-2.5 py-1 rounded-md bg-grt-panel-soft border border-grt-frame text-[11px] md:text-xs text-grt-soft hover:bg-grt-highlight transition" data-xqa-title="Reset Phase 3 thresholds to defaults">
+    Reset
+  </button>
+</div>
+
+
+</div>
+<div class="flex flex-col lg:flex-row gap-4">
+<div class="flex-1 flex flex-col gap-2">
+<div class="flex flex-wrap items-center gap-3">
+<span class="text-grt-soft text-[11px] md:text-xs font-semibold uppercase tracking-wide">
+                    Extended metrics
+                </span>
+                <!-- Extended metrics help chip -->
+                <button id="extendedMetricsHelpBtn" type="button" class="inline-flex items-center justify-center h-5 w-5 rounded-full
+                         bg-grt-panel-soft border border-grt-frame text-[10px] text-grt-soft
+                         hover:bg-grt-highlight hover:text-white transition" data-xqa-title="What do these extra metrics mean?">
+                  ?
+                </button>
+<label class="inline-flex items-center gap-1 text-grt-subtle text-[11px] md:text-xs">
+<input class="rounded border-grt-frame bg-grt-panel-soft" id="analysisShow95Band" type="checkbox" data-xqa-title="Show the ±1.96 SD band (about 95% of shots) in analysis.">
+<span>±95% SD band</span>
+</label>
+<label class="inline-flex items-center gap-1 text-grt-subtle text-[11px] md:text-xs">
+<input class="rounded border-grt-frame bg-grt-panel-soft" id="analysisShowMAD" type="checkbox" data-xqa-title="Include Median Absolute Deviation (MAD) in the analysis metrics.">
+<span>MAD</span>
+</label>
+<label class="inline-flex items-center gap-1 text-grt-subtle text-[11px] md:text-xs">
+<input class="rounded border-grt-frame bg-grt-panel-soft" id="analysisShowCV" type="checkbox" data-xqa-title="Include coefficient of variation (SD divided by mean) in the analysis metrics.">
+<span>CV%</span>
+</label>
+<label class="inline-flex items-center gap-1 text-grt-subtle text-[11px] md:text-xs">
+<input class="rounded border-grt-frame bg-grt-panel-soft" id="analysisShowESD" type="checkbox" data-xqa-title="Include ESD (ES divided by SD) in the analysis metrics.">
+<span>ESD (ES/4)</span>
+</label>
+</div>
+<div id="extendedMetricsHelpCard" class="hidden mt-2 bg-grt-panel-soft border border-grt-frame rounded-xl p-3
+           text-[11px] md:text-xs text-grt-soft max-w-xl">
+    <h4 class="text-white font-semibold mb-2 text-xs md:text-sm">
+        Extended metrics – quick explainer
+    </h4>
+    <ul class="list-disc list-inside space-y-1.5">
+        <li>
+            <span class="font-semibold">±95% SD band</span> –
+            Mean ± 1.96 × SD. Roughly where about 95% of shots should land
+            if your velocity is behaving nicely. Good for visualizing your
+            “normal” speed window.
+        </li>
+        <li>
+            <span class="font-semibold">MAD (Median Absolute Deviation)</span> –
+            A robust version of spread. Like SD but much less sensitive to
+            that one weird slow/fast shot. Lower MAD = more consistent.
+        </li>
+        <li>
+            <span class="font-semibold">CV%</span> (Coefficient of Variation) –
+            SD ÷ mean × 100. Lets you compare consistency between loads with
+            different average speeds (e.g., 2800 vs 3000 ft/s).
+        </li>
+        <li>
+            <span class="font-semibold">ESD (ES/4)</span> –
+            Rule-of-thumb “estimated SD” from extreme spread:
+            SD ≈ ES ÷ 4 for typical 5–10 shot strings. Good sanity check:
+            if SD and ES/4 wildly disagree, something odd is going on.
+        </li>
+    </ul>
+    <p class="mt-2 text-grt-subtle">
+        Tip: these metrics don’t replace SD/ES — they just give you more
+        ways to spot stable nodes and weird outliers.
+    </p>
+</div>
+</div>
+<div class="w-full lg:w-64 flex flex-col gap-2">
+<label class="text-grt-soft text-[11px] md:text-xs font-semibold uppercase tracking-wide" for="analysisBestNodeMode">
+                Best node selection
+            </label>
+<select class="w-full px-2.5 py-1.5 rounded border border-grt-frame bg-grt-panel-soft text-xs md:text-sm text-white focus:outline-none focus:ring-1 focus:ring-grt-accent" id="analysisBestNodeMode" data-xqa-title="How the tool chooses the best velocity node based on your thresholds.">
+<option value="sd">Min SD (within targets)</option>
+<option value="es">Min ES (within targets)</option>
+<option value="weighted">Weighted SD + ES</option>
+</select>
+<div class="text-grt-subtle text-[11px] md:text-xs leading-snug" id="analysisBestNodeSummary" data-xqa-title="Short text summary of the best node chosen from your data.">Best node will be highlighted after stats are computed.</div>
+</div>
+</div>
+</div>
+<!-- Analysis Dashboard -->
+
+<div class="bg-grt-panel rounded-2xl shadow-xl p-5 md:p-6 border border-grt-frame">
+<div class="flex flex-col md:flex-row md:items-center md:justify-between gap-3 mb-4">
+  <h2 class="text-xl font-bold text-white">
+    📊 Files Processed: <span id="fileCount">3</span>
+  </h2>
+  <div class="flex flex-col gap-1 md:items-start">
+    <div class="flex flex-wrap items-center gap-2">
+      <span class="text-grt-subtle text-xs md:text-sm">File stats unit:</span>
+      <span class="inline-flex items-center px-2.5 py-1 rounded-full text-xs md:text-sm border border-grt-frame-soft bg-grt-panel-soft/70 text-grt-soft font-medium" id="resultsUnit" data-xqa-title="Velocity unit used in tables, charts, and exported notes.">ft/s (file)</span>
+    </div>
+    <div class="flex flex-col md:flex-row md:items-center gap-2 text-[10px] md:text-xs text-grt-subtle">
+      <span>GRT internally uses m/s for imported shots.</span>
+      <div class="flex flex-wrap items-center gap-2">
+        <span class="inline-flex items-center gap-1">
+          <span class="h-1.5 w-1.5 rounded-full bg-emerald-400"></span>
+          <span>Within target</span>
+        </span>
+        <span class="inline-flex items-center gap-1">
+          <span class="h-1.5 w-1.5 rounded-full bg-sky-400"></span>
+          <span>Partial hit</span>
+        </span>
+        <span class="inline-flex items-center gap-1">
+          <span class="h-1.5 w-1.5 rounded-full bg-rose-400"></span>
+          <span>Outside / wide</span>
+        </span>
+      </div>
+    </div>
+  </div>
+</div>
+
+</div>
+<div class="grid grid-cols-1 md:grid-cols-1 lg:grid-cols-3 gap-4" id="statsGrid">
+                    <div class="bg-grt-panel-soft bg-[radial-gradient(circle_at_top,_rgba(148,163,184,0.06),_transparent_60%)] rounded-2xl border border-grt-frame/80 p-3 md:p-4 transition shadow-sm hover:shadow-md relative ">
+                        <div class="flex items-center justify-between gap-2 mb-2">
+                            <div class="flex items-center gap-2 min-w-0">
+                                <h3 class="text-white font-bold text-xs md:text-sm truncate">Charge 1</h3>
+                                <span class="hidden md:inline-flex items-center px-2 py-0.5 rounded-full border text-[10px] bg-rose-900/70 text-rose-200 border-rose-500/60">Above targets</span>
+                            </div>
+                            
+                <span class="inline-flex items-center gap-1 px-1.5 py-0.5 rounded-full border text-[9px] md:text-[10px] font-semibold bg-amber-900/80 text-amber-200 border-amber-500/60" data-xqa-title="OK: SD between 10 and 20 ft/s.">
+                    <span class="h-1.5 w-1.5 rounded-full bg-amber-400"></span>
+                    <span>OK</span>
+                </span>
+            
+                        </div>
+                        <div class="space-y-1 text-[11px] md:text-xs">
+                            <div class="flex justify-between">
+                                <span class="text-grt-subtle">Shots:</span>
+                                <span class="text-white font-semibold">22</span>
+                            </div>
+                            <div class="flex justify-between">
+                                <span class="text-grt-subtle">Average:</span>
+                                <span class="text-grt-soft font-semibold">2886.9 ft/s</span>
+                            </div>
+                            <div class="flex justify-between">
+                                <span class="text-grt-subtle" data-xqa-title="SD: standard deviation of velocity; lower means more consistent.">SD:</span>
+                                <span class="flex items-center gap-1">
+                                    <span class="text-rose-300 font-semibold">12.6 ft/s</span>
+                                    
+                <span class="inline-flex items-center gap-1 px-1.5 py-0.5 rounded-full border text-[9px] md:text-[10px] font-semibold bg-amber-900/80 text-amber-200 border-amber-500/60" data-xqa-title="OK: SD between 10 and 20 ft/s.">
+                    <span class="h-1.5 w-1.5 rounded-full bg-amber-400"></span>
+                    <span>OK</span>
+                </span>
+            
+                                </span>
+                            </div>
+                            <div class="flex justify-between">
+                                <span class="text-grt-subtle" data-xqa-title="ES: extreme spread (max - min); smaller usually indicates tighter performance.">ES:</span>
+                                <span class="text-rose-300 font-semibold">64.1 ft/s</span>
+                            </div>
+                            <div class="flex justify-between">
+                                <span class="text-grt-subtle">Min / Max:</span>
+                                <span class="text-grt-soft font-semibold">2839.8 / 2903.9 ft/s</span>
+                            </div>
+                            <div class="flex justify-between">
+                                <span class="text-grt-subtle">95% band:</span>
+                                <span class="text-grt-soft font-semibold">2862.1 / 2911.7 ft/s</span>
+                            </div><div class="flex justify-between">
+                                <span class="text-grt-subtle">MAD:</span>
+                                <span class="text-grt-soft font-semibold">4.6 ft/s</span>
+                            </div><div class="flex justify-between">
+                                <span class="text-grt-subtle">CV%:</span>
+                                <span class="text-grt-soft font-semibold">0.44 %</span>
+                            </div><div class="flex justify-between">
+                                <span class="text-grt-subtle">ESD (ES/4):</span>
+                                <span class="text-grt-soft font-semibold">16.0 ft/s</span>
+                            </div>
+                            <div class="mt-1 text-[10px] text-grt-subtle">
+                                File unit: ft/s • Imported to GRT as m/s
+                            </div>
+                        </div>
+                        <div class="mt-2 h-6 text-[var(--grt-accent)]" data-velocities="2839.8,2876.1,2875.2,2887.8,2889.5,2889.4,2880.2,2884.2,2886.7,2883.5,2891.2,2881,2902.6,2892.8,2899.9,2891,2895.8,2893,2887.1,2903.9,2888.4,2893.3">
+                    <svg viewBox="0 0 120 24" class="w-full h-6">
+                        <polyline fill="none" stroke="currentColor" stroke-width="1.2" points="0.0,22.0 5.7,10.7 11.4,11.0 17.1,7.0 22.9,6.5 28.6,6.5 34.3,9.4 40.0,8.1 45.7,7.4 51.4,8.4 57.1,6.0 62.9,9.1 68.6,2.4 74.3,5.5 80.0,3.2 85.7,6.0 91.4,4.5 97.1,5.4 102.9,7.2 108.6,2.0 114.3,6.8 120.0,5.3">
+                            <title>GRT Importer Advanced v0.87.13</title>
+                        </polyline>
+                    </svg>
+                </div>
+                    </div>
+                
+                    <div class="bg-grt-panel-soft bg-[radial-gradient(circle_at_top,_rgba(148,163,184,0.06),_transparent_60%)] rounded-2xl border border-grt-frame/80 p-3 md:p-4 transition shadow-sm hover:shadow-md relative ring-2 ring-emerald-400/80 shadow-[0_0_0_1px_rgba(16,185,129,0.4)]">
+                        <div class="flex items-center justify-between gap-2 mb-2">
+                            <div class="flex items-center gap-2 min-w-0">
+                                <h3 class="text-white font-bold text-xs md:text-sm truncate">Charge 2</h3>
+                                <span class="hidden md:inline-flex items-center px-2 py-0.5 rounded-full border text-[10px] bg-sky-900/70 text-sky-200 border-sky-500/60">SD OK / ES high</span>
+                            </div>
+                            
+                <span class="inline-flex items-center gap-1 px-1.5 py-0.5 rounded-full border text-[9px] md:text-[10px] font-semibold bg-emerald-900/80 text-emerald-200 border-emerald-500/60" data-xqa-title="Tight: SD &lt; 10 ft/s (very consistent).">
+                    <span class="h-1.5 w-1.5 rounded-full bg-emerald-400"></span>
+                    <span>Tight</span>
+                </span>
+            
+                        </div>
+                        <div class="space-y-1 text-[11px] md:text-xs">
+                            <div class="flex justify-between">
+                                <span class="text-grt-subtle">Shots:</span>
+                                <span class="text-white font-semibold">22</span>
+                            </div>
+                            <div class="flex justify-between">
+                                <span class="text-grt-subtle">Average:</span>
+                                <span class="text-grt-soft font-semibold">2893.1 ft/s</span>
+                            </div>
+                            <div class="flex justify-between">
+                                <span class="text-grt-subtle" data-xqa-title="SD: standard deviation of velocity; lower means more consistent.">SD:</span>
+                                <span class="flex items-center gap-1">
+                                    <span class="text-emerald-300 font-semibold">4.7 ft/s</span>
+                                    
+                <span class="inline-flex items-center gap-1 px-1.5 py-0.5 rounded-full border text-[9px] md:text-[10px] font-semibold bg-emerald-900/80 text-emerald-200 border-emerald-500/60" data-xqa-title="Tight: SD &lt; 10 ft/s (very consistent).">
+                    <span class="h-1.5 w-1.5 rounded-full bg-emerald-400"></span>
+                    <span>Tight</span>
+                </span>
+            
+                                </span>
+                            </div>
+                            <div class="flex justify-between">
+                                <span class="text-grt-subtle" data-xqa-title="ES: extreme spread (max - min); smaller usually indicates tighter performance.">ES:</span>
+                                <span class="text-rose-300 font-semibold">16.7 ft/s</span>
+                            </div>
+                            <div class="flex justify-between">
+                                <span class="text-grt-subtle">Min / Max:</span>
+                                <span class="text-grt-soft font-semibold">2885.9 / 2902.6 ft/s</span>
+                            </div>
+                            <div class="flex justify-between">
+                                <span class="text-grt-subtle">95% band:</span>
+                                <span class="text-grt-soft font-semibold">2884.0 / 2902.2 ft/s</span>
+                            </div><div class="flex justify-between">
+                                <span class="text-grt-subtle">MAD:</span>
+                                <span class="text-grt-soft font-semibold">2.8 ft/s</span>
+                            </div><div class="flex justify-between">
+                                <span class="text-grt-subtle">CV%:</span>
+                                <span class="text-grt-soft font-semibold">0.16 %</span>
+                            </div><div class="flex justify-between">
+                                <span class="text-grt-subtle">ESD (ES/4):</span>
+                                <span class="text-grt-soft font-semibold">4.2 ft/s</span>
+                            </div>
+                            <div class="mt-1 text-[10px] text-grt-subtle">
+                                File unit: ft/s • Imported to GRT as m/s
+                            </div>
+                        </div>
+                        <div class="mt-2 h-6 text-[var(--grt-accent)]" data-velocities="2892.9,2895.2,2885.9,2894.7,2890.9,2902.6,2889.5,2889.5,2899.3,2889.6,2893.5,2900.2,2886.3,2889.7,2891,2902.6,2888.8,2892.6,2894.2,2892.2,2897,2890.2">
+                    <svg viewBox="0 0 120 24" class="w-full h-6">
+                        <polyline fill="none" stroke="currentColor" stroke-width="1.2" points="0.0,13.6 5.7,10.9 11.4,22.0 17.1,11.5 22.9,16.0 28.6,2.0 34.3,17.7 40.0,17.7 45.7,6.0 51.4,17.6 57.1,12.9 62.9,4.9 68.6,21.5 74.3,17.4 80.0,15.9 85.7,2.0 91.4,18.5 97.1,14.0 102.9,12.1 108.6,14.5 114.3,8.7 120.0,16.9">
+                            <title>GRT Importer Advanced v0.87.13</title>
+                        </polyline>
+                    </svg>
+                </div>
+                    </div>
+                
+                    <div class="bg-grt-panel-soft bg-[radial-gradient(circle_at_top,_rgba(148,163,184,0.06),_transparent_60%)] rounded-2xl border border-grt-frame/80 p-3 md:p-4 transition shadow-sm hover:shadow-md relative ">
+                        <div class="flex items-center justify-between gap-2 mb-2">
+                            <div class="flex items-center gap-2 min-w-0">
+                                <h3 class="text-white font-bold text-xs md:text-sm truncate">Charge 3</h3>
+                                <span class="hidden md:inline-flex items-center px-2 py-0.5 rounded-full border text-[10px] bg-sky-900/70 text-sky-200 border-sky-500/60">SD OK / ES high</span>
+                            </div>
+                            
+                <span class="inline-flex items-center gap-1 px-1.5 py-0.5 rounded-full border text-[9px] md:text-[10px] font-semibold bg-emerald-900/80 text-emerald-200 border-emerald-500/60" data-xqa-title="Tight: SD &lt; 10 ft/s (very consistent).">
+                    <span class="h-1.5 w-1.5 rounded-full bg-emerald-400"></span>
+                    <span>Tight</span>
+                </span>
+            
+                        </div>
+                        <div class="space-y-1 text-[11px] md:text-xs">
+                            <div class="flex justify-between">
+                                <span class="text-grt-subtle">Shots:</span>
+                                <span class="text-white font-semibold">22</span>
+                            </div>
+                            <div class="flex justify-between">
+                                <span class="text-grt-subtle">Average:</span>
+                                <span class="text-grt-soft font-semibold">2896.1 ft/s</span>
+                            </div>
+                            <div class="flex justify-between">
+                                <span class="text-grt-subtle" data-xqa-title="SD: standard deviation of velocity; lower means more consistent.">SD:</span>
+                                <span class="flex items-center gap-1">
+                                    <span class="text-emerald-300 font-semibold">4.3 ft/s</span>
+                                    
+                <span class="inline-flex items-center gap-1 px-1.5 py-0.5 rounded-full border text-[9px] md:text-[10px] font-semibold bg-emerald-900/80 text-emerald-200 border-emerald-500/60" data-xqa-title="Tight: SD &lt; 10 ft/s (very consistent).">
+                    <span class="h-1.5 w-1.5 rounded-full bg-emerald-400"></span>
+                    <span>Tight</span>
+                </span>
+            
+                                </span>
+                            </div>
+                            <div class="flex justify-between">
+                                <span class="text-grt-subtle" data-xqa-title="ES: extreme spread (max - min); smaller usually indicates tighter performance.">ES:</span>
+                                <span class="text-rose-300 font-semibold">21.1 ft/s</span>
+                            </div>
+                            <div class="flex justify-between">
+                                <span class="text-grt-subtle">Min / Max:</span>
+                                <span class="text-grt-soft font-semibold">2887.9 / 2909.0 ft/s</span>
+                            </div>
+                            <div class="flex justify-between">
+                                <span class="text-grt-subtle">95% band:</span>
+                                <span class="text-grt-soft font-semibold">2887.8 / 2904.5 ft/s</span>
+                            </div><div class="flex justify-between">
+                                <span class="text-grt-subtle">MAD:</span>
+                                <span class="text-grt-soft font-semibold">1.4 ft/s</span>
+                            </div><div class="flex justify-between">
+                                <span class="text-grt-subtle">CV%:</span>
+                                <span class="text-grt-soft font-semibold">0.15 %</span>
+                            </div><div class="flex justify-between">
+                                <span class="text-grt-subtle">ESD (ES/4):</span>
+                                <span class="text-grt-soft font-semibold">5.3 ft/s</span>
+                            </div>
+                            <div class="mt-1 text-[10px] text-grt-subtle">
+                                File unit: ft/s • Imported to GRT as m/s
+                            </div>
+                        </div>
+                        <div class="mt-2 h-6 text-[var(--grt-accent)]" data-velocities="2895.4,2892.8,2892,2896.7,2887.9,2904.7,2897,2896.2,2893.5,2898,2901,2896.1,2894.7,2896.5,2895.3,2894.7,2895.8,2893.9,2897.1,2892.4,2909,2894.3">
+                    <svg viewBox="0 0 120 24" class="w-full h-6">
+                        <polyline fill="none" stroke="currentColor" stroke-width="1.2" points="0.0,14.9 5.7,17.4 11.4,18.1 17.1,13.7 22.9,22.0 28.6,6.1 34.3,13.4 40.0,14.1 45.7,16.7 51.4,12.4 57.1,9.6 62.9,14.2 68.6,15.6 74.3,13.8 80.0,15.0 85.7,15.6 91.4,14.5 97.1,16.3 102.9,13.3 108.6,17.7 114.3,2.0 120.0,15.9">
+                            <title>GRT Importer Advanced v0.87.13</title>
+                        </polyline>
+                    </svg>
+                </div>
+                    </div>
+                </div>
+</div>
+<div class="bg-grt-panel rounded-2xl shadow-xl p-5 md:p-6 border border-grt-frame">
+<div class="flex flex-col md:flex-row md:items-center md:justify-between gap-3 mb-4">
+<h2 class="text-xl font-bold text-white flex items-center gap-2">
+                        📄 GRT File (.grtload)
+                    </h2>
+<button class="px-5 py-2.5 bg-emerald-600 hover:bg-emerald-500 text-white rounded-lg text-sm font-semibold shadow-md border border-emerald-500/80 transition-transform transform hover:-translate-y-0.5 hover:shadow-lg" onclick="downloadGRT()">
+                        Download .grtload
+                    </button>
+</div>
+<div class="bg-emerald-950/70 border border-emerald-700/70 rounded-xl p-4">
+<h3 class="text-white font-semibold mb-2 text-sm md:text-base">✅ How to use in GRT</h3>
+<ol class="text-emerald-200 text-xs md:text-sm space-y-1.5 list-decimal list-inside">
+<li>Download the generated <code class="bg-emerald-900/70 px-1 rounded text-[11px]">.grtload</code> file.</li>
+<li>Open GRT and go to <strong>File → Open</strong>.</li>
+<li>Standard mode: use the <strong>Imported Measurement</strong> tab.</li>
+<li>Ladder mode: use the <strong>Imported Ladder</strong> tab; original ladder is unchanged.</li>
+<li>If used, view <strong>Imported Pictures</strong> and <strong>Imported Notes</strong> tabs.</li>
+<li>Check charge notes for AVG-E / SD / ES / MIN / MAX / UNIT.</li>
+<li>Check individual shots for PF and Time notes when present in the chrono file.</li>
+</ol>
+</div>
+</div>
+<!-- Advanced diagnostics pane -->
+
+
+</div></section></main>
+<div class="max-w-5xl mx-auto pb-10">
+<!-- Footer / What this tool does -->
+<div class="hidden text-emerald-300 text-amber-300 text-rose-300"></div>
+
+<div id="footerWhatToolDoes" class="bg-grt-panel-soft rounded-2xl border border-grt-frame p-4 md:p-4 mt-6">
+  <div class="flex flex-col md:flex-row md:items-start md:justify-between gap-4">
+    <div class="md:max-w-[60%]">
+      <h4 class="text-white font-semibold mb-2 text-xs md:text-sm flex items-center gap-2">
+        <span class="opacity-90">💡</span> What this tool does
+      </h4>
+      <p class="text-grt-soft text-[11px] md:text-xs leading-relaxed">
+        Converts chronograph strings into ready-to-use GRT measurements while keeping your base project intact.
+      </p>
+    </div>
+
+    <div class="md:max-w-[40%]">
+      <ul class="space-y-2 text-[11px] md:text-xs text-grt-soft leading-snug">
+        <li class="flex items-start gap-2">
+          <span class="inline-flex items-center justify-center w-4 h-4 rounded bg-emerald-500/20 border border-emerald-500/40 text-emerald-300">✓</span>
+          <span>Garmin Xero &amp; Athlon Rangecraft support</span>
+        </li>
+        <li class="flex items-start gap-2">
+          <span class="inline-flex items-center justify-center w-4 h-4 rounded bg-emerald-500/20 border border-emerald-500/40 text-emerald-300">✓</span>
+          <span>Standard, Ladder &amp; Measurements Sessions modes</span>
+        </li>
+        <li class="flex items-start gap-2">
+          <span class="inline-flex items-center justify-center w-4 h-4 rounded bg-emerald-500/20 border border-emerald-500/40 text-emerald-300">✓</span>
+          <span>Metric/imperial file units → GRT m/s</span>
+        </li>
+        <li class="flex items-start gap-2">
+          <span class="inline-flex items-center justify-center w-4 h-4 rounded bg-emerald-500/20 border border-emerald-500/40 text-emerald-300">✓</span>
+          <span>Charge notes: AVG‑E / SD / ES / MIN / MAX / UNIT</span>
+        </li>
+        <li class="flex items-start gap-2">
+          <span class="inline-flex items-center justify-center w-4 h-4 rounded bg-emerald-500/20 border border-emerald-500/40 text-emerald-300">✓</span>
+          <span>Per‑shot notes when PF &amp; time are present</span>
+        </li>
+        <li class="flex items-start gap-2">
+          <span class="inline-flex items-center justify-center w-4 h-4 rounded bg-emerald-500/20 border border-emerald-500/40 text-emerald-300">✓</span>
+          <span>Optional Imported Pictures &amp; Imported Notes tabs</span>
+        </li>
+      </ul>
+    </div>
+  </div>
+</div>
+
+<!-- Changelog panel (small text) – below "What this tool does" -->
+<div class="mt-6 flex justify-center">
+  <div class="inline-flex items-center gap-2 rounded-full px-4 py-2 bg-grt-panel-soft border border-grt-accent shadow-lg">
+    <span class="h-1.5 w-1.5 rounded-full bg-emerald-400 animate-pulse"></span>
+    <span class="text-[11px] md:text-xs text-grt-soft tracking-wide uppercase">Made for GRT group</span>
+  </div>
+</div>
+</div>
+
+<!-- How-to overlay -->
+<div id="helpOverlay" class="fixed inset-0 bg-black/70 backdrop-blur-sm flex items-center justify-center z-50 hidden">
+  <div class="bg-grt-panel-soft rounded-2xl border border-grt-frame max-w-xl w-[90%] p-4 md:p-6 shadow-2xl relative">
+    <button id="helpOverlayClose" class="absolute top-2 right-2 text-grt-subtle text-xs hover:text-grt-soft">
+      ✕
+    </button>
+
+    <h2 class="text-white text-lg md:text-xl font-semibold mb-2">
+      How to use GRT Chrono Importer
+    </h2>
+    <p class="text-grt-subtle text-xs md:text-sm mb-4">
+      This is a quick start for your first run. You can ignore advanced options until you’re comfortable.
+    </p>
+
+    <ol class="space-y-3 text-[11px] md:text-xs text-grt-soft list-decimal list-inside">
+      <li>
+        <span class="font-semibold text-grt-soft">Step 1 – Load base <code class="bg-slate-800/70 px-1 rounded">.grtload</code> (optional)</span><br>
+        Open an existing GRT project if you want imported data to land inside it. If you skip this, the importer creates a fresh GRT file.
+      </li>
+      <li>
+        <span class="font-semibold text-grt-soft">Step 2 – Pick an import mode</span><br>
+        <strong>Standard</strong>: chrono files → one “Imported Measurement” tab.<br>
+        <strong>Ladder</strong>: chrono files per charge → one “Imported Ladder” tab.<br>
+        <strong>Sessions</strong>: Garmin multi-session workbook → “Imported Sessions” tabs (Garmin only).
+      </li>
+      <li>
+        <span class="font-semibold text-grt-soft">Step 3 – Load chrono files</span><br>
+        Drop your CSV/TSV/Excel files into the file area. Check that units and device match (Garmin/Athlon).
+      </li>
+      <li>
+        <span class="font-semibold text-grt-soft">Step 4 – Export to GRT</span><br>
+        Click <strong>Generate GRT file</strong>, then open the downloaded <code class="bg-slate-800/70 px-1 rounded">.grtload</code> in GRT. Look for
+        “Imported Measurement”, “Imported Ladder”, “Imported Sessions”, and optional “Chrono vs Sim” in the measurement tabs.
+      </li>
+    </ol>
+
+    <div class="mt-4 border-t border-grt-frame/50 pt-3 text-[11px] md:text-xs text-grt-subtle space-y-1">
+      <p>
+        <span class="font-semibold text-grt-soft">Not ready for the advanced stuff?</span><br>
+        Leave <em>Extended metrics</em> and <em>Chrono vs Sim</em> OFF at first. Standard mode + SD/ES is plenty to get started.
+      </p>
+      <label class="inline-flex items-center gap-2 mt-1">
+        <input id="helpOverlayDontShow" type="checkbox" class="rounded border-grt-frame bg-grt-panel-soft">
+        <span>Don’t show this automatically next time.</span>
+      </label>
+    </div>
+  </div>
+</div>
+
+
+<!-- Hidden canvas used to generate the optional "Chrono vs Sim" PNG for .grtload export -->
+<canvas id="chronoSimChart" style="display:none" width="2000" height="1200"></canvas>
+
+
+<!-- ShotMarker drilldown overlay (Phase 2.1) -->
+<div id="smDrilldownOverlay" class="hidden fixed inset-0 z-[80]">
+  <div class="absolute inset-0 bg-black/70" onclick="closeSmDrilldown()"></div>
+  <div class="absolute right-0 top-0 h-full w-full sm:w-[520px] bg-grt-panel border-l border-grt-frame p-4 overflow-y-auto shadow-2xl">
+    <div id="smDrilldownPanel"></div>
+  </div>
+</div>
+
+
+        
+
+
+
+
+<script>
+/*__INJECT_JS__*/
+</script>
+</body></html>
