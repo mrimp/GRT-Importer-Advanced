@@ -1,0 +1,10 @@
+{
+  "name": "grt-importer-advanced-offline",
+  "private": true,
+  "version": "0.87.13-nextlevel",
+  "description": "GRT Importer Advanced - offline, self-contained release package",
+  "scripts": {
+    "build": "node build/build.js",
+    "build:py": "python3 build/build.py"
+  }
+}
